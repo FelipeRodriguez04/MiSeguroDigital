@@ -5,6 +5,8 @@ export default function HomeAdmin() {
         className="absolute top-6 left-6 text-red-600 hover:text-red-700 transition"
         onClick={() => {
           localStorage.removeItem("role");
+          localStorage.removeItem("userId");
+          localStorage.removeItem("userName");
           window.location.href = "/";
         }}
         title="Cerrar sesión"
