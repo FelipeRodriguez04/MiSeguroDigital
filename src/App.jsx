@@ -4,6 +4,8 @@ import HomeAdmin from "./pages/home_admin";
 import HomeAnalista from "./pages/home_analista";
 import HomeUser from "./pages/home_user";
 import RequireRole from "./components/RequireRole";
+import Catalog from "./pages/catalog";
+import MyApplications from "./pages/user_applications"; 
 
 export default function App() {
   return (
@@ -44,6 +46,10 @@ export default function App() {
             </RequireRole>
           }
         />
+        <Route path="/catalog" element={<RequireRole role="usuario"><Catalog /></RequireRole>} />
+
+        <Route path="/me/applications" element={<RequireRole role="usuario"><MyApplications /></RequireRole>} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

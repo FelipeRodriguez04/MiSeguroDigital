@@ -11,9 +11,30 @@ export default function Login() {
     e.preventDefault();
 
     const users = [
-      { email: "admin@example.com", password: "123456", role: "admin" },
-      { email: "analista@example.com", password: "654321", role: "analista" },
-      { email: "user@example.com", password: "111111", role: "usuario" },
+      {
+        email: "admin@example.com",
+        password: "123456",
+        role: "admin",
+        name: "Administrador General",
+      },
+      {
+        email: "analista@example.com",
+        password: "654321",
+        role: "analista",
+        name: "Analista de Seguros",
+      },
+      {
+        email: "user@example.com",
+        password: "111111",
+        role: "usuario",
+        name: "Mauricio Rodríguez",
+      },
+    {
+        email: "ana@example.com",
+        password: "222222",
+        role: "usuario",
+        name: "Ana Gómez",
+      },
     ];
 
     const user = users.find(
@@ -22,6 +43,8 @@ export default function Login() {
 
     if (user) {
       localStorage.setItem("role", user.role);
+      localStorage.setItem("userId", user.email); 
+      localStorage.setItem("userName", user.name); 
 
       switch (user.role) {
         case "admin":
