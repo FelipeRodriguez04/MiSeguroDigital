@@ -21,16 +21,16 @@ export default function BrokerPolicies() {
   ];
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-r from-green-50 via-white to-green-100 py-10">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-extrabold text-green-700 mb-6 text-center">
-          Gestión de Pólizas
-        </h1>
-        <p className="text-gray-700 text-lg mb-10 max-w-3xl mx-auto text-center">
-          Aquí puedes revisar, editar o eliminar las pólizas que ofrece el broker.
-        </p>
+    <div className="min-h-screen w-screen bg-gradient-to-r from-green-50 via-white to-green-100 flex flex-col">
+      <main className="flex-1 flex flex-col justify-center items-center py-10 px-4">
+        <div className="max-w-5xl w-full bg-white/80 rounded-2xl shadow-lg p-8 backdrop-blur-sm">
+          <h1 className="text-4xl font-extrabold text-green-700 mb-6 text-center">
+            Gestión de Pólizas
+          </h1>
+          <p className="text-gray-700 text-lg mb-10 max-w-3xl mx-auto text-center">
+            Aquí puedes revisar, editar o eliminar las pólizas que ofrece el broker.
+          </p>
 
-        <div className="w-full bg-white/80 rounded-2xl shadow-lg p-6 backdrop-blur-sm">
           <div className="overflow-auto max-h-[500px]">
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 bg-white">
@@ -43,10 +43,7 @@ export default function BrokerPolicies() {
               </thead>
               <tbody>
                 {policies.map((policy) => (
-                  <tr
-                    key={policy.id}
-                    className="border-b border-gray-200 hover:bg-green-50 transition"
-                  >
+                  <tr key={policy.id} className="border-b border-gray-200 hover:bg-green-50 transition">
                     <td className="py-3 px-4 font-semibold">{policy.name}</td>
                     <td className="py-3 px-4">{policy.coverage}</td>
                     <td className="py-3 px-4">{policy.price}</td>
@@ -64,11 +61,11 @@ export default function BrokerPolicies() {
             </table>
           </div>
         </div>
+      </main>
 
-        <footer className="mt-12 text-gray-500 text-sm text-center">
-          © 2025 MiSeguroDigital — Panel del Administrador del Broker.
-        </footer>
-      </div>
+      <footer className="py-6 text-gray-500 text-sm text-center">
+        © 2025 MiSeguroDigital — Panel del Administrador del Broker.
+      </footer>
     </div>
   );
 }
