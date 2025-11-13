@@ -9,3 +9,66 @@ services:
     ports:
       - "3000:80"
     restart: unless-stopped
+    networks:
+      - docker_network
+
+  mysql_database:
+    image: mysql:9.0
+    container_name: msd_mysql_database
+    ports:
+      - "33761:33761"
+    environment:
+      MYSQL_ROOT_PASSWORD: "2764"
+      MYSQL_DATABASE: "msd_database"
+      MYSQL_USER: "dbAccessProject"
+      MYSQL_PASSWORD: "dbAccess2024"
+      MYSQL_ROOT_HOST: "%"
+    
+    deploy:
+      resources:
+        limits:
+          memory: 10G
+          cpus: '4'
+        reservations:
+          memory: 4G
+          cpus: '2'
+    command: --port=33761
+    restart: unless-stopped
+    networks:
+      - docker_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: msd_backend
+    ports:
+      - "3002:3001"
+    restart: unless-stopped
+    networks:
+      - docker_network
+    depends_on:
+      - mysql_database
+
+  mysql_workbench:
+    image: lscr.io/linuxserver/mysql-workbench:latest
+    container_name: msd_mysql_workbench
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Guayaquil
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+    networks:
+      - docker_network
+    depends_on:
+      - mysql_database
+
+networks:
+  docker_network:
+    driver:  bridge
+
+volumes:
+  mysql_datastore:
+    driver: local
