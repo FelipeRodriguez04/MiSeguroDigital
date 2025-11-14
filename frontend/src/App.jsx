@@ -10,6 +10,7 @@ import BrokerApplications from "./pages/broker_applications";
 import BrokerReports from "./pages/broker_reports";
 import BrokerPolicies from "./pages/broker_policies";
 import BrokerNewPolicy from "./pages/new_policy";
+import BrokerVersioning from "./pages/versionamiento";
 
 export default function App() {
   return (
@@ -72,6 +73,15 @@ export default function App() {
           path="/broker/reports"
           element={
             <BrokerReports />
+          }
+        />
+
+        <Route
+          path="/broker/versions"
+          element={
+            <RequireRole role="admin">
+              <BrokerVersioning />
+            </RequireRole>
           }
         />
 

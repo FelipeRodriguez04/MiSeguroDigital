@@ -21,9 +21,18 @@ export default function BrokerPolicies() {
   ];
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-r from-green-50 via-white to-green-100 flex flex-col">
-      <main className="flex-1 flex flex-col justify-center items-center py-10 px-4">
-        <div className="max-w-5xl w-full bg-white/80 rounded-2xl shadow-lg p-8 backdrop-blur-sm">
+    <div
+      className="min-h-screen w-screen flex flex-col bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80')",
+      }}
+    > 
+      <div className="bg-white/70 flex flex-col min-h-screen backdrop-blur-sm">
+      <header className="flex justify-between items-center px-8 py-4 text-green-700 font-semibold">
+          <div className="text-xl">MiSeguroDigital</div>     
+      </header>
+        <div className="max-w-5xl w-full bg-white/80 rounded-2xl shadow-lg p-8 backdrop-blur-sm justify-center mx-auto my-10 flex-1">
           <h1 className="text-4xl font-extrabold text-green-700 mb-6 text-center">
             Gestión de Pólizas
           </h1>
@@ -61,11 +70,10 @@ export default function BrokerPolicies() {
             </table>
           </div>
         </div>
-      </main>
-
-      <footer className="py-6 text-gray-500 text-sm text-center">
+        <footer className="py-6 text-gray-500 text-sm text-center">
         © 2025 MiSeguroDigital — Panel del Administrador del Broker.
       </footer>
+      </div>
     </div>
   );
 }

@@ -11,40 +11,18 @@ export default function Login() {
     e.preventDefault();
 
     const users = [
-      {
-        email: "admin@example.com",
-        password: "123456",
-        role: "admin",
-        name: "Administrador General",
-      },
-      {
-        email: "analista@example.com",
-        password: "654321",
-        role: "analista",
-        name: "Analista de Seguros",
-      },
-      {
-        email: "user@example.com",
-        password: "111111",
-        role: "usuario",
-        name: "Mauricio Rodríguez",
-      },
-    {
-        email: "ana@example.com",
-        password: "222222",
-        role: "usuario",
-        name: "Ana Gómez",
-      },
+      { email: "admin@example.com", password: "123456", role: "admin", name: "Administrador General" },
+      { email: "analista@example.com", password: "654321", role: "analista", name: "Analista de Seguros" },
+      { email: "user@example.com", password: "111111", role: "usuario", name: "Mauricio Rodríguez" },
+      { email: "ana@example.com", password: "222222", role: "usuario", name: "Ana Gómez" },
     ];
 
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
+    const user = users.find((u) => u.email === email && u.password === password);
 
     if (user) {
       localStorage.setItem("role", user.role);
-      localStorage.setItem("userId", user.email); 
-      localStorage.setItem("userName", user.name); 
+      localStorage.setItem("userId", user.email);
+      localStorage.setItem("userName", user.name);
 
       switch (user.role) {
         case "admin":
@@ -65,9 +43,19 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen w-screen bg-gradient-to-r from-green-100 via-white to-green-50 flex flex-col items-center justify-center text-center">
-      <div className="bg-white/70 backdrop-blur-sm p-8 rounded-2xl shadow-xl w-full max-w-sm mx-4">
-        <h2 className="text-3xl font-extrabold text-green-700 mb-4">
+    <div
+      className="relative min-h-screen w-screen bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center"
+      style={{
+backgroundImage: "url('https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1600&q=80')",
+
+      }}
+    >
+      {/* 🔹 Capa de fondo borroso */}
+      <div className="absolute inset-0 bg-white/20 backdrop-blur-[12px]"></div>
+
+      {/* 🔹 Contenedor del formulario */}
+      <div className="relative bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-sm mx-4 z-10 border border-green-100">
+        <h2 className="text-3xl font-extrabold text-green-700 mb-4 text-center">
           Iniciar Sesión
         </h2>
 
@@ -104,7 +92,7 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="text-gray-500 text-xs text-center mt-6">
+        <p className="text-gray-600 text-xs text-center mt-6">
           © 2025 MiSeguroDigital — Todos los derechos reservados.
         </p>
       </div>
