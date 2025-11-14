@@ -66,20 +66,20 @@ export default function BrokerVersioning() {
         <div>
           <h1 className="text-3xl font-extrabold text-green-700 text-center">Versionamiento de Pólizas</h1>
         </div>
-        <section className="px-8 mt-8">  
+        <section className="flex justify-center items-center px-8 mt-8">
         <input
-          type="text"
-          className="w-full md:w-1/2 border rounded-xl px-4 py-2 outline-none focus:ring-2 ring-green-300"
-          placeholder="Buscar por nombre, descripción, versión o broker…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
+            type="text"
+            placeholder="Buscar por nombre, descripción, versión o broker…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="w-full md:w-1/2 border-2 border-green-700 rounded-xl px-4 py-2 outline-none focus:ring-2 ring-green-300"
         />
-      </section>
+        </section>
 
       <section className="px-8 mt-6">
         <div className="overflow-x-auto bg-white rounded-2xl shadow border">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-slate-700">
+            <thead className="bg-green-50 text-green-700">
               <tr>
                 <th className="text-left px-4 py-3">ID Versión</th>
                 <th className="text-left px-4 py-3">ID Póliza</th>

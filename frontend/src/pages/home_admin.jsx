@@ -78,7 +78,7 @@ export default function HomeAdmin() {
               </Link>
 
               <Link
-                to="/broker/applications"
+                to="/admin/applications"
                 className="inline-block no-underline border-2 border-green-600 !text-green-700 visited:!text-green-700 focus:!text-green-700 hover:!text-white hover:!bg-green-600 active:!text-green-800 px-6 py-2 rounded-lg text-base font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Ver Solicitudes
@@ -88,7 +88,7 @@ export default function HomeAdmin() {
         </main>
 
         <footer className="py-4 text-gray-600 text-sm text-center">
-          © 2025 MiSeguroDigital — Panel del Administrador del Broker.
+          © 2025 MiSeguroDigital — Panel del Administrador.
         </footer>
       </div>
     </div>

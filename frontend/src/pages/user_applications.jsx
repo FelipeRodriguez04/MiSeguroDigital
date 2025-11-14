@@ -1,5 +1,4 @@
 export default function MyApplications() {
-  // Mock alineado a AplicacionPoliza + relación con Polizas y Brokers
   const APPS_BY_USER = {
     "user@example.com": [
       {
@@ -42,9 +41,20 @@ export default function MyApplications() {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-r from-green-50 via-white to-green-100 py-10">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-extrabold text-green-700 mb-2 text-center">Mis Solicitudes</h1>
+    <div
+      className="relative min-h-screen w-screen bg-cover bg-center bg-no-repeat flex flex-col"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80')",
+      }}
+    >
+           <div className="absolute inset-0 bg-white/30 backdrop-blur-[12px]"></div>
+
+      <header className="relative flex justify-between items-center px-8 py-4 text-green-700 font-semibold z-10">
+        <div className="text-xl">MiSeguroDigital</div>
+      </header>
+            <div className="container mx-auto px-4 z-10 py-10">
+        <h1 className="text-4xl font-extrabold text-green-700 mb-2 text-center z-10 mt-8">Mis Solicitudes</h1>
         <p className="text-gray-700 text-lg mb-10 max-w-3xl mx-auto text-center">
           Hola <span className="font-semibold text-green-700">{userName}</span>, estas son tus solicitudes.
         </p>

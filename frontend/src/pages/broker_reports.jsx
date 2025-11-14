@@ -1,3 +1,5 @@
+import jsPDF from "jspdf";
+
 export default function BrokerReports() {
   const stats = [
     { label: "Solicitudes Aprobadas", value: 18, color: "text-green-700" },
@@ -5,8 +7,40 @@ export default function BrokerReports() {
     { label: "Solicitudes Pendientes", value: 7, color: "text-yellow-600" },
   ];
 
+  const generarPDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Reporte del Analista - MiSeguroDigital", 20, 20);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text("Resumen de solicitudes procesadas:", 20, 35);
+
+    let y = 50;
+    stats.forEach((stat) => {
+      doc.text(`${stat.label}: ${stat.value}`, 25, y);
+      y += 10;
+    });
+
+    doc.text(`Fecha de generación: ${new Date().toLocaleString()}`, 20, y + 10);
+
+    doc.save("reporte_analista.pdf");
+  };
+
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-r from-green-50 via-white to-green-100 flex flex-col">
+    <div
+          className="min-h-screen w-screen flex flex-col bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage:
+"url('https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1600&q=80')"
+          }}
+        >   
+      <div className="bg-white/70 flex flex-col min-h-screen backdrop-blur-sm">
+      <header className="flex justify-between items-center px-8 py-4 text-green-700 font-semibold">
+          <div className="text-xl">MiSeguroDigital</div>     
+      </header>
       <main className="flex-1 flex flex-col justify-center items-center py-10 px-4">
         <div className="max-w-4xl w-full bg-white/80 rounded-2xl shadow-lg p-8 backdrop-blur-sm text-center">
           <h1 className="text-4xl font-extrabold text-green-700 mb-6">
@@ -30,7 +64,7 @@ export default function BrokerReports() {
 
           <div className="text-center mt-10">
             <button
-              onClick={() => alert("Generando reporte en PDF...")}
+              onClick={generarPDF}
               className="!bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-lg shadow-md transition"
             >
               Generar Reporte PDF
@@ -42,6 +76,8 @@ export default function BrokerReports() {
       <footer className="py-6 text-gray-500 text-sm text-center">
         © 2025 MiSeguroDigital — Panel del Analista.
       </footer>
+      </div>
     </div>
   );
 }
+

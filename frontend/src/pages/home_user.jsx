@@ -4,8 +4,16 @@ export default function HomeUser() {
   const userName = localStorage.getItem("userName") || "Usuario";
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-r from-green-100 via-white to-green-50 flex flex-col">
-      <header className="flex justify-between items-center px-8 py-4 text-green-700 font-semibold">
+    <div
+      className="relative min-h-screen w-screen bg-cover bg-center bg-no-repeat flex flex-col"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80')",
+      }}
+    >
+      <div className="absolute inset-0 bg-white/30 backdrop-blur-[12px]"></div>
+
+      <header className="relative flex justify-between items-center px-8 py-4 text-green-700 font-semibold z-10">
         <div className="text-xl">MiSeguroDigital</div>
         <button
           className="text-red-600 hover:text-red-700 transition flex items-center gap-2"
@@ -33,8 +41,8 @@ export default function HomeUser() {
         </button>
       </header>
 
-      <main className="flex-1 flex flex-col justify-center items-center px-4">
-        <div className="max-w-2xl w-full bg-white/70 rounded-2xl shadow-lg p-10 backdrop-blur-sm text-center">
+      <main className="relative flex-1 flex flex-col justify-center items-center px-4 z-10">
+        <div className="max-w-2xl w-full bg-white/80 rounded-2xl shadow-lg p-10 backdrop-blur-md text-center border border-green-100">
           <h1 className="text-5xl font-extrabold text-green-700 mb-4">
             Bienvenido, {userName}
           </h1>
@@ -67,8 +75,7 @@ export default function HomeUser() {
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer className="py-6 text-gray-500 text-sm text-center">
+      <footer className="relative py-6 text-gray-600 text-sm text-center z-10">
         © 2025 MiSeguroDigital — Tu confianza, nuestra prioridad.
       </footer>
     </div>

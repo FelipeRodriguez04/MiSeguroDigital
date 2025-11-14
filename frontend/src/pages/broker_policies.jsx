@@ -71,7 +71,7 @@ export default function BrokerPolicies() {
           </div>
         </div>
         <footer className="py-6 text-gray-500 text-sm text-center">
-        © 2025 MiSeguroDigital — Panel del Administrador del Broker.
+        © 2025 MiSeguroDigital — Panel del Administrador.
       </footer>
       </div>
     </div>

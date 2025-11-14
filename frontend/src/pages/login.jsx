@@ -50,10 +50,13 @@ backgroundImage: "url('https://images.unsplash.com/photo-1505691723518-36a5ac3be
 
       }}
     >
-      {/* 🔹 Capa de fondo borroso */}
+
       <div className="absolute inset-0 bg-white/20 backdrop-blur-[12px]"></div>
 
-      {/* 🔹 Contenedor del formulario */}
+        <header className="absolute top-0 left-0 w-full flex justify-between items-center px-8 py-4 text-green-700 font-semibold z-20">
+    <div className="text-xl text-green-700">MiSeguroDigital</div>
+  </header>
+      
       <div className="relative bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-sm mx-4 z-10 border border-green-100">
         <h2 className="text-3xl font-extrabold text-green-700 mb-4 text-center">
           Iniciar Sesión

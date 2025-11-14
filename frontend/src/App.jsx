@@ -6,11 +6,13 @@ import HomeUser from "./pages/home_user";
 import RequireRole from "./components/RequireRole";
 import Catalog from "./pages/catalog";
 import MyApplications from "./pages/user_applications"; 
-import BrokerApplications from "./pages/broker_applications";
+import BrokerApplications from "./pages/analista_applications";
 import BrokerReports from "./pages/broker_reports";
 import BrokerPolicies from "./pages/broker_policies";
 import BrokerNewPolicy from "./pages/new_policy";
 import BrokerVersioning from "./pages/versionamiento";
+import AdminApplications from "./pages/admin_applications";
+import BrokerReviews from "./pages/analista_reviews";
 
 export default function App() {
   return (
@@ -94,8 +96,10 @@ export default function App() {
           }
         />
         <Route path="/catalog" element={<RequireRole role="usuario"><Catalog /></RequireRole>} />
+        <Route path="/admin/applications" element={<RequireRole role="admin"><AdminApplications /></RequireRole>} />  
 
         <Route path="/me/applications" element={<RequireRole role="usuario"><MyApplications /></RequireRole>} />
+        <Route path="/broker/reviews" element={<RequireRole role="analista"><BrokerReviews /></RequireRole>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

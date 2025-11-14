@@ -41,9 +41,20 @@ export default function Catalog() {
   ];
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-r from-green-50 via-white to-green-100 py-10 flex flex-col">
+    <div
+      className="relative min-h-screen w-screen bg-cover bg-center bg-no-repeat flex flex-col"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80')",
+      }}
+    >
+           <div className="absolute inset-0 bg-white/30 backdrop-blur-[12px]"></div>
+
+      <header className="relative flex justify-between items-center px-8 py-4 text-green-700 font-semibold z-10">
+        <div className="text-xl">MiSeguroDigital</div>
+      </header>
       <main className="flex-1 flex flex-col items-center px-6">
-      <h1 className="text-4xl font-extrabold text-green-700 mb-2 text-center">
+      <h1 className="text-4xl font-extrabold text-green-700 mb-2 text-center z-10 mt-8">
         Catálogo de Pólizas
       </h1>
       <p className="text-gray-600 text-lg mb-10 max-w-2xl text-center">
@@ -115,7 +126,7 @@ export default function Catalog() {
       </div>
       </main>
 
-      <footer className="mt-12 text-gray-500 text-sm text-center">
+      <footer className="mt-12 text-gray-500 text-sm text-center z-10">
         © 2025 MiSeguroDigital — Tu confianza, nuestra prioridad.
       </footer>
     </div>
