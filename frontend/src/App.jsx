@@ -21,19 +21,33 @@ import GlobalUserPolizas from "./pages/global_user_polizas";
 import GlobalBrokerEquipo from "./pages/global_broker_equipo";
 import GlobalBrokerPolizas from "./pages/global_broker_polizas";
 import GlobalBrokerSolicitudesEquipo from "./pages/global_broker_solicitudes";
+import BrokerEditPolicy from "./pages/broker_edit_policy";  
+import AdminApplicationDetails from "./pages/admin_application_details";
+import CatalogDetails from "./pages/catalog_details";
+import Inicio from "./pages/inicio";
+import RegistroUsuarios from "./pages/registroUsuarios";
+import RUsuario from "./pages/RUsuario";
+import RBroker from "./pages/RBroker";
+
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={
-            localStorage.getItem("role")
-              ? <Navigate to={`/${localStorage.getItem("role")}`} replace />
-              : <Login />
-          }
+      <Route
+  path="/"
+  element={<Inicio />}
+
         />
+
+<Route path="/" element={<Inicio />} />
+<Route path="/inicio" element={<Inicio />} />
+<Route path="/login" element={<Login />} />
+<Route path="/register" element={<RegistroUsuarios />} />
+<Route path="/register/user" element={<RUsuario />} />
+<Route path="/register/broker" element={<RBroker />} />
+
+<Route path="/broker_edit_policy/:id" element={<BrokerEditPolicy />} />
 
         <Route
           path="/admin"
@@ -43,6 +57,11 @@ export default function App() {
             </RequireRole>
           }
         />
+
+<Route path="/catalog/details/:id" element={<CatalogDetails />} />
+
+
+<Route path="/admin/application-details" element={<AdminApplicationDetails />} />
 
 
         <Route
