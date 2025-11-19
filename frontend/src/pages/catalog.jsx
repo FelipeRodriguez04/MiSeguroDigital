@@ -138,7 +138,7 @@ export default function Catalog() {
 
               <div className="flex items-center justify-between">
                 <Link
-                  to={`/catalog/${p.id_poliza}`}
+                  to={`/catalog/details/${p.id_poliza}`}
                   className="underline !text-green-700 hover:!text-green-800"
                 >
                   Ver detalles

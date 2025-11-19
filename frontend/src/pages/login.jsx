@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -7,21 +7,46 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    // Si ya hay sesión, redirigir según rol (opcional)
+    const role = localStorage.getItem("role");
+    if (role) {
+      switch (role) {
+        case "admin":
+          navigate("/admin");
+          break;
+        case "analista":
+          navigate("/analista");
+          break;
+        case "usuario":
+          navigate("/usuario");
+          break;
+        case "broker":
+          navigate("/broker");
+          break;
+        case "global_user":
+          navigate("/global_user");
+          break;
+        case "global_broker":
+          navigate("/global_broker");
+          break;
+        default:
+          break;
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const users = [
       { email: "admin@example.com", password: "123456", role: "admin", name: "Administrador General" },
-
       { email: "analista@example.com", password: "654321", role: "analista", name: "Analista de Seguros", id_aseguradora: 1 },
-
       { email: "user@example.com", password: "111111", role: "usuario", name: "Mauricio Rodríguez" },
       { email: "ana@example.com", password: "222222", role: "usuario", name: "Ana Gómez" },
-
       { email: "globaluser@example.com", password: "333333", role: "global_user", name: "Global User" },
-
       { email: "broker@example.com", password: "999999", role: "broker", name: "Broker Comercial", id_aseguradora: 1 },
-
       { email: "globalbroker@example.com", password: "444444", role: "global_broker", name: "Global Broker", id_aseguradora: 2 },
     ];
 
@@ -35,8 +60,9 @@ export default function Login() {
       if (user.id_aseguradora) {
         localStorage.setItem("id_aseguradora", user.id_aseguradora);
       } else {
-        localStorage.removeItem("id_aseguradora"); 
+        localStorage.removeItem("id_aseguradora");
       }
+
       switch (user.role) {
         case "admin":
           navigate("/admin");
@@ -79,9 +105,7 @@ export default function Login() {
       </header>
 
       <div className="relative bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-sm mx-4 z-10 border border-green-100">
-        <h2 className="text-3xl font-extrabold text-green-700 mb-4 text-center">
-          Iniciar Sesión
-        </h2>
+        <h2 className="text-3xl font-extrabold text-green-700 mb-4 text-center">Iniciar Sesión</h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
@@ -103,22 +127,28 @@ export default function Login() {
           />
 
           {error && (
-            <p className="text-red-600 text-sm text-center font-medium">
-              {error}
-            </p>
+            <p className="text-red-600 text-sm text-center font-medium">{error}</p>
           )}
 
-          <button
-            type="submit"
-            className="!bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg shadow-md transition"
-          >
-            Ingresar
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              type="submit"
+              className="!bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg shadow-md transition"
+            >
+              Ingresar
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/register")}
+              className="mt-1 text-sm text-center text-blue-600 underline"
+            >
+              ¿Aún no tienes cuenta? Regístrate
+            </button>
+          </div>
         </form>
 
-        <p className="text-gray-600 text-xs text-center mt-6">
-          © 2025 MiSeguroDigital — Todos los derechos reservados.
-        </p>
+        <p className="text-gray-600 text-xs text-center mt-6">© 2025 MiSeguroDigital — Todos los derechos reservados.</p>
       </div>
     </div>
   );
