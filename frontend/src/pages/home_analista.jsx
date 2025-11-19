@@ -56,7 +56,7 @@ export default function HomeAnalyst() {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
             <Link
               to="/broker/applications"
               className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
@@ -68,6 +68,12 @@ export default function HomeAnalyst() {
               className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
             >
               Reviews de Pólizas
+            </Link>
+            <Link
+              to="/broker/payments"
+              className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
+            >
+              Ver Pagos
             </Link>
             <Link
               to="/broker/reports"

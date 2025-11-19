@@ -28,6 +28,9 @@ import Inicio from "./pages/inicio";
 import RegistroUsuarios from "./pages/registroUsuarios";
 import RUsuario from "./pages/RUsuario";
 import RBroker from "./pages/RBroker";
+import PagarPolizas from "./pages/pagar_user";
+import PagarPolizaDetalle from "./pages/pagar_poliza_detalle";
+import BrokerPayments from "./pages/broker_payments"; 
 
 
 export default function App() {
@@ -138,6 +141,9 @@ export default function App() {
         <Route path="/global_broker/equipo" element={<RequireRole role="global_broker"><GlobalBrokerEquipo /></RequireRole>} />
         <Route path="/global_broker/polizas" element={<RequireRole role="global_broker"><GlobalBrokerPolizas /></RequireRole>} />
         <Route path="/global_broker/solicitudes" element={<RequireRole role="global_broker"><GlobalBrokerSolicitudesEquipo /></RequireRole>} />
+        <Route path="/me/pagar_polizas" element={<RequireRole role="usuario"><PagarPolizas /></RequireRole>} />
+        <Route path="/me/pagar_polizas/:id_solicitud" element={<RequireRole role="usuario"><PagarPolizaDetalle /></RequireRole>} />
+        <Route path="/broker/payments" element={<RequireRole role="analista"><BrokerPayments /></RequireRole>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

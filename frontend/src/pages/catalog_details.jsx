@@ -83,14 +83,7 @@ export default function CatalogDetails() {
             <li><strong>Importe por cancelación:</strong> ${policy.importe_cancelacion}</li>
           </ul>
 
-          <div className="flex justify-between mt-6">
-            <Link
-              to="/catalog"
-              className="underline text-green-700 hover:text-green-800"
-            >
-              ← Regresar
-            </Link>
-
+          <div className="flex justify-center mt-6">
             <Link
               to={`/me/apply/${policy.id_poliza}`}
               className="border-2 border-green-600 text-green-700 hover:bg-green-600 hover:text-white px-6 py-2 rounded-lg font-semibold transition-all shadow-sm"
