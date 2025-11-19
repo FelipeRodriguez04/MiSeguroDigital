@@ -1,48 +1,45 @@
--- ? 1. Transaccion para actualizar broker manualmente por Global Admin
--- ? 2. Permite cambio de informacion personal y estado del broker
--- ? 3. Maneja asignacion y cambio de roles segun estado
+-- ? Actualiza broker manualmente por Global Admin
+-- ? Permite cambio de informacion personal y estado del broker
+-- ? Maneja asignacion y cambio de roles segun estado
 
-DELIMITER $$
-
-CREATE PROCEDURE tx_update_broker_manual(
-    IN p_broker_id INT,
-    IN p_nombre_prim VARCHAR(255),
-    IN p_apellido_prim VARCHAR(255),
-    IN p_full_nombre VARCHAR(512),
-    IN p_telefono VARCHAR(50),
-    IN p_fecha_nacimiento DATE,
-    IN p_estado_broker ENUM('pendiente', 'activo', 'rechazado'),
-    IN p_rol_broker ENUM('broker_superadmin', 'broker_admin', 'broker_analyst'),
-    IN p_admin_id INT,
-    OUT p_result_code INT
+create procedure actualizarBrokerManual(
+    in brokerId int,
+    in nombrePrim varchar(255),
+    in apellidoPrim varchar(255),
+    in fullNombre varchar(512),
+    in telefono varchar(50),
+    in fechaNacimiento date,
+    in estadoBroker enum('pendiente', 'activo', 'rechazado'),
+    in rolBroker enum('broker_superadmin', 'broker_admin', 'broker_analyst'),
+    in adminId int,
+    out codigoResultado int
 )
-BEGIN
-    -- ? 4. Variables para valores anteriores
-    DECLARE v_old_nombre VARCHAR(255);
-    DECLARE v_old_apellido VARCHAR(255);
-    DECLARE v_old_full_nombre VARCHAR(512);
-    DECLARE v_old_telefono VARCHAR(50);
-    DECLARE v_old_fecha_nacimiento DATE;
-    DECLARE v_old_estado VARCHAR(50);
-    DECLARE v_broker_exists INT DEFAULT 0;
-    DECLARE v_has_role INT DEFAULT 0;
-    DECLARE v_exit_handler_called BOOLEAN DEFAULT FALSE;
+begin
+    -- ? Declarar variables para valores anteriores
+    declare oldNombre varchar(255);
+    declare oldApellido varchar(255);
+    declare oldFullNombre varchar(512);
+    declare oldTelefono varchar(50);
+    declare oldFechaNacimiento date;
+    declare oldEstado varchar(50);
+    declare brokerExiste int default 0;
+    declare tieneRol int default 0;
     
-    -- ? 5. Handler para errores SQL
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET v_exit_handler_called = TRUE;
-        SET p_result_code = 500;
-        ROLLBACK;
-    END;
+    -- ? Handler de errores SQL
+    declare exit handler for sqlexception
+    begin
+        set codigoResultado = 500; --  Retornamos valor base de 5xx  error del servidor
+        rollback;
+    end;
     
-    -- ? 6. Inicializar resultado
-    SET p_result_code = 200;
+    -- ? Inicializar resultado
+    set codigoResultado = 200; -- Retornamos vlaor de 2xx asumiendo que la ejecucion
+    -- paso sin errores.
     
-    START TRANSACTION;
+    start transaction;
     
-    -- ? 7. Verificar existencia y obtener valores actuales
-    SELECT 
+    -- ? Verificar existencia y obtener valores actuales
+    select
         nombre_prim_broker,
         apellido_prim_broker,
         full_nombre_broker,
@@ -50,56 +47,61 @@ BEGIN
         fecha_nacimiento_broker,
         estado_broker,
         1
-    INTO 
-        v_old_nombre,
-        v_old_apellido,
-        v_old_full_nombre,
-        v_old_telefono,
-        v_old_fecha_nacimiento,
-        v_old_estado,
-        v_broker_exists
-    FROM Registro_Global_Brokers 
-    WHERE id_broker = p_broker_id;
+    into
+        oldNombre,
+        oldApellido,
+        oldFullNombre,
+        oldTelefono,
+        oldFechaNacimiento,
+        oldEstado,
+        brokerExiste
+    from   Registro_Global_Brokers 
+    where  id_broker = brokerId;
     
-    -- ? 8. Verificar si broker no existe
-    IF v_broker_exists = 0 THEN
-        SET p_result_code = 404; -- Broker no encontrado
-        ROLLBACK;
-    ELSE
-        -- ? 9. Actualizar informacion del broker
-        UPDATE Registro_Global_Brokers 
-        SET 
-            nombre_prim_broker = p_nombre_prim,
-            apellido_prim_broker = p_apellido_prim,
-            full_nombre_broker = p_full_nombre,
-            numero_telefono_broker = p_telefono,
-            fecha_nacimiento_broker = p_fecha_nacimiento,
-            estado_broker = p_estado_broker
-        WHERE id_broker = p_broker_id;
+    -- ? Verificar si broker no existe
+    if brokerExiste = 0 then
+        set codigoResultado = 404; -- No obtuvimos un id de salida y por tanto no existe.
+        rollback;
+    else
+        -- ? Actualizar informacion del broker
+        update Registro_Global_Brokers 
+        set
+            nombre_prim_broker = nombrePrim,
+            apellido_prim_broker = apellidoPrim,
+            full_nombre_broker = fullNombre,
+            numero_telefono_broker = telefono,
+            fecha_nacimiento_broker = fechaNacimiento,
+            estado_broker = estadoBroker
+        where  id_broker = brokerId;
         
-        -- ? 10. Verificar si ya tiene rol asignado
-        SELECT COUNT(*) INTO v_has_role
-        FROM Roles_Broker
-        WHERE id_broker = p_broker_id;
+        -- ? Verificar si ya tiene rol asignado
+        select count(*) into tieneRol
+        from   Roles_Broker
+        where  id_broker = brokerId;
         
-        -- ? 11. Manejar roles segun estado
-        IF p_estado_broker = 'activo' THEN
-            -- ? 12. Si esta activo, asegurar que tenga rol
-            IF v_has_role = 0 THEN
-                INSERT INTO Roles_Broker (id_broker, rol_broker)
-                VALUES (p_broker_id, p_rol_broker);
-            ELSE
-                UPDATE Roles_Broker 
-                SET rol_broker = p_rol_broker
-                WHERE id_broker = p_broker_id;
-            END IF;
-        ELSEIF p_estado_broker IN ('pendiente', 'rechazado') AND v_has_role > 0 THEN
-            -- ? 13. Si no esta activo, remover rol si existe
-            DELETE FROM Roles_Broker WHERE id_broker = p_broker_id;
-        END IF;
+        -- ? Manejar roles segun estado
+        if estadoBroker = 'activo' then
+            -- ? Si esta activo, asegurar que tenga rol
+            if tieneRol = 0 then
+                insert into Roles_Broker (id_broker, rol_broker)
+                values (brokerId, rolBroker);
+            else
+                update Roles_Broker 
+                set    rol_broker = rolBroker
+                where  id_broker = brokerId;
+            end if;
+        elseif estadoBroker in ('pendiente', 'rechazado') and tieneRol > 0 then
+            -- ? Si no esta activo, remover rol si existe. En este caso, si
+            -- el broker tiene un rol, y el  estado del broker paso hacia pendiente
+            -- o rechazado, entonces eliminamos el registro anterior de roles.
+
+            -- Para el manejo de esta sentencia, usaremos la nocion en el BE API que
+            -- tenemos que evitar el caso de actualizacion de la misma data del usuario aqui
+            delete from Roles_Broker where id_broker = brokerId;
+        end if;
         
-        -- ? 14. Registrar cambios en auditoria
-        INSERT INTO RegistroAudit_AccionesBrokers (
+        -- ? Registrar cambios en auditoria
+        insert into RegistroAudit_AccionesBrokers (
             id_broker,
             id_admin_modificacion,
             operacion_realizada,
@@ -114,29 +116,23 @@ BEGIN
             numero_telefono_nuevo,
             fecha_nacimiento_usuario_nuevo,
             fecha_modificacion_usuario
-        ) VALUES (
-            p_broker_id,
-            p_admin_id,
+        ) values (
+            brokerId,
+            adminId,
             'UPDATE',
-            v_old_nombre,
-            v_old_apellido,
-            v_old_full_nombre,
-            v_old_telefono,
-            v_old_fecha_nacimiento,
-            p_nombre_prim,
-            p_apellido_prim,
-            p_full_nombre,
-            p_telefono,
-            p_fecha_nacimiento,
-            NOW()
+            oldNombre,
+            oldApellido,
+            oldFullNombre,
+            oldTelefono,
+            oldFechaNacimiento,
+            nombrePrim,
+            apellidoPrim,
+            fullNombre,
+            telefono,
+            fechaNacimiento,
+            now()
         );
         
-        -- ? 15. Confirmar transaccion
-        IF NOT v_exit_handler_called THEN
-            COMMIT;
-        END IF;
-    END IF;
-    
-END$$
-
-DELIMITER ;
+        commit;
+    end if;
+end;

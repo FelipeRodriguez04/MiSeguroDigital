@@ -13,17 +13,19 @@ services:
       - docker_network
 
   mysql_database:
-    image: mysql:9.0
+    image: mysql:8.0
     container_name: msd_mysql_database
     ports:
-      - "33761:33761"
+      - "34761:34761"
     environment:
       MYSQL_ROOT_PASSWORD: "2764"
       MYSQL_DATABASE: "msd_database"
       MYSQL_USER: "dbAccessProject"
       MYSQL_PASSWORD: "dbAccess2024"
       MYSQL_ROOT_HOST: "%"
-    
+    volumes:
+      - mysql_datastore:/var/lib/mysql
+      - ./db_init_ordered.sql:/docker-entrypoint-initdb.d/init.sql
     deploy:
       resources:
         limits:
@@ -32,7 +34,7 @@ services:
         reservations:
           memory: 4G
           cpus: '2'
-    command: --port=33761
+    command:  --port=34761
     restart: unless-stopped
     networks:
       - docker_network
@@ -42,8 +44,14 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: msd_backend
+    environment:
+        DB_HOST: mysql_database
+        DB_PORT: 34761
+        DB_USER: proj-UserBackend-DB
+        DB_PASSWORD: s2764are0104
+        PORT: 33761
     ports:
-      - "3002:3001"
+      - "33761:33761"
     restart: unless-stopped
     networks:
       - docker_network
@@ -58,7 +66,7 @@ services:
       PGID: 1000
       TZ: America/Guayaquil
     ports:
-      - "3001:3000"
+      - "35761:3000"
     restart: unless-stopped
     networks:
       - docker_network

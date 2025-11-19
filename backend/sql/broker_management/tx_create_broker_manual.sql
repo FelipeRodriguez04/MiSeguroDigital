@@ -1,85 +1,80 @@
--- ? 1. Transaccion para crear broker manualmente por Global Admin
--- ? 2. Incluye validaciones de email unico y aseguradora valida
--- ? 3. Crea registro completo y asigna rol inicial
+-- ? Crea broker manualmente por Global Admin
+-- ? Incluye validaciones de email unico y aseguradora valida
+-- ? Crea regfstro completo y asigna rol inicial
 
-DELIMITER $$
-
-CREATE PROCEDURE tx_create_broker_manual(
-    IN p_email VARCHAR(255),
-    IN p_password_hash VARCHAR(512),
-    IN p_password_salt VARCHAR(512),
-    IN p_nombre_prim VARCHAR(255),
-    IN p_apellido_prim VARCHAR(255),
-    IN p_full_nombre VARCHAR(512),
-    IN p_telefono VARCHAR(50),
-    IN p_fecha_nacimiento DATE,
-    IN p_id_aseguradora INT,
-    IN p_estado_inicial ENUM('pendiente', 'activo', 'rechazado'),
-    IN p_rol_inicial ENUM('broker_superadmin', 'broker_admin', 'broker_analyst'),
-    IN p_admin_id INT,
-    OUT p_result_code INT,
-    OUT p_new_broker_id INT
+create procedure crearBrokerManual(
+    in email varchar(255),
+    in passwordHash varchar(512),
+    in passwordSalt varchar(512),
+    in nombrePrim varchar(255),
+    in apellidoPrim varchar(255),
+    in fullNombre varchar(512),
+    in telefono varchar(50),
+    in fechaNacimiento date,
+    in aseguradoraId int,
+    in estadoInicial enum('pendiente', 'activo', 'rechazado'),
+    in rolInicial enum('broker_superadmin', 'broker_admin', 'broker_analyst'),
+    in adminId int,
+    out codigoResultado int,
+    out nuevoBrokerId int
 )
-BEGIN
-    -- ? 4. Variables para control de flujo
-    DECLARE v_email_count INT DEFAULT 0;
-    DECLARE v_aseguradora_exists INT DEFAULT 0;
-    DECLARE v_identity_id INT DEFAULT 0;
-    DECLARE v_broker_id INT DEFAULT 0;
-    DECLARE v_exit_handler_called BOOLEAN DEFAULT FALSE;
+begin
+    -- ? Declarar variables para control de flujo
+    declare emailCount int default 0;
+    declare aseguradoraExiste int default 0;
+    declare identityId int default 0;
+    declare brokerId int default 0;
     
-    -- ? 5. Handler para errores SQL
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET v_exit_handler_called = TRUE;
-        SET p_result_code = 500;
-        ROLLBACK;
-    END;
+    -- ? Handler de errores SQL
+    declare exit handler for sqlexception
+    begin
+        set codigoResultado = 500;
+        rollback;
+    end;
     
-    -- ? 6. Inicializar resultados
-    SET p_result_code = 200;
-    SET p_new_broker_id = 0;
+    -- ? Inicializar resultados
+    set codigoResultado = 200;
+    set nuevoBrokerId = 0;
     
-    START TRANSACTION;
+    start transaction;
     
-    -- ? 7. Verificar email unico
-    SELECT COUNT(*) INTO v_email_count 
-    FROM Registro_SignUp_Global 
-    WHERE correo_registro = p_email;
+    -- ? Verificar email unico
+    select count(*) into emailCount 
+    from   Registro_SignUp_Global 
+    where  correo_registro = email;
     
-    -- ? 8. Verificar que aseguradora existe
-    SELECT COUNT(*) INTO v_aseguradora_exists
-    FROM Aseguradoras
-    WHERE id_aseguradora = p_id_aseguradora;
+    -- ? Verificar que aseguradora existe
+    select count(*) into aseguradoraExiste
+    from   Aseguradoras
+    where  id_aseguradora = aseguradoraId;
     
-    -- ? 9. Validar email unico
-    IF v_email_count > 0 THEN
-        SET p_result_code = 409; -- Email ya existe
-        ROLLBACK;
-    -- ? 10. Validar aseguradora existe
-    ELSEIF v_aseguradora_exists = 0 THEN
-        SET p_result_code = 404; -- Aseguradora no encontrada
-        ROLLBACK;
-    ELSE
-        -- ? 11. Crear registro principal
-        INSERT INTO Registro_SignUp_Global (
+    -- ? Validar email unico
+    if emailCount > 0 then
+        set codigoResultado = 409;   -- ?   Correo de registro ya existe
+        rollback;
+    elseif aseguradoraExiste = 0 then
+        set codigoResultado = 404; -- ? Aseguradora no existe
+        rollback;
+    else
+        -- ? Crear registro principal
+        insert into Registro_SignUp_Global (
             correo_registro,
             hashed_pwd_registro,
             hashed_pwd_salt_registro,
             estado_actividad_registro,
             fecha_registro
-        ) VALUES (
-            p_email,
-            p_password_hash,
-            p_password_salt,
+        ) values (
+            email,
+            passwordHash,
+            passwordSalt,
             'activo',
-            NOW()
+            now()
         );
         
-        SET v_identity_id = LAST_INSERT_ID();
+        set identityId = last_insert_id();
         
-        -- ? 12. Crear registro de broker
-        INSERT INTO Registro_Global_Brokers (
+        -- ? Crear registro de broker
+        insert into Registro_Global_Brokers (
             id_identidad_registro,
             id_aseguradora,
             nombre_prim_broker,
@@ -88,33 +83,33 @@ BEGIN
             numero_telefono_broker,
             fecha_nacimiento_broker,
             estado_broker
-        ) VALUES (
-            v_identity_id,
-            p_id_aseguradora,
-            p_nombre_prim,
-            p_apellido_prim,
-            p_full_nombre,
-            p_telefono,
-            p_fecha_nacimiento,
-            p_estado_inicial
+        ) values (
+            identityId,
+            aseguradoraId,
+            nombrePrim,
+            apellidoPrim,
+            fullNombre,
+            telefono,
+            fechaNacimiento,
+            estadoInicial
         );
         
-        SET v_broker_id = LAST_INSERT_ID();
-        SET p_new_broker_id = v_broker_id;
+        set brokerId = last_insert_id();
+        set nuevoBrokerId = brokerId;
         
-        -- ? 13. Asignar rol si el estado es activo
-        IF p_estado_inicial = 'activo' THEN
-            INSERT INTO Roles_Broker (
+        -- ? Asignar rol si el estado es activo
+        if estadoInicial = 'activo' then
+            insert into Roles_Broker (
                 id_broker,
                 rol_broker
-            ) VALUES (
-                v_broker_id,
-                p_rol_inicial
+            ) values (
+                brokerId,
+                rolInicial
             );
-        END IF;
+        end if;
         
-        -- ? 14. Registrar en auditoria
-        INSERT INTO RegistroAudit_AccionesBrokers (
+        -- ? Registrar en auditoria
+        insert into RegistroAudit_AccionesBrokers (
             id_broker,
             id_admin_modificacion,
             operacion_realizada,
@@ -124,24 +119,18 @@ BEGIN
             numero_telefono_nuevo,
             fecha_nacimiento_usuario_nuevo,
             fecha_modificacion_usuario
-        ) VALUES (
-            v_broker_id,
-            p_admin_id,
+        ) values (
+            brokerId,
+            adminId,
             'INSERT',
-            p_nombre_prim,
-            p_apellido_prim,
-            p_full_nombre,
-            p_telefono,
-            p_fecha_nacimiento,
-            NOW()
+            nombrePrim,
+            apellidoPrim,
+            fullNombre,
+            telefono,
+            fechaNacimiento,
+            now()
         );
         
-        -- ? 15. Confirmar transaccion
-        IF NOT v_exit_handler_called THEN
-            COMMIT;
-        END IF;
-    END IF;
-    
-END$$
-
-DELIMITER ;
+        commit;
+    end if;
+end;

@@ -1,55 +1,54 @@
--- ? 1. Vista para mostrar brokers agrupados por estado
--- ? 2. Facilita revision de solicitudes pendientes y gestion
--- ? 3. Incluye informacion de aseguradora para contexto
+-- ? Vista para mostrar brokers agrupados por estado
+-- ? Facilita revision de solicitudes pendientes y gestion
+-- ? Incluye informacion de aseguradora para contexto
 
-CREATE OR REPLACE VIEW v_brokers_by_status AS
-SELECT 
-    -- ? 4. Estado del broker para agrupacion
-    b.estado_broker,
+create or replace view viewBrokersAgrupadosPorEstadoBroker as
+select 
+    -- ? Estado del broker para agrupacion
+    registro_brokers.estado_broker,
     
-    -- ? 5. Informacion basica del broker
-    b.id_broker,
-    r.correo_registro AS email,
-    b.nombre_prim_broker,
-    b.apellido_prim_broker,
-    b.full_nombre_broker,
-    b.numero_telefono_broker,
+    -- ? Informacion basica del broker
+    registro_brokers.id_broker,
+    registro_identidad.correo_registro as email,
+    registro_brokers.nombre_prim_broker,
+    registro_brokers.apellido_prim_broker,
+    registro_brokers.full_nombre_broker,
+    registro_brokers.numero_telefono_broker,
     
-    -- ? 6. Fechas importantes
-    r.fecha_registro AS application_date,
+    -- ? Fechas importantes
+    registro_identidad.fecha_registro as application_date,
     
-    -- ? 7. Informacion de la aseguradora
+    -- ? Informacion de la aseguradora
     a.nombre_aseguradora,
     a.dominio_correo_aseguradora,
     
-    -- ? 8. Rol asignado si ya fue aprobado
-    rb.rol_broker AS current_role,
+    -- ? Rol asignado si ya fue aprobado
+    roless_broker.rol_broker as current_role,
     
-    -- ? 9. Indicador si tiene rol asignado
-    CASE 
-        WHEN rb.id_rol_broker IS NOT NULL THEN 'Si'
-        ELSE 'No'
-    END AS has_role_assigned
+    -- ? Indicador si tiene rol asignado
+    case 
+        when roless_broker.id_rol_broker is not null then 'Si'
+        else 'No'
+    end as has_role_assigned
     
-FROM Registro_SignUp_Global r
-    -- ? 10. Join con brokers
-    INNER JOIN Registro_Global_Brokers b ON r.id_identidad = b.id_identidad_registro
-    
-    -- ? 11. Join con aseguradoras
-    INNER JOIN Aseguradoras a ON b.id_aseguradora = a.id_aseguradora
-    
-    -- ? 12. Left join con roles para ver asignaciones
-    LEFT JOIN Roles_Broker rb ON b.id_broker = rb.id_broker
-    
--- ? 13. Solo registros activos
-WHERE r.estado_actividad_registro = 'activo'
+from Registro_SignUp_Global registro_identidad
+    -- ? Join con brokers en base al id de identidad para hallar los datos originales de usuario
+    join Registro_Global_Brokers registro_brokers
+        on registro_identidad.id_identidad = registro_brokers.id_identidad_registro
+    -- ? Join con aseguradoras para sacar los detalles delas asegurdaoras
+    join Aseguradoras a
+        on registro_brokers.id_aseguradora = a.id_aseguradora
+    -- ? Left join con roles para ver asignaciones
+    left join Roles_Broker roless_broker
+        on registro_brokers.id_broker = roless_broker.id_broker
+where registro_identidad.estado_actividad_registro = 'activo'
 
--- ? 14. Ordenar por prioridad de estado y fecha
-ORDER BY 
-    CASE b.estado_broker
-        WHEN 'pendiente' THEN 1
-        WHEN 'activo' THEN 2
-        WHEN 'rechazado' THEN 3
-        ELSE 4
-    END,
-    r.fecha_registro ASC;
+-- ? Ordenar por prioridad de estado y fecha
+order by 
+    case registro_brokers.estado_broker
+        when 'pendiente' then 1
+        when 'activo' then 2
+        when 'rechazado' then 3
+        else 4
+    end,
+    registro_identidad.fecha_registro asc;
