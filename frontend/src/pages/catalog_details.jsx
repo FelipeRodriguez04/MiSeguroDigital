@@ -14,6 +14,11 @@ export default function CatalogDetails() {
       estado_de_poliza: "ACTIVA",
       importe_cancelacion: 150,
       image: "https://cdn-icons-png.flaticon.com/512/1048/1048945.png",
+      requerimientos: [
+        "Cédula de identidad",
+        "Declaración de salud",
+        "Formulario de solicitud firmado",
+      ],
     },
     {
       id_poliza: 102,
@@ -25,6 +30,11 @@ export default function CatalogDetails() {
       estado_de_poliza: "ACTIVA",
       importe_cancelacion: 200,
       image: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      requerimientos: [
+        "Cédula de identidad",
+        "Matrícula del vehículo",
+        "Fotos del vehículo (frontal, posterior y costados)",
+      ],
     },
     {
       id_poliza: 103,
@@ -36,6 +46,11 @@ export default function CatalogDetails() {
       estado_de_poliza: "ACTIVA",
       importe_cancelacion: 180,
       image: "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
+      requerimientos: [
+        "Cédula de identidad",
+        "Historial médico básico",
+        "Formulario de solicitud firmado",
+      ],
     },
   ];
 
@@ -81,6 +96,19 @@ export default function CatalogDetails() {
             <li><strong>Estado:</strong> {policy.estado_de_poliza}</li>
             <li><strong>Duración del contrato:</strong> {policy.duracion_contrato_meses} meses</li>
             <li><strong>Importe por cancelación:</strong> ${policy.importe_cancelacion}</li>
+          </ul>
+
+          {/* ---------------------- REQUERIMIENTOS ---------------------- */}
+
+          <h2 className="text-2xl font-bold text-green-700 mb-3">Requerimientos</h2>
+
+          <ul className="text-gray-700 space-y-2 mb-8">
+            {policy.requerimientos.map((req, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span className="text-green-600 font-bold">•</span>
+                <span>{req}</span>
+              </li>
+            ))}
           </ul>
 
           <div className="flex justify-center mt-6">

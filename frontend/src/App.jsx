@@ -31,7 +31,10 @@ import RBroker from "./pages/RBroker";
 import PagarPolizas from "./pages/pagar_user";
 import PagarPolizaDetalle from "./pages/pagar_poliza_detalle";
 import BrokerPayments from "./pages/broker_payments"; 
-
+import SolicitarP from "./pages/SolicitarP";
+import EditarGlobalUser from "./EditarGlobalUser";
+import EditarGlobalBroker from "./pages/EditarGlobalBroker";
+import EditarGlobalPoliza from "./pages/EditarGlobalPoliza";
 
 export default function App() {
   return (
@@ -42,15 +45,18 @@ export default function App() {
   element={<Inicio />}
 
         />
-
+<Route path="/me/apply/:id" element={<SolicitarP />} />
 <Route path="/" element={<Inicio />} />
 <Route path="/inicio" element={<Inicio />} />
 <Route path="/login" element={<Login />} />
 <Route path="/register" element={<RegistroUsuarios />} />
 <Route path="/register/user" element={<RUsuario />} />
 <Route path="/register/broker" element={<RBroker />} />
-
+<Route path="/global-user/brokers/editar/:id" element={<EditarGlobalBroker />} />
 <Route path="/broker_edit_policy/:id" element={<BrokerEditPolicy />} />
+<Route path="/editar-poliza/:id" element={<EditarGlobalPoliza />} />
+
+
 
         <Route
           path="/admin"
@@ -63,6 +69,7 @@ export default function App() {
 
 <Route path="/catalog/details/:id" element={<CatalogDetails />} />
 
+<Route path="/global/edit-user/:id" element={<EditarGlobalUser />} />
 
 <Route path="/admin/application-details" element={<AdminApplicationDetails />} />
 
