@@ -250,4 +250,6 @@ router.get('/:brokerId', async (req: Request, res: Response) => {
     }
 });
 
+//TODO: Obtener todos los brokers por estado
+
 export default router;

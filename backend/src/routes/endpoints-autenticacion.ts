@@ -35,7 +35,9 @@ router.post('/iniciar-sesion', async (req: Request, res: Response) => {
     }
     
     const hashedPassword = hashPassword(password, salt);
-    
+
+
+    //TODO: Modificar segmento para enviar data en json con ROL de usuario si se puede
     await connection.execute('CALL loginUsuario(?, ?, @codigoResultado, @usuarioData)', [email, hashedPassword]);
     const [loginResult] = await connection.execute('SELECT @codigoResultado as codigo, @usuarioData as userData');
     const { codigo, userData } = Array.isArray(loginResult) && loginResult[0] ? loginResult[0] as any : { codigo: 401, userData: null };

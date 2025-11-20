@@ -27,7 +27,7 @@ export default function Login() {
     }
 
     if (role === "global_superadmin" || role === "global_admin") {
-      normalizedRole = "global_user";
+      normalizedRole = "user_admin";
     }
 
     switch (normalizedRole) {
@@ -37,13 +37,13 @@ export default function Login() {
       case "analista":
         navigate("/analista");
         break;
-      case "usuario":
+      case "global_user":
         navigate("/usuario");
         break;
       case "broker":
         navigate("/broker");
         break;
-      case "global_user":
+      case "user_admin":
         navigate("/global_user");
         break;
       case "global_broker":

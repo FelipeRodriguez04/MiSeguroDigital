@@ -7,6 +7,8 @@ import commentRoutes from './routes/endpoints-comentarios-de-polizas';
 import paymentRoutes from './routes/endpoints-pasarela-de-pagos';
 import reportRoutes from './routes/endpoints-de-reportes';
 import brokerRoutes from './routes/endpoints-brokers';
+import cors from 'cors';
+
 
 /*
 * @author: Santiago Arellano
@@ -22,7 +24,7 @@ const PORT = process.env.PORT || 33761;
 /*Le indicamos a la API que vamos a usar el modulo interno de jsond e express dado que las respuestas de la API se van a
 * enviar en formato JSON en general*/
 app.use(express.json());
-
+app.use(cors())
 // Ruta principal
 app.get('/', (req, res) => {
   res.json({ message: 'MiSeguroDigital API is running!' });
