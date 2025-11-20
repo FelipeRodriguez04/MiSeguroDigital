@@ -3292,13 +3292,13 @@ INSERT INTO Aseguradoras
 
 -- Insertar registros de identidad para usuarios globales
 INSERT INTO Registro_SignUp_Global (correo_registro, hashed_pwd_registro, hashed_pwd_salt_registro) VALUES
-('admin@miseguro.com', '', ''),
-('superadmin@miseguro.com', '', ''),
-('juan.perez@gmail.com', '', ''),
-('maria.gonzalez@hotmail.com', '', ''),
-('carlos.rodriguez@yahoo.com', '', ''),
-('ana.martinez@gmail.com', '', ''),
-('luis.fernandez@outlook.com', '', '');
+('admin@miseguro.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('superadmin@miseguro.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('juan.perez@gmail.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('maria.gonzalez@hotmail.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('carlos.rodriguez@yahoo.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('ana.martinez@gmail.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('luis.fernandez@outlook.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803');
 
 -- Insertar usuarios globales
 INSERT INTO Registro_Global_Usuarios (id_identidad_registro, nombre_prim_usuario, apellido_prim_usuario, full_nombre_usuario, numero_telefono_usuario, fecha_nacimiento_usuario) VALUES

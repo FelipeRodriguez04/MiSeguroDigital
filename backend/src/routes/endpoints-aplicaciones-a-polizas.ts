@@ -10,12 +10,16 @@ const router = Router();
  * @param {number} body.polizaId - ID de la poliza (numero).
  * @returns Retorna: confirmacion de creacion o error.
  */
-router.post('/crear', async (req: Request, res: Response) => {
+router.post('/crear-poliza', async (req: Request, res: Response) => {
   const { usuarioId, polizaId } = req.body;
   
   try {
     const connection = await getConnection();
-    await connection.execute('CALL crear_aplicacion_poliza(?, ?, @codigoResultado)', [usuarioId, polizaId]);
+    await
+        connection.execute(
+            'CALL MiSeguroDigital.crearAplicacionEnPolizaPorUsuario(?, ?, @codigoResultado)',
+            [usuarioId, polizaId]
+        );
     
     const [result] = await connection.execute('SELECT @codigoResultado as codigo');
     await connection.end();
@@ -23,9 +27,12 @@ router.post('/crear', async (req: Request, res: Response) => {
     const codigo = Array.isArray(result) && result[0] ? (result[0] as any).codigo : 500;
     
     if (codigo === 200) {
-      res.json({ success: true, message: 'Aplicacion creada correctamente' });
+      res.status(200).json({ success: true, message: 'Aplicacion creada correctamente' });
+    } else if (codigo == 404){
+        res.status(404).json({ success: false, message: 'Error al crear aplicacion: Puede que ' +
+                'la poliza o el usuario ya no existan' });
     } else {
-      res.status(codigo === 404 ? 404 : 400).json({ success: false, message: 'Error al crear aplicacion' });
+        res.status(codigo).json({ success: false, message: 'Error al crear aplicacion' });
     }
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
@@ -38,15 +45,34 @@ router.post('/crear', async (req: Request, res: Response) => {
  * @param {number} params.userId - ID del usuario (numero).
  * @returns Retorna: lista de aplicaciones del usuario.
  */
-router.get('/usuario/:userId', async (req: Request, res: Response) => {
+router.get('/aplicaciones-usuario/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
   
   try {
     const connection = await getConnection();
-    const [rows] = await connection.execute('SELECT * FROM aplicaciones_usuario_view WHERE id_usuario = ?', [userId]);
+    const [rows] = await
+        connection.execute(
+            'SELECT * FROM MiSeguroDigital.viewAplicacionesPolizaPorUsuario WHERE id_usuario = ?',
+            [userId]
+        );
     await connection.end();
     
-    res.json(rows);
+    //? En base a la respuesta creamos un  JSON especifico para el frontend
+    let arrayOfPolizas = Array.isArray(rows) ? rows.map((poliza: any) => (
+        {
+            id_poliza: poliza.id_aplicacion_poliza,
+            fecha_aplicacion_poliza: poliza.fecha_de_aplicacion,
+            estado_actual_aplicacion:  poliza.estado_actual_aplicacion,
+            nombre_poliza: poliza.nombre_de_la_poliza,
+            tipo_poliza: poliza.tipo_de_poliza,
+            nombre_aseguradora: poliza.nombre_aseguradora
+        }
+    )): [];
+    if (arrayOfPolizas.length === 0) {
+        res.status(404).json({ message: 'No se encontraron aplicaciones para el usuario especificado' });
+    } else {
+        res.status(200).json(arrayOfPolizas);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
@@ -57,10 +83,10 @@ router.get('/usuario/:userId', async (req: Request, res: Response) => {
  * @note Sin parametros.
  * @returns Retorna: lista de aplicaciones pendientes de aprobacion.
  */
-router.get('/broker/pendientes', async (req: Request, res: Response) => {
+router.get('/broker/aplicaciones-pendientes', async (req: Request, res: Response) => {
   try {
     const connection = await getConnection();
-    const [rows] = await connection.execute('SELECT * FROM aplicaciones_pendientes_broker_view');
+    const [rows] = await connection.execute('SELECT * FROM MiSeguroDigital.viewAplicacionesPendientesPorBroker');
     await connection.end();
     
     res.json(rows);
