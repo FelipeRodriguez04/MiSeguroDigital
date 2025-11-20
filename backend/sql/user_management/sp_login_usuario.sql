@@ -64,16 +64,19 @@
                     select json_object(
                         'id_broker', registro_brokers.id_broker,
                         'full_nombre_broker', registro_brokers.full_nombre_broker,
-                        'rol_usuario', 'broker',
+                        'rol_usuario', roles_broker.rol_broker,
                         'correo_registro', registro_identidad.correo_registro,
                         'nombre_prim_broker', registro_brokers.nombre_prim_broker,
                         'apellido_prim_broker', registro_brokers.apellido_prim_broker,
                         'numero_telefono_broker', registro_brokers.numero_telefono_broker
+                        'estado_broker', registro_brokers.estado_broker
                     )
                     into usuarioInfo
                     from Registro_SignUp_Global registro_identidad
                     join Registro_Global_Brokers registro_brokers
                         on registro_identidad.id_identidad = registro_brokers.id_identidad_registro
+                    left join roles_broker
+                        on registro_brokers.id_broker = roles_broker.id_broker
                     where registro_identidad.correo_registro = email;
                     
                     if usuarioInfo is not null then
