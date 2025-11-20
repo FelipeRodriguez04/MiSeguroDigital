@@ -1,12 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const usuarios = [
-  { id_usuario: 10, nombres: "Mauricio", apellidos: "Rodríguez", email: "mauricio@example.com"},
-  { id_usuario: 11, nombres: "Ana", apellidos: "Gómez", email: "ana@example.com"},
-  { id_usuario: 12, nombres: "Pedro", apellidos: "Paredes", email: "pedro@example.com"},
+  { id_usuario: 10, nombres: "Mauricio", apellidos: "Rodríguez", email: "mauricio@example.com" },
+  { id_usuario: 11, nombres: "Ana", apellidos: "Gómez", email: "ana@example.com" },
+  { id_usuario: 12, nombres: "Pedro", apellidos: "Paredes", email: "pedro@example.com" },
 ];
 
 export default function GlobalUserUsuarios() {
+  const navigate = useNavigate();
+
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-cover bg-center bg-no-repeat"
@@ -54,7 +56,7 @@ export default function GlobalUserUsuarios() {
 
                       <button
                         className="px-3 py-1 !bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-700 transition"
-                        onClick={() => alert(`Editar usuario ${u.id_usuario}`)}
+                        onClick={() => navigate(`/global/edit-user/${u.id_usuario}`)}
                       >
                         Editar
                       </button>

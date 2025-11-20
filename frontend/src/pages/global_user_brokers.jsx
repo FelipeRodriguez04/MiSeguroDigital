@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const aseguradoras = [
   { id_aseguradora: 1, nombre: "Aseguradora Andina" },
@@ -12,6 +12,8 @@ const brokers = [
 ];
 
 export default function GlobalUserBrokers() {
+  const navigate = useNavigate();
+
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-cover bg-center bg-no-repeat"
@@ -63,14 +65,14 @@ export default function GlobalUserBrokers() {
                       <td className="border px-3 py-2 text-center space-x-3">
 
                         <button
-                          className="px-3 py-1 !bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-700 transition"
-                          onClick={() => alert(`Editar broker ${b.id_broker}`)}
+                          className="px-3 py-1 !bg-yellow-500 !text-white text-xs rounded-lg hover:bg-yellow-700 transition"
+                          onClick={() => navigate(`/global-user/brokers/editar/${b.id_broker}`)}
                         >
                           Editar
                         </button>
 
                         <button
-                          className="px-3 py-1 !bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition"
+                          className="px-3 py-1 !bg-red-600 !text-white text-xs rounded-lg hover:bg-red-700 transition"
                           onClick={() => alert(`Eliminar broker ${b.id_broker}`)}
                         >
                           Eliminar

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const aseguradoras = [
   { id_aseguradora: 1, nombre: "Aseguradora Andina" },
@@ -12,7 +12,7 @@ const polizas = [
     nombre: "Plan Vida Plus",
     descripcion: "Cobertura integral de vida y accidentes",
     tipo: "Vida",
-    pago_mensual: 35.50,
+    pago_mensual: 35.5,
     cobertura_total: 50000,
     duracion_contrato: "12 meses",
   },
@@ -32,13 +32,15 @@ const polizas = [
     nombre: "Hogar Seguro Premium",
     descripcion: "Protección total para bienes del hogar",
     tipo: "Hogar",
-    pago_mensual: 29.00,
+    pago_mensual: 29.0,
     cobertura_total: 15000,
     duracion_contrato: "12 meses",
   },
 ];
 
 export default function GlobalUserPolizas() {
+  const navigate = useNavigate();
+
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-cover bg-center bg-no-repeat"
@@ -96,23 +98,24 @@ export default function GlobalUserPolizas() {
                       <td className="border px-3 py-2">{p.duracion_contrato}</td>
                       <td className="border px-3 py-2">{aseg?.nombre}</td>
 
-                      <td className="border px-3 py-2 text-center space-x-3">
+                      <td className="border px-3 py-2">
+                        <div className="flex justify-center gap-4">
+                          <button
+                            className="px-3 py-1 !bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-700 transition"
+                            onClick={() => navigate(`/editar-poliza/${p.id_poliza}`)}
+                          >
+                            Editar
+                          </button>
 
-                        <button
-                          className="px-3 py-1 !bg-yellow-500 text-white text-xs rounded-lg hover:bg-yellow-700 transition"
-                          onClick={() => alert(`Editar póliza ${p.id_poliza}`)}
-                        >
-                          Editar
-                        </button>
-
-                        <button
-                          className="px-3 py-1 !bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition"
-                          onClick={() => alert(`Eliminar póliza ${p.id_poliza}`)}
-                        >
-                          Eliminar
-                        </button>
-
+                          <button
+                            className="px-3 py-1 !bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition"
+                            onClick={() => alert(`Eliminar póliza ${p.id_poliza}`)}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
                       </td>
+
                     </tr>
                   );
                 })}
