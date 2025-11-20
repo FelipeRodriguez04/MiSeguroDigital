@@ -532,11 +532,15 @@ begin
     start transaction;
 
     -- ? Verificar existencia del usuario
-    select count(*) into usuarioExiste 
+    select
+        1
+    into usuarioExiste
     from Registro_Global_Usuarios where id_usuario = usuarioId;
 
     -- ? Verificar que la poliza existe y esta activa
-    select count(*) into polizaExiste 
+    select
+       1
+    into polizaExiste
     from PolizasDeSeguro where id_poliza = polizaId 
     and estado_de_poliza = 'activa';
 
@@ -549,7 +553,7 @@ begin
         rollback;
     else
         -- ? ? Insertar nuevo registro de aplicacion
-        insert into aplicacionapoliza (
+        insert into AplicacionAPoliza (
             id_usuario,
             id_poliza,
             fecha_de_aplicacion,
@@ -681,7 +685,9 @@ begin
         rollback;
     else
         -- ? Verificar que no existe registro activo para este usuario y poliza
-        select count(*) into registroExistente
+        select
+            1
+        into registroExistente
         from   RegistroDeUsuarioEnPoliza
         where  id_usuario = usuarioId
             and estado_de_registro = 'registro_activo'
@@ -787,7 +793,7 @@ from
     left join (
         select
             id_aplicacion_poliza,
-            COUNT(*) as cantidad_documentos
+            COUNT(Documentos_por_AplicacionPoliza.id_documento_aplicacion) as cantidad_documentos
         from
             Documentos_por_AplicacionPoliza
         Group by
@@ -920,7 +926,7 @@ begin
     
     -- ?  Verificar si el broker existe
     select
-        count(*)
+        1
     into BrokerExists
     from Registro_Global_Brokers registro_brokers
     join Registro_SignUp_Global registro_identidad
@@ -1086,12 +1092,16 @@ begin
     start transaction;
     
     -- ? Verificar email unico
-    select count(*) into emailCount 
+    select
+        1
+    into emailCount
     from   Registro_SignUp_Global 
     where  correo_registro = email;
     
     -- ? Verificar que aseguradora existe
-    select count(*) into aseguradoraExiste
+    select
+        1
+    into aseguradoraExiste
     from   Aseguradoras
     where  id_aseguradora = aseguradoraId;
     
@@ -1323,9 +1333,12 @@ begin
         where  id_broker = brokerId;
         
         -- ? Verificar si ya tiene rol asignado
-        select count(*) into tieneRol
-        from   Roles_Broker
-        where  id_broker = brokerId;
+        select
+            1
+        into tieneRol
+        from Roles_Broker
+        where
+            id_broker = brokerId;
 
         -- ? Manejar roles segun estado
         if tieneRol = 0 then
@@ -1533,8 +1546,9 @@ begin
     start transaction;
 
     -- ? Verificar que el review existe
-    select count(*)
-        into reviewExiste
+    select
+        1
+    into reviewExiste
     from ReviewsDePolizas
     where id_review = reviewId;
 
@@ -1585,8 +1599,9 @@ begin
     start transaction;
 
     -- ? Validar que el usuario tiene registro activo para esta poliza
-    select count(*)
-        into registroActivoExiste
+    select
+        1
+    into registroActivoExiste
     from   RegistroDeUsuarioEnPoliza
     where  id_usuario = usuarioId
       and id_poliza = polizaId
@@ -1740,7 +1755,7 @@ begin
 
     -- ? Validar que el registro de poliza existe y esta activo
     select
-        count(*)
+        1
     into registroActivoExiste
     from   RegistroDeUsuarioEnPoliza
     where  id_registro_en_poliza = registroPolizaId
@@ -1890,7 +1905,7 @@ begin
 
     -- ? Verificar si el requerimiento existe
     select
-        count(*)  --  Registramos el conteo del requerimiento por poliza si existe el ID
+        1  --  Registramos el conteo del requerimiento por poliza si existe el ID
     -- esperariamos que sea 1, si sgue como cero entonces el requerimiento no existe.
     into requerimientoExiste
     from Requerimientos_por_Poliza
@@ -1942,7 +1957,7 @@ begin
 
     -- ? Verificar si la poliza existe
     select
-        count(*)
+        1
     into polizaExiste
     from PolizasDeSeguro
     where id_poliza = polizaId;
@@ -2010,7 +2025,7 @@ begin
     
     -- ? Verificar que aseguradora existe
     select
-        count(*)
+        1
     into aseguradoraExiste
     from   Aseguradoras
     where  id_aseguradora = aseguradoraId;
@@ -2119,7 +2134,7 @@ begin
     else
         -- ? Verificar si tiene registros activos
         select
-            count(*)
+            1
         into registrosActivos
         from   RegistroDeUsuarioEnPoliza
         where  id_poliza = polizaId
@@ -2183,7 +2198,7 @@ begin
 
     -- ? Verificar si el requerimiento existe
     select
-        count(*)
+        1
     into requerimientoExiste
     from Requerimientos_por_Poliza
     where id_requerimiento = requerimientoId;
@@ -2374,13 +2389,13 @@ select
 
     -- ? Tasa de aprobacion calculada
     case
-        when coalesce(estadista_aplicaciones.total_aplicaciones, 0) > 0 then
-            round((coalesce(estadista_aplicaciones.aplicaciones_aprobadas, 0) * 100.0) / estadista_aplicaciones.total_aplicaciones, 2)
+        when IFNULL(estadista_aplicaciones.total_aplicaciones, 0) > 0 then
+            round((IFNULL(estadista_aplicaciones.aplicaciones_aprobadas, 0) * 100.0) / estadista_aplicaciones.total_aplicaciones, 2)
         else 0
     end as tasa_aprobacion_real,
 
     -- ? Registros activos actuales
-    coalesce(estadista_registro.registros_activos, 0) as registros_activos_actuales
+    IFNULL(estadista_registro.registros_activos, 0) as registros_activos_actuales
 
 from PolizasDeSeguro polizas
     -- ? Join con aseguradoras
@@ -2394,7 +2409,7 @@ from PolizasDeSeguro polizas
     left join (
         select
             id_poliza,
-            count(*) as total_aplicaciones,
+            count(AplicacionAPoliza.id_aplicacion_poliza) as total_aplicaciones,
             -- Suma inline que me dijo Claude para contar los pendientes, aprobadors
             -- y rechazados y sacar numeros  para estadistica.
             sum(case
@@ -2417,7 +2432,7 @@ from PolizasDeSeguro polizas
     left join (
         select
             id_poliza,
-            count(*) as registros_activos
+            count(RegistroDeUsuarioEnPoliza.id_registro_en_poliza) as registros_activos
         from RegistroDeUsuarioEnPoliza
         where estado_de_registro = 'registro_activo'
         group by id_poliza
@@ -2474,7 +2489,7 @@ from PolizasDeSeguro poliza
     left join (
         select 
             id_poliza,
-            count(*) as total_aplicaciones,
+            count(id_aplicacion_poliza) as total_aplicaciones,
             sum(case
                 when estado_actual_aplicacion = 'pendiente_procesar'
                     then 1 else 0 end) as aplicaciones_pendientes,
@@ -2536,7 +2551,7 @@ from Aseguradoras aseguradora
     left join (
         select 
             id_poliza,
-            count(*) as total_aplicaciones
+            count(id_aplicacion_poliza) as total_aplicaciones
         from AplicacionAPoliza
         group by id_poliza
     ) as conteo_aplicantes_polizas
@@ -2546,7 +2561,7 @@ from Aseguradoras aseguradora
     left join (
         select 
             id_poliza,
-            count(*) as registros_activos
+            count(id_registro_en_poliza) as registros_activos
         from RegistroDeUsuarioEnPoliza
         where estado_de_registro = 'registro_activo'
         group by id_poliza
@@ -2611,7 +2626,7 @@ begin
     
     -- ? Verificar si el usuario existe
     select
-        count(*)
+        1
     into UserExists
     from Registro_Global_Usuarios registro_usuarios
     join Registro_SignUp_Global registro_global
@@ -2686,7 +2701,7 @@ begin
     
     -- ?  Verificar si el email ya existe en el sistema
     select
-        count(*)
+        1
     into emailCount
     from   Registro_SignUp_Global 
     where  correo_registro = email;
@@ -2864,7 +2879,7 @@ begin
         -- ?  Si es Global Admin, verificar que no sea el ultimo
         if rolUsuario in ('global_superadmin', 'global_admin') then
             select
-                count(*)
+                count(registro_usuarios.id_usuario)
             into globalAdminCount
             from Registro_Global_Usuarios registro_usuarios
             join Roles_Users roles_usuarios
@@ -2876,7 +2891,8 @@ begin
             and
                 registro_identidad.estado_actividad_registro = 'activo'
             and
-                registro_usuarios.id_usuario <> usuarioId;
+                registro_usuarios.id_usuario <> usuarioId
+            group by registro_usuarios.id_usuario;
             
             -- ?  Si es el ultimo Global Admin, no permitir eliminacion
             if globalAdminCount = 0 then
@@ -3104,8 +3120,8 @@ delimiter ;
 
 
 delimiter $$
--- ? Procedure para autenticar usuario con email y password hash
-create procedure loginUsuario(
+ -- ? Procedure para autenticar usuario con email y password hash
+    create procedure loginUsuario(
         in email varchar(255),
         in passwordHash varchar(512),
         out codigoResultado int,
@@ -3134,7 +3150,7 @@ create procedure loginUsuario(
         -- por lo que si el usuario aparece enla tabla de registros principales vamos a buscar que tenga un registro
         -- activo en los usuarios primero
         select
-            count(*),
+            1,
             registro_identidad.hashed_pwd_salt_registro,
             registro_identidad.hashed_pwd_registro
         into
@@ -3170,16 +3186,19 @@ create procedure loginUsuario(
                     select json_object(
                         'id_broker', registro_brokers.id_broker,
                         'full_nombre_broker', registro_brokers.full_nombre_broker,
-                        'rol_usuario', 'broker',
+                        'rol_usuario', Roles_Broker.rol_broker,
                         'correo_registro', registro_identidad.correo_registro,
                         'nombre_prim_broker', registro_brokers.nombre_prim_broker,
                         'apellido_prim_broker', registro_brokers.apellido_prim_broker,
                         'numero_telefono_broker', registro_brokers.numero_telefono_broker
+                        'estado_broker', registro_brokers.estado_broker
                     )
                     into usuarioInfo
                     from Registro_SignUp_Global registro_identidad
                     join Registro_Global_Brokers registro_brokers
                         on registro_identidad.id_identidad = registro_brokers.id_identidad_registro
+                    left join Roles_Broker
+                        on registro_brokers.id_broker = Roles_Broker.id_broker
                     where registro_identidad.correo_registro = email;
 
                     if usuarioInfo is not null then
@@ -3216,14 +3235,15 @@ begin
 
     -- ? Buscar salt del usuario
     select
-        count(*),
+        count(registro_identidad.id_identidad),
         registro_identidad.hashed_pwd_salt_registro
     into
         usuarioCount,
         passwordSalt
     from Registro_SignUp_Global registro_identidad
     where registro_identidad.correo_registro = email
-    and registro_identidad.estado_actividad_registro = 'activo';
+    and registro_identidad.estado_actividad_registro = 'activo'
+    group by registro_identidad.id_identidad;
 
     -- ? Si usuario existe, retornar salt
     if usuarioCount > 0 then

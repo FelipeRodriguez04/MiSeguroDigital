@@ -20,8 +20,8 @@ begin
     set passwordSalt = null;
     
     -- ? Buscar salt del usuario
-    select 
-        count(*),
+    select
+        1,
         registro_identidad.hashed_pwd_salt_registro
     into 
         usuarioCount,
@@ -35,3 +35,5 @@ begin
         set codigoResultado = 200;
     end if;
 end;
+
+drop procedure obtenerSaltUsuario;
