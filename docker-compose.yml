@@ -9,3 +9,77 @@ services:
     ports:
       - "3000:80"
     restart: unless-stopped
+    networks:
+      - docker_network
+
+  mysql_database:
+    image: mysql:8.0
+    platform: linux/amd64  
+    container_name: msd_mysql_database
+    ports:
+      - "34761:34761"
+    environment:
+      MYSQL_ROOT_PASSWORD: "2764"
+      MYSQL_DATABASE: "msd_database"
+      MYSQL_USER: "dbAccessProject"
+      MYSQL_PASSWORD: "dbAccess2024"
+      MYSQL_ROOT_HOST: "%"
+    volumes:
+      - mysql_datastore:/var/lib/mysql
+      - ./db_init_ordered.sql:/docker-entrypoint-initdb.d/init.sql
+    deploy:
+      resources:
+        limits:
+          memory: 10G
+          cpus: '4'
+        reservations:
+          memory: 4G
+          cpus: '2'
+    command: --port=34761
+    restart: unless-stopped
+    networks:
+      - docker_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    platform: linux/amd64   # 👈 MUY IMPORTANTE (tu backend usa node imagen x86)
+    container_name: msd_backend
+    environment:
+        DB_HOST: mysql_database
+        DB_PORT: 34761
+        DB_USER: proj-UserBackend-DB
+        DB_PASSWORD: s2764are0104
+        PORT: 33761
+    ports:
+      - "33761:33761"
+    restart: unless-stopped
+    networks:
+      - docker_network
+    depends_on:
+      - mysql_database
+
+  mysql_workbench:
+    image: lscr.io/linuxserver/mysql-workbench:latest
+    platform: linux/amd64   # 👈 ESTA IMAGEN NO TIENE SOPORTE ARM
+    container_name: msd_mysql_workbench
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Guayaquil
+    ports:
+      - "35761:3000"
+    restart: unless-stopped
+    networks:
+      - docker_network
+    depends_on:
+      - mysql_database
+
+networks:
+  docker_network:
+    driver: bridge
+
+volumes:
+  mysql_datastore:
+    driver: local
