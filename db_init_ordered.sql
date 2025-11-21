@@ -3190,7 +3190,7 @@ delimiter $$
                         'correo_registro', registro_identidad.correo_registro,
                         'nombre_prim_broker', registro_brokers.nombre_prim_broker,
                         'apellido_prim_broker', registro_brokers.apellido_prim_broker,
-                        'numero_telefono_broker', registro_brokers.numero_telefono_broker
+                        'numero_telefono_broker', registro_brokers.numero_telefono_broker,
                         'estado_broker', registro_brokers.estado_broker
                     )
                     into usuarioInfo

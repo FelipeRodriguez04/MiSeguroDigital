@@ -127,29 +127,29 @@ export default function App() {
         <Route
           path="/usuario"
           element={
-            <RequireRole role="usuario">
+            <RequireRole role="global_user">
               <HomeUser />
             </RequireRole>
           }
         />
-        <Route path="/catalog" element={<RequireRole role="usuario"><Catalog /></RequireRole>} />
+        <Route path="/catalog" element={<RequireRole role="global_user"><Catalog /></RequireRole>} />
         <Route path="/admin/applications" element={<RequireRole role="admin"><AdminApplications /></RequireRole>} />  
 
-        <Route path="/me/applications" element={<RequireRole role="usuario"><MyApplications /></RequireRole>} />
+        <Route path="/me/applications" element={<RequireRole role="global_user"><MyApplications /></RequireRole>} />
         <Route path="/broker/reviews" element={<RequireRole role="analista"><BrokerReviews /></RequireRole>} />
 
-        <Route path="/global_user" element={<RequireRole role="global_user"><GlobalUserHome /></RequireRole>} />
+        <Route path="/global_user" element={<RequireRole role="user_admin"><GlobalUserHome /></RequireRole>} />
         <Route path="/global_broker" element={<RequireRole role="global_broker"><GlobalBrokerHome /></RequireRole>} />
 
-        <Route path="/global_user/usuarios" element={<RequireRole role="global_user"><GlobalUserUsuarios /></RequireRole>} />
+        <Route path="/global_user/usuarios" element={<RequireRole role="user_admin"><GlobalUserUsuarios /></RequireRole>} />
 
-        <Route path="/global_user/brokers" element={<RequireRole role="global_user"><GlobalUserBrokers /></RequireRole>} />
-        <Route path="/global_user/polizas" element={<RequireRole role="global_user"><GlobalUserPolizas /></RequireRole>} />
+        <Route path="/global_user/brokers" element={<RequireRole role="user_admin"><GlobalUserBrokers /></RequireRole>} />
+        <Route path="/global_user/polizas" element={<RequireRole role="user_admin"><GlobalUserPolizas /></RequireRole>} />
         <Route path="/global_broker/equipo" element={<RequireRole role="global_broker"><GlobalBrokerEquipo /></RequireRole>} />
         <Route path="/global_broker/polizas" element={<RequireRole role="global_broker"><GlobalBrokerPolizas /></RequireRole>} />
         <Route path="/global_broker/solicitudes" element={<RequireRole role="global_broker"><GlobalBrokerSolicitudesEquipo /></RequireRole>} />
-        <Route path="/me/pagar_polizas" element={<RequireRole role="usuario"><PagarPolizas /></RequireRole>} />
-        <Route path="/me/pagar_polizas/:id_solicitud" element={<RequireRole role="usuario"><PagarPolizaDetalle /></RequireRole>} />
+        <Route path="/me/pagar_polizas" element={<RequireRole role="global_user"><PagarPolizas /></RequireRole>} />
+        <Route path="/me/pagar_polizas/:id_solicitud" element={<RequireRole role="global_user"><PagarPolizaDetalle /></RequireRole>} />
         <Route path="/broker/payments" element={<RequireRole role="analista"><BrokerPayments /></RequireRole>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

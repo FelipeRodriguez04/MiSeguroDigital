@@ -50,6 +50,7 @@ router.post('/iniciar-sesion', async (req: Request, res: Response) => {
       res.status(401).json({ success: false, message: 'Credenciales invalidas' });
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 });
