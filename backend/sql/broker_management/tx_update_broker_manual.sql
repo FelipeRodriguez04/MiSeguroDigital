@@ -11,6 +11,7 @@ create procedure actualizarBrokerManual(
     in fechaNacimiento date,
     in estadoBroker enum('pendiente', 'activo', 'rechazado'),
     in rolBroker enum('broker_superadmin', 'broker_admin', 'broker_analyst'),
+    in comingFrom enum('broker_admin','broker'),
     in adminId int,
     out codigoResultado int
 )
@@ -24,20 +25,20 @@ begin
     declare oldEstado varchar(50);
     declare brokerExiste int default 0;
     declare tieneRol int default 0;
-    
+
     -- ? Handler de errores SQL
     declare exit handler for sqlexception
     begin
         set codigoResultado = 500; --  Retornamos valor base de 5xx  error del servidor
         rollback;
     end;
-    
+
     -- ? Inicializar resultado
     set codigoResultado = 200; -- Retornamos vlaor de 2xx asumiendo que la ejecucion
     -- paso sin errores.
-    
+
     start transaction;
-    
+
     -- ? Verificar existencia y obtener valores actuales
     select
         nombre_prim_broker,
@@ -55,51 +56,62 @@ begin
         oldFechaNacimiento,
         oldEstado,
         brokerExiste
-    from   Registro_Global_Brokers 
+    from   Registro_Global_Brokers
     where  id_broker = brokerId;
-    
+
     -- ? Verificar si broker no existe
     if brokerExiste = 0 then
         set codigoResultado = 404; -- No obtuvimos un id de salida y por tanto no existe.
         rollback;
     else
         -- ? Actualizar informacion del broker
-        update Registro_Global_Brokers 
-        set
-            nombre_prim_broker = nombrePrim,
-            apellido_prim_broker = apellidoPrim,
-            full_nombre_broker = fullNombre,
-            numero_telefono_broker = telefono,
-            fecha_nacimiento_broker = fechaNacimiento,
-            estado_broker = estadoBroker
-        where  id_broker = brokerId;
-        
-        -- ? Verificar si ya tiene rol asignado
-        select count(*) into tieneRol
-        from   Roles_Broker
-        where  id_broker = brokerId;
-        
-        -- ? Manejar roles segun estado
-        if estadoBroker = 'activo' then
-            -- ? Si esta activo, asegurar que tenga rol
-            if tieneRol = 0 then
-                insert into Roles_Broker (id_broker, rol_broker)
-                values (brokerId, rolBroker);
-            else
-                update Roles_Broker 
-                set    rol_broker = rolBroker
-                where  id_broker = brokerId;
-            end if;
-        elseif estadoBroker in ('pendiente', 'rechazado') and tieneRol > 0 then
-            -- ? Si no esta activo, remover rol si existe. En este caso, si
-            -- el broker tiene un rol, y el  estado del broker paso hacia pendiente
-            -- o rechazado, entonces eliminamos el registro anterior de roles.
+        if comingFrom = 'broker_admin' then
+            update Registro_Global_Brokers
+            set
+                nombre_prim_broker = nombrePrim,
+                apellido_prim_broker = apellidoPrim,
+                full_nombre_broker = fullNombre,
+                numero_telefono_broker = telefono,
+                fecha_nacimiento_broker = fechaNacimiento,
+                estado_broker = estadoBroker
+            where  id_broker = brokerId;
 
-            -- Para el manejo de esta sentencia, usaremos la nocion en el BE API que
-            -- tenemos que evitar el caso de actualizacion de la misma data del usuario aqui
-            delete from Roles_Broker where id_broker = brokerId;
+            -- ? Verificar si ya tiene rol asignado
+            select 1 into tieneRol
+            from   Roles_Broker
+            where  id_broker = brokerId;
+
+            -- ? Manejar roles segun estado
+            if estadoBroker = 'activo' then
+                -- ? Si esta activo, asegurar que tenga rol
+                if tieneRol = 0 then
+                    insert into Roles_Broker (id_broker, rol_broker)
+                    values (brokerId, rolBroker);
+                else
+                    update Roles_Broker
+                    set    rol_broker = rolBroker
+                    where  id_broker = brokerId;
+                end if;
+            elseif estadoBroker in ('pendiente', 'rechazado') and tieneRol > 0 then
+                -- ? Si no esta activo, remover rol si existe. En este caso, si
+                -- el broker tiene un rol, y el  estado del broker paso hacia pendiente
+                -- o rechazado, entonces eliminamos el registro anterior de roles.
+
+                -- Para el manejo de esta sentencia, usaremos la nocion en el BE API que
+                -- tenemos que evitar el caso de actualizacion de la misma data del usuario aqui
+                delete from Roles_Broker where id_broker = brokerId;
+            end if;
+        else
+            -- Actualizamos todo menos el estado
+            update Registro_Global_Brokers
+            set
+                nombre_prim_broker = nombrePrim,
+                apellido_prim_broker = apellidoPrim,
+                full_nombre_broker = fullNombre,
+                numero_telefono_broker = telefono,
+                fecha_nacimiento_broker = fechaNacimiento
+            where  id_broker = brokerId;
         end if;
-        
         -- ? Registrar cambios en auditoria
         insert into RegistroAudit_AccionesBrokers (
             id_broker,
@@ -132,7 +144,7 @@ begin
             fechaNacimiento,
             now()
         );
-        
+
         commit;
     end if;
 end;

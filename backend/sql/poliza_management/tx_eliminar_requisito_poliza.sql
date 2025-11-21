@@ -23,7 +23,7 @@ begin
 
     -- ? Verificar si el requerimiento existe
     select
-        count(*)
+        1
     into requerimientoExiste
     from Requerimientos_por_Poliza
     where id_requerimiento = requerimientoId;

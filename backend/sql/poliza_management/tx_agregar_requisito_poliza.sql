@@ -26,7 +26,7 @@ begin
 
     -- ? Verificar si la poliza existe
     select
-        count(*)
+        1
     into polizaExiste
     from PolizasDeSeguro
     where id_poliza = polizaId;

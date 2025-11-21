@@ -20,7 +20,7 @@ services:
     image: mysql:8.0
     container_name: msd_mysql_database
     ports:
-      - "34761"
+      - "61200:34761"
     environment:
       MYSQL_ROOT_PASSWORD: "2764"
       MYSQL_DATABASE: "msd_database"
@@ -50,7 +50,7 @@ services:
     container_name: msd_backend
     environment:
         DB_HOST: mysql_database
-        DB_PORT: 34761
+        DB_PORT: 61200
         DB_USER: proj-UserBackend-DB
         DB_PASSWORD: s2764are0104@
         PORT: 33761

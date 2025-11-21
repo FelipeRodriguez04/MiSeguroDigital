@@ -26,7 +26,7 @@ begin
 
     -- ? Verificar si el requerimiento existe
     select
-        count(*)  --  Registramos el conteo del requerimiento por poliza si existe el ID
+        1 --  Registramos el conteo del requerimiento por poliza si existe el ID
     -- esperariamos que sea 1, si sgue como cero entonces el requerimiento no existe.
     into requerimientoExiste
     from Requerimientos_por_Poliza

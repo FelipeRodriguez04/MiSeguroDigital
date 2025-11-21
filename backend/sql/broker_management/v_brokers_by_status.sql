@@ -41,7 +41,7 @@ from Registro_SignUp_Global registro_identidad
     -- ? Left join con roles para ver asignaciones
     left join Roles_Broker roless_broker
         on registro_brokers.id_broker = roless_broker.id_broker
-where registro_identidad.estado_actividad_registro = 'activo'
+where registro_identidad.estado_actividad_registro in ('activo', 'inactivo')
 
 -- ? Ordenar por prioridad de estado y fecha
 order by 

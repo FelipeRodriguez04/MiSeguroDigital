@@ -8,6 +8,8 @@ begin
     -- ? Seleccionar datos del comentario y del usuario
     select
         reviews_de_poliza.id_review,
+        registro_usuarios.id_usuario,
+        reviews_de_poliza.id_review,
         reviews_de_poliza.rating_del_usuario,
         reviews_de_poliza.contexto_review,
         reviews_de_poliza.tiene_hidden_fees,

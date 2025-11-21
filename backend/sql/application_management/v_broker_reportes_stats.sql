@@ -6,6 +6,9 @@ select
     -- ? Agrupar por aseguradora para reportes especificos del broker
     poliza.id_aseguradora,
     aseguradora.nombre_aseguradora,
+    poliza.nombre_de_la_poliza,
+    poliza.estado_de_poliza,
+    poliza.descripcion_de_la_poliza,
     -- ? Contar el total de aplicaciones
     count(aplicacionPoliza.id_aplicacion_poliza) as total_aplicaciones,
     -- ? Contar las aplicaciones pendientes

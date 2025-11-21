@@ -18,10 +18,10 @@ begin
 
     -- ? Handler de errores SQL
     declare exit handler for sqlexception
-    begin
-        set codigoResultado = 500;
-        rollback;
-    end;
+        begin
+            set codigoResultado = 500;
+            rollback;
+        end;
 
     -- ? Inicializar codigo de resultado
     set codigoResultado = 200;
@@ -42,12 +42,14 @@ begin
         rollback;
     else
         -- ? Verificar que no existe registro activo para este usuario y poliza
-        select count(*) into registroExistente
+        select
+            1
+        into registroExistente
         from   RegistroDeUsuarioEnPoliza
         where  id_usuario = usuarioId
-            and estado_de_registro = 'registro_activo'
-            and id_poliza = polizaId
-            and estado_de_registro = 'registro_activo';
+          and estado_de_registro = 'registro_activo'
+          and id_poliza = polizaId
+          and estado_de_registro = 'registro_activo';
 
         if registroExistente > 0 then
             set codigoResultado = 409; -- Si tenemos un registro a la salida, el conteno es mayor que el default
@@ -74,13 +76,13 @@ begin
                 fecha_finalizacion_registro,
                 estado_de_registro
             ) values (
-                polizaId,
-                usuarioId,
-                aplicacionPolizaId,
-                fechaInicio,
-                fechaFin,
-                'registro_activo'
-            );
+                         polizaId,
+                         usuarioId,
+                         aplicacionPolizaId,
+                         fechaInicio,
+                         fechaFin,
+                         'registro_activo'
+                     );
 
             -- ? Registrar accion en auditoria
             insert into RegistroAudit_RegistrosPolizas (
@@ -91,15 +93,15 @@ begin
                 cambios_por_usuario_id,
                 fecha_de_modificacion
             ) values (
-                'INSERT',
-                last_insert_id(),
-                usuarioId,
-                polizaId,
-                adminId,
-                now()
-            );
+                         'INSERT',
+                         last_insert_id(),
+                         usuarioId,
+                         polizaId,
+                         adminId,
+                         now()
+                     );
 
             commit;
         end if;
     end if;
-end;
+end ;

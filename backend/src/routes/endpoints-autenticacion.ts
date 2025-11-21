@@ -21,6 +21,17 @@ const router = Router();
  */
 router.post('/iniciar-sesion', async (req: Request, res: Response) => {
   const { email, password } = req.body;
+
+	//? 1. Validamos que las entradas no se encuentren vacias
+	if (!email || !password) {
+		res.status(400).json({
+			success: false,
+			message: 'Error code 0x001 - [Raised] No se han registrado alguno de los campos' +
+				'para este endpoint',
+			offender: (!email) ? 'email' : 'password'
+		});
+	}
+
   
   try {
     const connection = await getConnection();
@@ -37,9 +48,13 @@ router.post('/iniciar-sesion', async (req: Request, res: Response) => {
     const hashedPassword = hashPassword(password, salt);
 
 
-    //TODO: Modificar segmento para enviar data en json con ROL de usuario si se puede
-    await connection.execute('CALL loginUsuario(?, ?, @codigoResultado, @usuarioData)', [email, hashedPassword]);
-    const [loginResult] = await connection.execute('SELECT @codigoResultado as codigo, @usuarioData as userData');
+
+    await
+			connection.execute(
+				'CALL loginUsuario(?, ?, @codigoResultado, @usuarioData)',
+							[email, hashedPassword]);
+    const [loginResult] = await
+			connection.execute('SELECT @codigoResultado as codigo, @usuarioData as userData');
     const { codigo, userData } = Array.isArray(loginResult) && loginResult[0] ? loginResult[0] as any : { codigo: 401, userData: null };
     
     await connection.end();
@@ -67,12 +82,29 @@ router.post('/iniciar-sesion', async (req: Request, res: Response) => {
  * @param {string} body.fechaNacimiento - Fecha de nacimiento del usuario (string).
  * @returns Retorna: ID del usuario creado o error de registro.
  */
-router.post('/registrar-usuario', async (req: Request, res: Response) => {
+router.post('/usuarios/registrar-usuario', async (req: Request, res: Response) => {
   const { email, password, nombrePrim, apellidoPrim, fullNombre, telefono, fechaNacimiento } = req.body;
-  
+
+	//? 1. Validamos que todas las entradas esten presentes, y reportamos el offender
+	if (!email || !password || !nombrePrim || !apellidoPrim || !fullNombre || !telefono || !fechaNacimiento) {
+		res.status(400).json({
+			success: false,
+			message: 'Error code 0x001 - [Raised] No se han registrado alguno de los campos' +
+				'para este endpoint',
+			offender: (!email) ? 'email' : (!password) ? 'password' :
+				(!nombrePrim) ? 'nombrePrim' :
+					(!apellidoPrim) ? 'apellidoPrim' :
+						(!fullNombre) ? 'fullNombre' :
+							(!telefono) ? 'telefono' : 'fechaNacimiento'
+		});
+	}
+
+	//? 2. Continuamos con el proceso regular
   try {
     const connection = await getConnection();
-    
+
+		//? 2.1 Generamos un salt y el hashing en base al algoritmo de la aplicacion, esto permite registrar
+		//? y que el logging sea mas facil para los usuairios ya creados.
     const salt = generateSalt();
     const hashedPassword = hashPassword(password, salt);
     
@@ -81,11 +113,17 @@ router.post('/registrar-usuario', async (req: Request, res: Response) => {
       [email, hashedPassword, salt, nombrePrim, apellidoPrim, fullNombre, telefono, fechaNacimiento, 'global_user', null, 'signup']
     );
     
-    const [result] = await connection.execute('SELECT @codigoResultado as codigo, @nuevoUsuarioId as usuarioId');
+    const [resultadoRegistroUsuarioNormal] =
+			await connection.execute(
+				'SELECT @codigoResultado as codigo, @nuevoUsuarioId as usuarioId');
     await connection.end();
     
-    const { codigo, usuarioId } = Array.isArray(result) && result[0] ? result[0] as any : { codigo: 500, usuarioId: null };
-    
+    const { codigo, usuarioId } =
+			Array.isArray(resultadoRegistroUsuarioNormal) && resultadoRegistroUsuarioNormal[0] ?
+				resultadoRegistroUsuarioNormal[0] as any : { codigo: 500, usuarioId: null };
+
+		//? 2.2 Al final retornamos solo la data del codigo de la consulta y el id del usuario creado, no
+		//? es necesario retornar el objeto creado completo porque esto es otro paso.
     if (codigo === 200) {
       res.json({ success: true, usuarioId, message: 'Usuario creado correctamente' });
     } else if (codigo === 409) {
@@ -99,7 +137,9 @@ router.post('/registrar-usuario', async (req: Request, res: Response) => {
 });
 
 /**
- * @description Registrar nuevo usuario desde panel de administracion.
+ * @description Registrar nuevo usuario desde panel de administracion. Este metodo se diferencia del
+ * /usuarios/registrar-usuarios ya que peremite crear usaurios con roles variados como global_superadmin, o
+ * global_admin, no solo global_user como es el de arriba.
  * @param {object} body - Parametros del cuerpo de la peticion.
  * @param {string} body.email - Correo electronico del nuevo usuario (string).
  * @param {string} body.password - Contrasena del nuevo usuario (string).
@@ -112,9 +152,32 @@ router.post('/registrar-usuario', async (req: Request, res: Response) => {
  * @param {number} body.adminId - ID del administrador que registra al usuario (numero).
  * @returns Retorna: ID del usuario creado o error de registro.
  */
-router.post('/registrar-admin', async (req: Request, res: Response) => {
-  const { email, password, nombrePrim, apellidoPrim, fullNombre, telefono, fechaNacimiento, rolUsuario, adminId } = req.body;
-  
+router.post('/admins/registrar-usuario', async (req: Request, res: Response) => {
+  const { email, password,
+		nombrePrim, apellidoPrim,
+		fullNombre, telefono,
+		fechaNacimiento, rolUsuario, adminId } = req.body;
+
+
+	//? 1. Validamos que todos los datos esten presentes, y reportamos el offender
+	if (!email || !password || !nombrePrim || !apellidoPrim || !fullNombre
+		|| !telefono || !fechaNacimiento || !rolUsuario || !adminId) {
+		res.status(400).json(
+			{
+				success: false,
+				message: 'Error code 0x001 - [Raised] No se han registrado alguno de los campos' +
+					'para este endpoint',
+				offender: (!email) ? 'email' : (!password) ? 'password' :
+					(!nombrePrim) ? 'nombrePrim' :
+						(!apellidoPrim) ? 'apellidoPrim' :
+							(!fullNombre) ? 'fullNombre' :
+								(!telefono) ? 'telefono' : (!fechaNacimiento) ? 'fechaNacimiento' :
+									(!rolUsuario) ? 'rolUsuario' : 'adminId'
+			}
+		)
+	}
+
+	//? 2. Continuamos con el proceso regular
   try {
     const connection = await getConnection();
     
@@ -123,13 +186,14 @@ router.post('/registrar-admin', async (req: Request, res: Response) => {
     
     await connection.execute(
       'CALL crearUsuarioManualDesdeAdminOSignUp(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @codigoResultado, @nuevoUsuarioId)',
-      [email, hashedPassword, salt, nombrePrim, apellidoPrim, fullNombre, telefono, fechaNacimiento, rolUsuario, adminId, 'admin']
+      [email, hashedPassword, salt, nombrePrim, apellidoPrim,
+				fullNombre, telefono, fechaNacimiento, rolUsuario, adminId, 'admin']
     );
     
-    const [result] = await connection.execute('SELECT @codigoResultado as codigo, @nuevoUsuarioId as usuarioId');
+    const [resultadoRegistroPorAdminPanel] = await connection.execute('SELECT @codigoResultado as codigo, @nuevoUsuarioId as usuarioId');
     await connection.end();
     
-    const { codigo, usuarioId } = Array.isArray(result) && result[0] ? result[0] as any : { codigo: 500, usuarioId: null };
+    const { codigo, usuarioId } = Array.isArray(resultadoRegistroPorAdminPanel) && resultadoRegistroPorAdminPanel[0] ? resultadoRegistroPorAdminPanel[0] as any : { codigo: 500, usuarioId: null };
     
     if (codigo === 200) {
       res.json({ success: true, usuarioId, message: 'Usuario creado correctamente' });

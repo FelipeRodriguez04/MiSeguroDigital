@@ -10,9 +10,17 @@ const router = Router();
  * @param {number} body.polizaId - ID de la poliza (numero).
  * @returns Retorna: confirmacion de creacion o error.
  */
-router.post('/crear-poliza', async (req: Request, res: Response) => {
+router.post('/usuarios/crear-aplicacion-a-poliza', async (req: Request, res: Response) => {
   const { usuarioId, polizaId } = req.body;
-  
+
+	//? 1. Validamos la entrada de datos para que existan los ids (no sean nulos) y que sean mayores que cero
+	if (!usuarioId || !polizaId || usuarioId <= 0 || polizaId <= 0) {
+		res.status(400).json(
+			{ message: 'Los IDs de usuario y poliza son requeridos, se pasaron como cero o negativos' }
+		);
+		return;
+	}
+	//? 2. Conitnuamos con la query normal
   try {
     const connection = await getConnection();
     await
@@ -45,9 +53,16 @@ router.post('/crear-poliza', async (req: Request, res: Response) => {
  * @param {number} params.userId - ID del usuario (numero).
  * @returns Retorna: lista de aplicaciones del usuario.
  */
-router.get('/aplicaciones-usuario/:userId', async (req: Request, res: Response) => {
+router.get('/usuarios/aplicaciones-de-usuario/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
-  
+	//? 1. Revisamos entradas de datos para ver que el id del usuario no este vacio
+	if (!userId || Number.parseInt(userId) <= 0) {
+		res.status(400).json(
+			{ message: 'El ID del usuario es requerido, se lo paso en blanco' }
+		);
+		return;
+	}
+	//? 2. Continuams con el proceso normal
   try {
     const connection = await getConnection();
     const [rows] = await
@@ -83,13 +98,31 @@ router.get('/aplicaciones-usuario/:userId', async (req: Request, res: Response) 
  * @note Sin parametros.
  * @returns Retorna: lista de aplicaciones pendientes de aprobacion.
  */
-router.get('/broker/aplicaciones-pendientes', async (req: Request, res: Response) => {
+router.get('/brokers/aplicaciones-pendientes', async (req: Request, res: Response) => {
   try {
-    const connection = await getConnection();
-    const [rows] = await connection.execute('SELECT * FROM MiSeguroDigital.viewAplicacionesPendientesPorBroker');
-    await connection.end();
+        const connection = await getConnection();
+        const [rows] = await connection.execute('SELECT * FROM MiSeguroDigital.viewAplicacionesPendientesPorBroker');
+        await connection.end();
     
-    res.json(rows);
+        //? 1. Con la salida de la query, transformamos la data en un array de objetos de JSON
+        let arrayOfApplications = Array.isArray(rows) ? rows.map((application: any) => ({
+            id_aplicacion_poliza: application.id_aplicacion_poliza,
+            fecha_aplicacion_poliza: application.fecha_de_aplicacion,
+            estado_actual_aplicacion: application.estado_actual_aplicacion,
+            id_usuario_aplicacion: application.id_usuario,
+            full_nombre_usuario_aplicacion: application.full_nombre_usuario,
+            correo_registro_usuario_aplicaicon: application.email_usuario,
+            id_poliza_aplicacion: application.id_poliza,
+            nombre_poliza_aplicacion: application.nombre_de_la_poliza,
+            id_aseguradora_poliza_aplicacion: application.id_aseguradora,
+            nombre_aseguradora_poliza_aplicacion: application.nombre_aseguradora
+        })) : [];
+
+        if (arrayOfApplications.length === 0) {
+            res.status(404).json({ message: 'No se encontraron aplicaciones pendientes de aprobacion' });
+        } else {
+            res.status(200).json(arrayOfApplications);
+        }
   } catch (error) {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
@@ -101,15 +134,30 @@ router.get('/broker/aplicaciones-pendientes', async (req: Request, res: Response
  * @param {number} params.applicationId - ID de la aplicacion (numero).
  * @param {object} body - Parametros del cuerpo de la peticion.
  * @param {number} body.brokerAnalistaId - ID del broker analista (numero).
- * @param {string} body.decision - Decision sobre la aplicacion (string).
+ * @param {string} body.decision - Decision sobre la aplicacion (string). Tiene que ser del tipo enum
+ * perteneciente a [enum ('aprobada', 'rechazada')].
  * @param {string} [body.razonRechazo] - Razon de rechazo (string opcional).
  * @returns Retorna: confirmacion de procesamiento o error.
  */
-router.put('/procesar/:applicationId', async (req: Request, res: Response) => {
+router.put('/brokers/procesar-aplicacion/:applicationId', async (req: Request, res: Response) => {
   const { applicationId } = req.params;
   const { brokerAnalistaId, decision, razonRechazo } = req.body;
-  
+    //? 1. Validamos que todos los parametros existan y que el enum se cumpla. La razon puede estar vacia
+    if (!brokerAnalistaId || !decision && !(decision in ['aprobada', 'rechazada'])) {
+        return res.status(400)
+					.json(
+						{ success: false,
+							message: 'Parametros invalidos' });
+    }
+		if (decision === 'rechazada' && !razonRechazo) {
+			return res.status(400)
+				.json(
+					{ success: false,
+						message: 'Razon de rechazo es requerida para aplicacion rechazada' });
+		}
+		//? 2. Continuamos con el proceso normal
   try {
+
     const connection = await getConnection();
     await connection.execute(
       'CALL MiSeguroDigital.procesarAplicacionEnPolizaPorUsuario(?, ?, ?, ?, @codigoResultado)',
@@ -122,56 +170,172 @@ router.put('/procesar/:applicationId', async (req: Request, res: Response) => {
     const codigo = Array.isArray(result) && result[0] ? (result[0] as any).codigo : 500;
     
     if (codigo === 200) {
-      res.json({ success: true, message: 'Aplicacion procesada correctamente' });
-    } else {
-      res.status(codigo === 404 ? 404 : codigo === 409 ? 409 : 400).json({ success: false, message: 'Error al procesar aplicacion' });
-    }
+      res.status(200).json({ success: true, message: 'Aplicacion procesada correctamente' });
+    } else if (codigo === 409){
+			res.status(409)
+				.json({ success: false,
+					message: 'Error al procesar aplicacion: La aplicacion ya fue procesada' });
+		}
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 });
 
 /**
- * @description Obtener detalles completos de una aplicacion especifica.
+ * @description Obtener detalles completos de una aplicacion especifica con el usuario en mente,
+ * la data que se envia no es completa como en el endpoint de brokers
  * @param {object} params - Parametros de la URL.
  * @param {number} params.applicationId - ID de la aplicacion (numero).
+ * @param {number} params.userId - ID del usuario (numero).
  * @returns Retorna: detalles completos de la aplicacion incluyendo datos del usuario y poliza.
  */
-router.get('/:applicationId/details', async (req: Request, res: Response) => {
-  const { applicationId } = req.params;
-  
+router.get('/usuarios/obtener-detalles-aplicacion/:applicationId', async (req: Request, res: Response) => {
+  const { applicationId, userId } = req.params;
+
+	//? 1. Validamos que el id de la aplicacion no este vacio o sea menor que cero
+	if (!applicationId || Number.parseInt(applicationId) <= 0) {
+		res.status(400).json(
+			{ message: 'El ID de la aplicacion es requerido, se lo paso en blanco o negativo' }
+		);
+	}
+	if (!userId || Number.parseInt(userId) <= 0) {
+		res.status(400).json(
+			{ message: 'El ID del usuario es requerido, se lo paso en blanco o negativo' }
+		);
+	}
+
+	//? 2. Continuamos con el proceso normal, en este caso segmentado para usuarios
   try {
     const connection = await getConnection();
-    // TODO: Use v_aplicacion_detalles view (viewDetallesDeAplicacionPorUsuarios)
+    // OJO: con esta query filtramos los registros para un usuario especifico con una aplicacion especifica
+		const [resultingRow] = await
+			connection.execute('select * from MiSeguroDigital.viewAplicacionesPolizaPorUsuario where id_aplicacion_poliza = ? and id_usuario = ?',
+				[applicationId]);
     await connection.end();
-    
-    res.status(501).json({ message: 'Not implemented yet' });
+
+		//? 2.1 Sacamos los resultados de la query
+		let arrayOfSingleApplication =
+			Array.isArray(resultingRow) ? resultingRow.map((application: any) => ({
+				fecha_de_aplicacion: application.fecha_de_aplicacion,
+				estado_actual_aplicacion: application.estado_actual_aplicacion,
+				/*No incluyo datos del usuario porque para hacer esto ya se tienen guardados en el browser*/
+				nombre_de_la_poliza: application.nombre_de_la_poliza,
+				tipo_de_poliza: application.tipo_de_poliza,
+				descripcion_de_la_poliza: application.descripcion_de_la_poliza,
+				pago_mensual_de_la_poliza: application.pago_mensual,
+				monto_cobertura_total: application.monto_cobertura_total,
+				nombre_aseguradora: application.nombre_aseguradora,
+				cantidad_documentos_subidos: application.cantidad_documentos
+			})) : [];
+		if (arrayOfSingleApplication.length === 0) {
+			res.status(404).json({ message: 'No se encontraron detalles de la aplicacion especificada' });
+		} else {
+			res.status(200).json(arrayOfSingleApplication);
+		}
   } catch (error) {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 });
+
+
+router.get('/brokers/obtener-detalles-aplicacion/:applicationId', async (req: Request, res: Response) => {
+	const { applicationId, userId } = req.params;
+
+	//? 1. Validamos que el id de la aplicacion no este vacio o sea menor que cero
+	if (!applicationId || Number.parseInt(applicationId) <= 0) {
+		res.status(400).json(
+			{ message: 'El ID de la aplicacion es requerido, se lo paso en blanco o negativo' }
+		);
+	}
+	if (!userId || Number.parseInt(userId) <= 0) {
+		res.status(400).json(
+			{ message: 'El ID del usuario es requerido, se lo paso en blanco o negativo' }
+		);
+	}
+
+	//? 2. Continuamos con el proceso normal, en este caso segmentado para usuarios
+	try {
+		const connection = await getConnection();
+		// OJO: con esta query filtramos los registros para un usuario especifico con una aplicacion especifica
+		const [resultingRow] = await
+			connection.execute('select * from MiSeguroDigital.viewAplicacionesPolizaPorUsuario where id_aplicacion_poliza = ? and id_usuario = ?',
+				[applicationId]);
+		await connection.end();
+
+		//? 2.1 Sacamos los resultados de la query
+		let arrayOfSingleApplication =
+			Array.isArray(resultingRow) ? resultingRow.map((application: any) => ({
+				id_aplicacion_poliza: application.id_aplicacion_poliza,
+				fecha_de_aplicacion: application.fecha_de_aplicacion,
+				estado_actual_aplicacion: application.estado_actual_aplicacion,
+				id_usuario: application.id_usuario,
+				full_nombre_usuario: application.full_nombre_usuario,
+				correo_registro: application.correo_registro,
+				numero_telefono_usuario: application.numero_telefono_usuario,
+				fecha_nacimiento_usuario: application.fecha_nacimiento_usuario,
+				id_poliza: application.id_poliza,
+				nombre_de_la_poliza: application.nombre_de_la_poliza,
+				descripcion_de_la_poliza: application.descripcion_de_la_poliza,
+				pago_mensual: application.pago_mensual,
+				monto_cobertura_total: application.monto_cobertura_total,
+				nombre_aseguradora: application.nombre_aseguradora,
+				cantidad_documentos: application.cantidad_documentos
+			})) : [];
+
+		if (arrayOfSingleApplication.length === 0) {
+			res.status(404).json({ message: 'No se encontraron detalles de la aplicacion especificada' });
+		} else {
+			res.status(200).json(arrayOfSingleApplication);
+		}
+	} catch (error) {
+		res.status(500).json({ message: 'Error interno del servidor' });
+	}
+})
 
 /**
  * @description Formalizar registro de usuario en poliza despues de aprobacion.
  * @param {object} params - Parametros de la URL.
  * @param {number} params.applicationId - ID de la aplicacion aprobada (numero).
  * @param {object} body - Parametros del cuerpo de la peticion.
- * @param {string} body.fechaInicio - Fecha de inicio del registro (string).
- * @param {string} body.fechaFinalizacion - Fecha de finalizacion del registro (string).
- * @param {boolean} body.autoRenew - Si la poliza tiene auto-renovacion (boolean).
  * @param {number} body.brokerId - ID del broker que formaliza el registro (numero).
  * @returns Retorna: confirmacion de registro formalizado o error.
  */
-router.post('/:applicationId/register', async (req: Request, res: Response) => {
+router.post('broker/registrar-aprobacion-aplicacion/:applicationId', async (req: Request, res: Response) => {
   const { applicationId } = req.params;
-  const { fechaInicio, fechaFinalizacion, autoRenew, brokerId } = req.body;
-  
+	const { brokerId } = req.body;
+
+	//? 1. Revisamos que el broker id y la application id no sean nulos ni que sean menores que cero
+	if (!brokerId || !applicationId || brokerId <= 0 || Number.parseInt(applicationId) <= 0) {
+		res.status(400).json(
+			{
+				message: 'Los datos de entrada son incorrectos',
+				reason: (brokerId <= 0) ? 'El ID del broker no puede ser menor o igual a cero':
+					'El ID de la aplicacion no puede ser menor o igual a cero'
+			});
+	}
+
+	//? 2. Continuamos con el proceso normal
   try {
     const connection = await getConnection();
-    // TODO: Call tx_registrar_usuario_en_poliza stored procedure
+		const [result] =
+			await connection.execute('call MiSeguroDigital.registrarUsuarioEnPolizaPorAplicacion(?, ?, @codigoResultado) ',
+				[
+				applicationId, brokerId
+			])
     await connection.end();
-    
-    res.status(501).json({ message: 'Not implemented yet' });
+
+		//? 1. Procesamos salida en forma de codigo de error
+		const codigo = Array.isArray(result) && result[0] ? (result[0] as any).codigo : 500;
+
+		if (codigo === 404){
+			res.status(404).json({ message: 'No se encontro la aplicacion definida' });
+		} else if (codigo === 409) {
+			res.status(409).json({ message: 'La aplicacion ya fue formalizada' });
+		} else if (codigo ==  500) {
+			res.status(500).json({ message: 'Error interno del servidor' });
+		}else {
+			res.status(200).json({ success: true, message: 'Registro formalizado correctamente' });
+		}
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
