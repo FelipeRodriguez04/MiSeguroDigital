@@ -22,7 +22,7 @@ begin
     start transaction;
 
     -- ? Verificar que el review existe
-    select count(*)
+    select 1
         into reviewExiste
     from ReviewsDePolizas
     where id_review = reviewId;

@@ -66,6 +66,14 @@ begin
                 brokerId,
                 rolInicial
             );
+        else
+            -- Si fue denegado entonces marcamos la cuenta como desactivada en
+            -- en el registro principal
+            update Registro_SignUp_Global
+            join Registro_Global_Brokers registro_brokers
+                on registro_brokers.id_identidad_registro = Registro_SignUp_Global.id_identidad
+            set Registro_SignUp_Global.estado_actividad_registro = 'inactivo'
+            where registro_brokers.id_broker = brokerId;
         end if;
         
         -- ? Registrar decision en auditoria

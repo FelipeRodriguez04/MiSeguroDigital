@@ -772,6 +772,7 @@ select
     polizas.monto_cobertura_total,
     -- ? Informacion de la aseguradora
     aseguradoras.nombre_aseguradora,
+    aseguradoras.id_aseguradora,
     -- ? Informacion de los requisitos y documentos
     IFNULL(doc_count.cantidad_documentos, 0) AS cantidad_documentos
 from
@@ -793,7 +794,7 @@ from
     left join (
         select
             id_aplicacion_poliza,
-            COUNT(Documentos_por_AplicacionPoliza.id_documento_aplicacion) as cantidad_documentos
+            COUNT(*) as cantidad_documentos
         from
             Documentos_por_AplicacionPoliza
         Group by
@@ -802,8 +803,6 @@ from
         on polizaAplicacion.id_aplicacion_poliza = doc_count.id_aplicacion_poliza
 ORDER BY
     polizaAplicacion.fecha_de_aplicacion DESC;
--- ? Vista para que los analistas de broker vean las solicitudes pendientes
--- ? Muestra las solicitudes asociadas a las polizas de su aseguradora
 
 create or replace view viewAplicacionesPendientesPorBroker as
 select
@@ -840,14 +839,14 @@ where
 order by
     -- ? Ordenar por fecha de aplicacion ascendente para procesar las mas antiguas primero
     aplicacionPoliza.fecha_de_aplicacion asc;
--- ? Vista para generar estadisticas de solicitudes para los reportes del broker
--- ? Calcula el total de solicitudes aprobadas, rechazadas y pendientes
-
 create or replace view viewEstadisticasDeSolicitudesReporteParaBrokers as
 select
     -- ? Agrupar por aseguradora para reportes especificos del broker
     poliza.id_aseguradora,
     aseguradora.nombre_aseguradora,
+    poliza.nombre_de_la_poliza,
+    poliza.estado_de_poliza,
+    poliza.descripcion_de_la_poliza,
     -- ? Contar el total de aplicaciones
     count(aplicacionPoliza.id_aplicacion_poliza) as total_aplicaciones,
     -- ? Contar las aplicaciones pendientes
@@ -1195,73 +1194,14 @@ delimiter ;
 -- Elimina broker manualmente por Global Admin
 -- Implementa soft delete cambiando estado de registro
 -- Limpia roles asociados y registra en auditoria
-delimiter $$
-create procedure eliminarBrokerManual(
-    in brokerId int,
-    in adminId int,
-    out codigoResultado int
-)
-begin
-    -- Declarar variables de control
-    declare brokerExiste int default 0;
-    declare identityId int default 0;
-    
-    -- Handler de errores SQL
-    declare exit handler for sqlexception
-    begin
-        set codigoResultado = 500;
-        rollback;
-    end;
-    
-    -- Inicializar resultado
-    set codigoResultado = 200;
-    
-    start transaction;
-    
-    -- Verificar existencia del broker y obtener identity_id
-    select id_identidad_registro, 1
-        into   identityId, brokerExiste
-    from   Registro_Global_Brokers registro_brokers
-    join Registro_SignUp_Global registro_identidad
-        on registro_brokers.id_identidad_registro = registro_identidad.id_identidad
-    where  registro_brokers.id_broker = brokerId
-        and registro_identidad.estado_actividad_registro = 'activo';
-    
-    -- Si broker no existe o ya esta inactivo
-    if brokerExiste = 0 then
-        set codigoResultado = 404;
-        rollback;
-    else
-        -- Eliminar roles del broker si existen
-        delete from Roles_Broker 
-        where  id_broker = brokerId;
-        
-        -- Soft delete del registro principal
-        update Registro_SignUp_Global 
-        set    estado_actividad_registro = 'inactivo'
-        where  id_identidad = identityId;
-        
-        -- Registrar eliminacion en auditoria
-        insert into RegistroAudit_AccionesBrokers (
-            id_broker,
-            id_admin_modificacion,
-            operacion_realizada,
-            fecha_modificacion_usuario
-        ) values (
-            brokerId,
-            adminId,
-            'DELETE',
-            now()
-        );
-        
-        commit;
-    end if;
-end $$
-delimiter ;
 -- ? Actualiza broker manualmente por Global Admin
 -- ? Permite cambio de informacion personal y estado del broker
 -- ? Maneja asignacion y cambio de roles segun estado
 delimiter $$
+-- ? Actualiza broker manualmente por Global Admin
+-- ? Permite cambio de informacion personal y estado del broker
+-- ? Maneja asignacion y cambio de roles segun estado
+
 create procedure actualizarBrokerManual(
     in brokerId int,
     in nombrePrim varchar(255),
@@ -1269,7 +1209,9 @@ create procedure actualizarBrokerManual(
     in fullNombre varchar(512),
     in telefono varchar(50),
     in fechaNacimiento date,
+    in estadoBroker enum('pendiente', 'activo', 'rechazado'),
     in rolBroker enum('broker_superadmin', 'broker_admin', 'broker_analyst'),
+    in comingFrom enum('broker_admin','broker'),
     in adminId int,
     out codigoResultado int
 )
@@ -1283,20 +1225,20 @@ begin
     declare oldEstado varchar(50);
     declare brokerExiste int default 0;
     declare tieneRol int default 0;
-    
+
     -- ? Handler de errores SQL
     declare exit handler for sqlexception
     begin
         set codigoResultado = 500; --  Retornamos valor base de 5xx  error del servidor
         rollback;
     end;
-    
+
     -- ? Inicializar resultado
     set codigoResultado = 200; -- Retornamos vlaor de 2xx asumiendo que la ejecucion
     -- paso sin errores.
-    
+
     start transaction;
-    
+
     -- ? Verificar existencia y obtener valores actuales
     select
         nombre_prim_broker,
@@ -1314,42 +1256,62 @@ begin
         oldFechaNacimiento,
         oldEstado,
         brokerExiste
-    from   Registro_Global_Brokers 
+    from   Registro_Global_Brokers
     where  id_broker = brokerId;
-    
+
     -- ? Verificar si broker no existe
     if brokerExiste = 0 then
         set codigoResultado = 404; -- No obtuvimos un id de salida y por tanto no existe.
         rollback;
     else
         -- ? Actualizar informacion del broker
-        update Registro_Global_Brokers 
-        set
-            nombre_prim_broker = nombrePrim,
-            apellido_prim_broker = apellidoPrim,
-            full_nombre_broker = fullNombre,
-            numero_telefono_broker = telefono,
-            fecha_nacimiento_broker = fechaNacimiento
-        where  id_broker = brokerId;
-        
-        -- ? Verificar si ya tiene rol asignado
-        select
-            1
-        into tieneRol
-        from Roles_Broker
-        where
-            id_broker = brokerId;
+        if comingFrom = 'broker_admin' then
+            update Registro_Global_Brokers
+            set
+                nombre_prim_broker = nombrePrim,
+                apellido_prim_broker = apellidoPrim,
+                full_nombre_broker = fullNombre,
+                numero_telefono_broker = telefono,
+                fecha_nacimiento_broker = fechaNacimiento,
+                estado_broker = estadoBroker
+            where  id_broker = brokerId;
 
-        -- ? Manejar roles segun estado
-        if tieneRol = 0 then
-                insert into Roles_Broker (id_broker, rol_broker)
-                values (brokerId, rolBroker);
+            -- ? Verificar si ya tiene rol asignado
+            select 1 into tieneRol
+            from   Roles_Broker
+            where  id_broker = brokerId;
+
+            -- ? Manejar roles segun estado
+            if estadoBroker = 'activo' then
+                -- ? Si esta activo, asegurar que tenga rol
+                if tieneRol = 0 then
+                    insert into Roles_Broker (id_broker, rol_broker)
+                    values (brokerId, rolBroker);
+                else
+                    update Roles_Broker
+                    set    rol_broker = rolBroker
+                    where  id_broker = brokerId;
+                end if;
+            elseif estadoBroker in ('pendiente', 'rechazado') and tieneRol > 0 then
+                -- ? Si no esta activo, remover rol si existe. En este caso, si
+                -- el broker tiene un rol, y el  estado del broker paso hacia pendiente
+                -- o rechazado, entonces eliminamos el registro anterior de roles.
+
+                -- Para el manejo de esta sentencia, usaremos la nocion en el BE API que
+                -- tenemos que evitar el caso de actualizacion de la misma data del usuario aqui
+                delete from Roles_Broker where id_broker = brokerId;
+            end if;
         else
-            update Roles_Broker
-            set    rol_broker = rolBroker
+            -- Actualizamos todo menos el estado
+            update Registro_Global_Brokers
+            set
+                nombre_prim_broker = nombrePrim,
+                apellido_prim_broker = apellidoPrim,
+                full_nombre_broker = fullNombre,
+                numero_telefono_broker = telefono,
+                fecha_nacimiento_broker = fechaNacimiento
             where  id_broker = brokerId;
         end if;
-        
         -- ? Registrar cambios en auditoria
         insert into RegistroAudit_AccionesBrokers (
             id_broker,
@@ -1382,7 +1344,7 @@ begin
             fechaNacimiento,
             now()
         );
-        
+
         commit;
     end if;
 end $$
@@ -1391,8 +1353,12 @@ delimiter ;
 -- ? Une tablas de registro, brokers, aseguradoras y roles
 -- ? Muestra solo brokers activos para administracion
 
+-- ? Vista para mostrar brokers con informacion consolidada
+-- ? Une tablas de registro, brokers, aseguradoras y roles
+-- ? Muestra solo brokers activos para administracion
+
 create or replace view viewBrokerInfoBasica as
-select 
+select
     -- ? Campos principales del broker
     registro_brokers.id_broker,
     registro_identidad.correo_registro as email,
@@ -1401,20 +1367,20 @@ select
     registro_brokers.full_nombre_broker,
     registro_brokers.numero_telefono_broker,
     registro_brokers.fecha_nacimiento_broker,
-    
+
     -- ? Estado del broker y fechas
     registro_brokers.estado_broker,
     registro_identidad.estado_actividad_registro as is_active,
     registro_identidad.fecha_registro as created_at,
-    
+
     -- ? Informacion de la aseguradora
     aseguradoras.id_aseguradora,
     aseguradoras.nombre_aseguradora,
     aseguradoras.dominio_correo_aseguradora,
-    
+
     -- ? Rol del broker si tiene asignado
     rb.rol_broker as broker_role
-    
+
 from Registro_SignUp_Global registro_identidad
     -- ? Join con brokers para informacion personal
     join Registro_Global_Brokers registro_brokers
@@ -1428,7 +1394,7 @@ from Registro_SignUp_Global registro_identidad
     -- que estos se crean a la hora de actualizar el estado a aprobado.
     left join Roles_Broker rb
         on registro_brokers.id_broker = rb.id_broker
-where registro_identidad.estado_actividad_registro = 'activo'
+where registro_identidad.estado_actividad_registro in ('activo', 'inactivo')
 -- ? Ordenar por estado del broker y fecha de registro
 order by 
     case registro_brokers.estado_broker
@@ -1481,7 +1447,7 @@ from Registro_SignUp_Global registro_identidad
     -- ? Left join con roles para ver asignaciones
     left join Roles_Broker roless_broker
         on registro_brokers.id_broker = roless_broker.id_broker
-where registro_identidad.estado_actividad_registro = 'activo'
+where registro_identidad.estado_actividad_registro in ('activo', 'inactivo')
 
 -- ? Ordenar por prioridad de estado y fecha
 order by 
@@ -1502,6 +1468,7 @@ begin
     -- ? Seleccionar datos del comentario y del usuario
     select
         reviews_de_poliza.id_review,
+        registro_usuarios.id_usuario,
         reviews_de_poliza.rating_del_usuario,
         reviews_de_poliza.contexto_review,
         reviews_de_poliza.tiene_hidden_fees,
@@ -2134,11 +2101,12 @@ begin
     else
         -- ? Verificar si tiene registros activos
         select
-            1
+            count(RegistroDeUsuarioEnPoliza.id_registro_en_poliza)
         into registrosActivos
         from   RegistroDeUsuarioEnPoliza
         where  id_poliza = polizaId
-          and estado_de_registro = 'registro_activo';
+          and estado_de_registro = 'registro_activo'
+        group by id_poliza;
         
         -- ? Si tiene registros activos, no permitir eliminacion
         if registrosActivos > 0 then
@@ -2516,61 +2484,6 @@ order by
 --  y retorno de datos en base de las aseguradoras,permitiendonos filtrar luego en la
 -- aplicacion final
 
-create or replace view viewPolizaInfoPorAseguradora as
-select 
-    -- ? Informacion de la aseguradora
-    aseguradora.id_aseguradora,
-    aseguradora.nombre_aseguradora,
-    
-    -- ? Informacion de la poliza
-    polizas.id_poliza,
-    polizas.nombre_de_la_poliza,
-    polizas.tipo_de_poliza,
-    polizas.pago_mensual,
-    polizas.monto_cobertura_total,
-    polizas.estado_de_poliza,
-    polizas.porcentaje_de_aprobacion,
-    
-    -- ? Metricas de aplicaciones
-    IFNULL(conteo_aplicantes_polizas.total_aplicaciones, 0) as total_aplicaciones,
-    IFNULL(conteo_registros_activos_poliza.registros_activos, 0)                  as registros_activos,
-    
-    -- ? Indicadores de popularidad
-    case 
-        when IFNULL(conteo_aplicantes_polizas.total_aplicaciones, 0) > 10 then 'Alta'
-        when IFNULL(conteo_aplicantes_polizas.total_aplicaciones, 0) > 5 then 'Media'
-        else 'Baja'
-    end                                                     as popularidad_poliza
-    
-from Aseguradoras aseguradora
-    -- ? Join con polizas
-    join PolizasDeSeguro polizas
-        on aseguradora.id_aseguradora = polizas.id_aseguradora
-    -- ? Left join con conteo de aplicaciones: otra vez ,los dos left join
-    --  hechos son para obtener datos de aplicaciones y mantener datos si es nulo
-    left join (
-        select 
-            id_poliza,
-            count(id_aplicacion_poliza) as total_aplicaciones
-        from AplicacionAPoliza
-        group by id_poliza
-    ) as conteo_aplicantes_polizas
-        on polizas.id_poliza = conteo_aplicantes_polizas.id_poliza
-    
-    -- ? Left join con conteo de registros activos
-    left join (
-        select 
-            id_poliza,
-            count(id_registro_en_poliza) as registros_activos
-        from RegistroDeUsuarioEnPoliza
-        where estado_de_registro = 'registro_activo'
-        group by id_poliza
-    ) as conteo_registros_activos_poliza
-        on polizas.id_poliza = conteo_registros_activos_poliza.id_poliza
-
--- ? Ordenar por aseguradora y popularidad
-order by 
-    aseguradora.nombre_aseguradora asc;
 -- ? Vista optimizada para el catalogo publico de polizas, la informacion
 -- ? que se obtiene aqui retorna solo la data importante para el usuario
 
@@ -2588,6 +2501,7 @@ select
     polizas.importe_por_cancelacion,
     -- ? Informacion de la aseguradora
     aseguradoras.nombre_aseguradora,
+    aseguradoras.id_aseguradora,
     -- ? Solo mostrar polizas activas
     polizas.estado_de_poliza
 from
@@ -2602,6 +2516,7 @@ order by
     -- ? Ordenar por tipo de poliza y luego por nombre
     polizas.tipo_de_poliza,
     polizas.nombre_de_la_poliza;
+
 
 -- ? Stored Procedure usado para obtener la informacion de usuario basado en un id de usuario
 delimiter $$
@@ -3120,7 +3035,7 @@ delimiter ;
 
 
 delimiter $$
- -- ? Procedure para autenticar usuario con email y password hash
+     -- ? Procedure para autenticar usuario con email y password hash
     create procedure loginUsuario(
         in email varchar(255),
         in passwordHash varchar(512),
@@ -3150,7 +3065,7 @@ delimiter $$
         -- por lo que si el usuario aparece enla tabla de registros principales vamos a buscar que tenga un registro
         -- activo en los usuarios primero
         select
-            1,
+            count(*),
             registro_identidad.hashed_pwd_salt_registro,
             registro_identidad.hashed_pwd_registro
         into
@@ -3186,7 +3101,7 @@ delimiter $$
                     select json_object(
                         'id_broker', registro_brokers.id_broker,
                         'full_nombre_broker', registro_brokers.full_nombre_broker,
-                        'rol_usuario', IFNULL(Roles_Broker.rol_broker, 'No Definido'),
+                        'rol_usuario', MiSeguroDigital.Roles_Broker.rol_broker,
                         'correo_registro', registro_identidad.correo_registro,
                         'nombre_prim_broker', registro_brokers.nombre_prim_broker,
                         'apellido_prim_broker', registro_brokers.apellido_prim_broker,
@@ -3251,6 +3166,27 @@ begin
     end if;
 end $$
 delimiter ;
+
+-- ? Esta vista nos permite obtener todas las aseguradoras
+-- tomando especificamente su id, su nombre y su terminacion de correo esto
+-- mas que todo para poder mostrar data en la pagina de sign up
+
+create or replace view viewInformacionAseguradorasBasica as
+       select
+            Aseguradoras.id_aseguradora,
+            Aseguradoras.nombre_aseguradora,
+            Aseguradoras.dominio_correo_aseguradora
+       from Aseguradoras;
+
+-- ? Esta segunda vista nos permite obtener la informacion detallada de todas las
+-- aseguradoras para el manejo interno de la aplicacion
+
+create or replace view viewInformacionAseguradorasFull as
+    select *
+    from Aseguradoras;
+
+
+
 -- -------------------------------------------------------------------------------------
 -- Seccion Tres: Creacion de usuarios para el acceso a la base de datos
 -- -------------------------------------------------------------------------------------

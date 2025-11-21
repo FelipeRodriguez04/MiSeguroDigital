@@ -21,6 +21,7 @@ select
     polizas.monto_cobertura_total,
     -- ? Informacion de la aseguradora
     aseguradoras.nombre_aseguradora,
+    aseguradoras.id_aseguradora,
     -- ? Informacion de los requisitos y documentos
     IFNULL(doc_count.cantidad_documentos, 0) AS cantidad_documentos
 from

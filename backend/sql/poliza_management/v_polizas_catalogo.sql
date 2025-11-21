@@ -15,6 +15,7 @@ select
     polizas.importe_por_cancelacion,
     -- ? Informacion de la aseguradora
     aseguradoras.nombre_aseguradora,
+    aseguradoras.id_aseguradora,
     -- ? Solo mostrar polizas activas
     polizas.estado_de_poliza
 from

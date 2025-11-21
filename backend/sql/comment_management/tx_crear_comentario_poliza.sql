@@ -30,7 +30,7 @@ begin
     start transaction;
 
     -- ? Validar que el usuario tiene registro activo para esta poliza
-    select count(*)
+    select 1
         into registroActivoExiste
     from   RegistroDeUsuarioEnPoliza
     where  id_usuario = usuarioId

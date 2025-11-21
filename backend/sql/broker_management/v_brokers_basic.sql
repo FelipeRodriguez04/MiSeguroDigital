@@ -39,7 +39,7 @@ from Registro_SignUp_Global registro_identidad
     -- que estos se crean a la hora de actualizar el estado a aprobado.
     left join Roles_Broker rb
         on registro_brokers.id_broker = rb.id_broker
-where registro_identidad.estado_actividad_registro = 'activo'
+where registro_identidad.estado_actividad_registro in ('activo', 'inactivo')
 -- ? Ordenar por estado del broker y fecha de registro
 order by 
     case registro_brokers.estado_broker
