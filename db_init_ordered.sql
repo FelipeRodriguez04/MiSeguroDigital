@@ -3101,7 +3101,7 @@ delimiter $$
                     select json_object(
                         'id_broker', registro_brokers.id_broker,
                         'full_nombre_broker', registro_brokers.full_nombre_broker,
-                        'rol_usuario', IFNULL(Roles_Broker.rol_broker, 'No Definido'),
+                        'rol_usuario', MiSeguroDigital.Roles_Broker.rol_broker,
                         'correo_registro', registro_identidad.correo_registro,
                         'nombre_prim_broker', registro_brokers.nombre_prim_broker,
                         'apellido_prim_broker', registro_brokers.apellido_prim_broker,
