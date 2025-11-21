@@ -42,7 +42,7 @@ export default function RUsuario() {
     };
 
     try {
-      const resp = await fetch("http://localhost:33761/api/autenticacion/registrar-usuario", {
+      const resp = await fetch("http://localhost:33761/api/autenticacion/usuarios/registrar-usuario", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,44 +1,66 @@
+import { useEffect, useState } from "react";
+
 export default function MyApplications() {
-  const APPS_BY_USER = {
-    "user@example.com": [
-      {
-        id_aplicacion_poliza: 1001,
-        poliza: "Seguro Vehicular",
-        fecha_solicitud: "2025-10-21",
-        estado_aplicacion: "Aprobada",
-      },
-      {
-        id_aplicacion_poliza: 1002,
-        poliza: "Seguro de Vida Familiar",
-        fecha_solicitud: "2025-11-03",
-        estado_aplicacion: "Pendiente",
-      },
-    ],
-    "ana@example.com": [
-      {
-        id_aplicacion_poliza: 2001,
-        poliza: "Seguro Hogar Plus",
-        fecha_solicitud: "2025-08-12",
-        estado_aplicacion: "Pendiente",
-      },
-      {
-        id_aplicacion_poliza: 2002,
-        poliza: "Seguro Viaje Anual",
-        fecha_solicitud: "2025-11-01",
-        estado_aplicacion: "Rechazada",
-      },
-    ],
-  };
+  const [apps, setApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
 
   const userId = localStorage.getItem("userId") || "";
   const userName = localStorage.getItem("userName") || "Usuario";
-  const apps = APPS_BY_USER[userId] || [];
 
   const statusColors = {
     Aprobada: "text-green-700 font-semibold",
     Pendiente: "text-yellow-600 font-semibold",
     Rechazada: "text-red-600 font-semibold",
   };
+
+  const TiposPolizas={
+  seguro_automotriz: "Seguro Automotriz",
+  seguro_inmobiliario: "Seguro Inmobiliario",
+  seguro_de_vida: "Seguro de Vida",
+  seguro_de_salud: "Seguro de Salud",
+};
+
+const TipoEstado={
+  pendiente_procesar: "Pendiente",
+  aprobada: "Aprobada",
+  rechazada: "Rechazada",
+}
+
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchApps = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:33761/api/aplicaciones/usuarios/aplicaciones-de-usuario/${userId}`,
+          {
+            method: "GET",
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setApiError(data.message || "Error al obtener solicitudes");
+          console.error("Error al obtener solicitudes:", data);
+          return;
+        }
+
+        setApps(data);
+      } catch (err) {
+        console.error("Error de red:", err);
+        setApiError("No se pudo conectar con el servidor");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApps();
+  }, [userId]);
 
   return (
     <div
@@ -48,22 +70,38 @@ export default function MyApplications() {
           "url('https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80')",
       }}
     >
-           <div className="absolute inset-0 bg-white/30 backdrop-blur-[12px]"></div>
+      <div className="absolute inset-0 bg-white/30 backdrop-blur-[12px]"></div>
 
       <header className="relative flex justify-between items-center px-8 py-4 text-green-700 font-semibold z-10">
         <div className="text-xl">MiSeguroDigital</div>
       </header>
-            <div className="container mx-auto px-4 z-10 py-10">
-        <h1 className="text-4xl font-extrabold text-green-700 mb-2 text-center z-10 mt-8">Mis Solicitudes</h1>
+
+      <div className="container mx-auto px-4 z-10 py-10">
+        <h1 className="text-4xl font-extrabold text-green-700 mb-2 text-center z-10 mt-8">
+          Mis Solicitudes
+        </h1>
         <p className="text-gray-700 text-lg mb-10 max-w-3xl mx-auto text-center">
-          Hola <span className="font-semibold text-green-700">{userName}</span>, estas son tus solicitudes.
+          Hola{" "}
+          <span className="font-semibold text-green-700">{userName}</span>, estas
+          son tus solicitudes.
         </p>
 
         <div className="w-full bg-white/80 rounded-2xl shadow-lg p-6 backdrop-blur-sm">
-          {apps.length === 0 ? (
+          {loading ? (
+            <div className="text-center text-gray-600 py-10">
+              Cargando solicitudes...
+            </div>
+          ) : apiError ? (
+            <div className="text-center text-red-600 py-10">
+              {apiError}
+            </div>
+          ) : apps.length === 0 ? (
             <div className="text-center text-gray-600 py-10">
               <p>No tienes solicitudes registradas.</p>
-              <a href="/catalog" className="inline-block mt-4 text-green-700 hover:text-green-800 underline font-semibold">
+              <a
+                href="/catalog"
+                className="inline-block mt-4 text-green-700 hover:text-green-800 underline font-semibold"
+              >
                 Ir al catálogo de pólizas →
               </a>
             </div>
@@ -73,17 +111,30 @@ export default function MyApplications() {
                 <thead className="sticky top-0 bg-white">
                   <tr className="border-b-2 border-green-200">
                     <th className="py-3 px-4 text-green-800 text-lg">Póliza</th>
-                    <th className="py-3 px-4 text-green-800 text-lg">Fecha solicitud</th>
+                    <th className="py-3 px-4 text-green-800 text-lg">Tipo</th>
+                    <th className="py-3 px-4 text-green-800 text-lg">Aseguradora</th>
+                    <th className="py-3 px-4 text-green-800 text-lg">
+                      Fecha solicitud
+                    </th>
                     <th className="py-3 px-4 text-green-800 text-lg">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
                   {apps.map((app) => (
-                    <tr key={app.id_aplicacion_poliza} className="border-b border-gray-200 hover:bg-green-50 transition">
-                      <td className="py-3 px-4">{app.poliza}</td>
-                      <td className="py-3 px-4">{app.fecha_solicitud}</td>
-                      <td className={`py-3 px-4 ${statusColors[app.estado_aplicacion] || ""}`}>
-                        {app.estado_aplicacion}
+                    <tr
+                      key={app.id_aplicacion_poliza}
+                      className="border-b border-gray-200 hover:bg-green-50 transition"
+                    >
+                      <td className="py-3 px-4">{app.nombre_poliza}</td>
+                      <td className="py-3 px-4">{TiposPolizas[app.tipo_poliza]}</td>
+                      <td className="py-3 px-4">{app.nombre_aseguradora}</td>
+                      <td className="py-3 px-4">{app.fecha_aplicacion_poliza}</td>
+                      <td
+                        className={`py-3 px-4 ${
+                          statusColors[TipoEstado[app.estado_actual_aplicacion]] || ""
+                        }`}
+                      >
+                        {TipoEstado[app.estado_actual_aplicacion]}
                       </td>
                     </tr>
                   ))}
@@ -93,9 +144,10 @@ export default function MyApplications() {
           )}
         </div>
 
-        <footer className="mt-12 text-gray-500 text-sm text-center">© 2025 MiSeguroDigital — Tu confianza, nuestra prioridad.</footer>
+        <footer className="mt-12 text-gray-500 text-sm text-center">
+          © 2025 MiSeguroDigital — Tu confianza, nuestra prioridad.
+        </footer>
       </div>
     </div>
   );
 }
-

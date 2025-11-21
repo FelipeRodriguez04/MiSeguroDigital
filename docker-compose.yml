@@ -50,7 +50,7 @@ services:
     container_name: msd_backend
     environment:
         DB_HOST: mysql_database
-        DB_PORT: 61200
+        DB_PORT: 34761
         DB_USER: proj-UserBackend-DB
         DB_PASSWORD: s2764are0104@
         PORT: 33761
@@ -64,6 +64,7 @@ services:
 
   mysql_workbench:
     image: lscr.io/linuxserver/mysql-workbench:latest
+    platform: linux/amd64
     container_name: msd_mysql_workbench
     environment:
       PUID: 1000

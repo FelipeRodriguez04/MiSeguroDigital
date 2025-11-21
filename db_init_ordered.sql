@@ -3065,7 +3065,7 @@ delimiter $$
         -- por lo que si el usuario aparece enla tabla de registros principales vamos a buscar que tenga un registro
         -- activo en los usuarios primero
         select
-            count(*),
+            1,
             registro_identidad.hashed_pwd_salt_registro,
             registro_identidad.hashed_pwd_registro
         into
@@ -3101,7 +3101,7 @@ delimiter $$
                     select json_object(
                         'id_broker', registro_brokers.id_broker,
                         'full_nombre_broker', registro_brokers.full_nombre_broker,
-                        'rol_usuario', MiSeguroDigital.Roles_Broker.rol_broker,
+                        'rol_usuario', IFNULL(Roles_Broker.rol_broker, 'No Definido'),
                         'correo_registro', registro_identidad.correo_registro,
                         'nombre_prim_broker', registro_brokers.nombre_prim_broker,
                         'apellido_prim_broker', registro_brokers.apellido_prim_broker,

@@ -125,6 +125,7 @@ router.post('/usuarios/registrar-usuario', async (req: Request, res: Response) =
 		//? 2.2 Al final retornamos solo la data del codigo de la consulta y el id del usuario creado, no
 		//? es necesario retornar el objeto creado completo porque esto es otro paso.
     if (codigo === 200) {
+      console.log(password, salt, hashedPassword);
       res.json({ success: true, usuarioId, message: 'Usuario creado correctamente' });
     } else if (codigo === 409) {
       res.status(409).json({ success: false, message: 'El correo ya esta registrado' });
@@ -132,6 +133,7 @@ router.post('/usuarios/registrar-usuario', async (req: Request, res: Response) =
       res.status(400).json({ success: false, message: 'Error al crear usuario' });
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 });
