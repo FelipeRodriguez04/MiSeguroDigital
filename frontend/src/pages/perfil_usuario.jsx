@@ -9,7 +9,7 @@ export default function PerfilUsuario() {
     global_user: "Usuario",
     global_admin: "Administrador Global",
     global_superadmin: "Superadministrador Global",
-    };
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -19,7 +19,7 @@ export default function PerfilUsuario() {
         );
         const data = await resp.json();
         if (resp.ok) {
-          setUserData(data.data[0]); 
+          setUserData(data.data[0]);
         } else {
           console.error("Error al obtener datos del usuario:", data.message);
         }
@@ -65,35 +65,47 @@ export default function PerfilUsuario() {
               Cargando datos del usuario...
             </div>
           ) : (
-            <div className="mt-4 grid grid-cols-1 gap-4 text-gray-800 text-sm">
-              <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
-                <span className="font-semibold">Nombre completo:</span>{" "}
-                {userData.full_nombre_usuario}
+            <>
+              <div className="mt-4 grid grid-cols-1 gap-4 text-gray-800 text-sm">
+                <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
+                  <span className="font-semibold">Nombre completo:</span>{" "}
+                  {userData.full_nombre_usuario}
+                </div>
+
+                <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
+                  <span className="font-semibold">Email:</span> {userData.email}
+                </div>
+
+                <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
+                  <span className="font-semibold">Teléfono:</span>{" "}
+                  {userData.numero_telefono_usuario}
+                </div>
+
+                <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
+                  <span className="font-semibold">Fecha de nacimiento:</span>{" "}
+                  {userData.fecha_nacimiento_usuario}
+                </div>
+
+                <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
+                  <span className="font-semibold">Fecha de creación:</span>{" "}
+                  {userData.fecha_creacion_usuario}
+                </div>
+
+                <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
+                  <span className="font-semibold">Rol:</span>{" "}
+                  {RolesMap[userData.rol]}
+                </div>
               </div>
 
-              <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
-                <span className="font-semibold">Email:</span> {userData.email}
+              <div className="mt-6 flex justify-center">
+                <Link
+                  to="/usuario/editar_perfil"
+                  className="!bg-green-700 hover:bg-green-800 !text-white font-semibold px-6 py-3 rounded-lg shadow-md transition"
+                >
+                  Editar Información
+                </Link>
               </div>
-
-              <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
-                <span className="font-semibold">Teléfono:</span>{" "}
-                {userData.numero_telefono_usuario}
-              </div>
-
-              <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
-                <span className="font-semibold">Fecha de nacimiento:</span>{" "}
-                {userData.fecha_nacimiento_usuario}
-              </div>
-
-              <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
-                <span className="font-semibold">Fecha de creación:</span>{" "}
-                {userData.fecha_creacion_usuario}
-              </div>
-
-              <div className="p-3 bg-green-50/60 rounded-lg border border-green-100">
-                <span className="font-semibold">Rol:</span> {RolesMap[userData.rol]}
-              </div>
-            </div>
+            </>
           )}
         </div>
       </main>

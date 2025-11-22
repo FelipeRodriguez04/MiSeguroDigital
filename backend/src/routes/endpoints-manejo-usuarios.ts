@@ -281,71 +281,90 @@ router.delete('admin/eliminar-usuario/:userId', async (req: Request, res: Respon
  * @param {number} body.userId - ID del usuario que actualiza su propio perfil (numero).
  * @returns Retorna: confirmacion de actualizacion o error.
  */
+
+//LISTO!!
+
 router.put('/actualizar-mi-perfil', async (req: Request, res: Response) => {
   const { nombrePrim, apellidoPrim, fullNombre, telefono, fechaNacimiento, userId } = req.body;
 
-	//? 1.1 Validamos que toda la data ingresada no sea nula
-	if (!nombrePrim || !apellidoPrim || !fullNombre
-		|| !telefono || !fechaNacimiento || !userId) {
-		res.status(400).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] Datos de entrada no validos',
-			offender: (!nombrePrim) ? 'nombrePrim' : (!apellidoPrim) ?
-				'apellidoPrim' : (!fullNombre) ? 'fullNombre' : (!telefono) ?
-					'telefono' : (!fechaNacimiento) ? 'fechaNacimiento' : 'userId'
-		});
-	}
+  if (!nombrePrim || !apellidoPrim || !fullNombre || !telefono || !fechaNacimiento || !userId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Error Code 0x001 - [Raised] Datos de entrada no validos',
+      offender: (!nombrePrim) ? 'nombrePrim' :
+                (!apellidoPrim) ? 'apellidoPrim' :
+                (!fullNombre) ? 'fullNombre' :
+                (!telefono) ? 'telefono' :
+                (!fechaNacimiento) ? 'fechaNacimiento' : 'userId'
+    });
+  }
 
-	//? 1.2 Validamos que el id del usuario sea mayor que cero
-	if (Number(userId) <= 0) {
-		res.status(400).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] ID de usuario no valido',
-			offender: 'userId'
-		});
-	}
+  if (Number(userId) <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Error Code 0x001 - [Raised] ID de usuario no valido',
+      offender: 'userId'
+    });
+  }
 
-	//? 2. Ejecutamos el procedimiento interno
   try {
     const connection = await getConnection();
-      await connection.execute(
-              'call MiSeguroDigital.actualizarUnUsuarioDesdeAdminOUsuario(?,?,?,?,?,?,?,?,?,@codigoResultado)',
-              [userId, nombrePrim, apellidoPrim,
-                  fullNombre, telefono, fechaNacimiento,'global_user','user', userId]);
-      const [resultCode] = await connection.execute('SELECT @ResultCode as codigo');
+
+    await connection.execute(
+      'CALL MiSeguroDigital.actualizarUnUsuarioDesdeAdminOUsuario(?,?,?,?,?,?,?,?,?,@codigoResultado)',
+      [
+        userId,
+        nombrePrim,
+        apellidoPrim,
+        fullNombre,
+        telefono,
+        fechaNacimiento,
+        'global_user',
+        'user',
+        userId,
+      ]
+    );
+
+    const [rows] = await connection.execute(
+      'SELECT @codigoResultado AS codigo'
+    );
+
     await connection.end();
-    
-    //? 2. Con la respuesta de la llamada vamos a revisar el estado interno
-    const codigo = Array.isArray(resultCode) &&
-				resultCode[0] ? (resultCode[0] as any).codigo : 500;
+
+    const codigo =
+      Array.isArray(rows) && rows[0]
+        ? (rows[0] as any).codigo
+        : 500;
 
     if (codigo === 200) {
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: 'Perfil actualizado correctamente',
         offender: ''
       });
     } else if (codigo === 404) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] Usuario no encontrado',
         offender: 'userId'
       });
     } else {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] API Error al realizar la actualizacion de datos',
         offender: 'API Error'
       });
     }
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       success: false,
       message: 'Error Code 0x001 - [Raised] Error interno del servidor',
       offender: error
     });
   }
 });
+
 
 /**
  * @description Obtener usuarios filtrados por rol. Esta ruta esta validada para solo el grupo de usuarios de administracion.
