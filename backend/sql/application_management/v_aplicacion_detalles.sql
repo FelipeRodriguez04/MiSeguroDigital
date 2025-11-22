@@ -7,6 +7,10 @@ select
     polizaAplicacion.id_aplicacion_poliza,
     polizaAplicacion.fecha_de_aplicacion,
     polizaAplicacion.estado_actual_aplicacion,
+    polizaAplicacion.id_bien_asegurado,
+    BienesPorUsuario.nombre_bien,
+    BienesPorUsuario.tipo_de_bien,
+    BienesPorUsuario.valoracion_bien,
     -- ? Informacion del usuario
     registro_usuarios.id_usuario,
     registro_usuarios.full_nombre_usuario,
@@ -50,5 +54,12 @@ from
             id_aplicacion_poliza
     ) doc_count
         on polizaAplicacion.id_aplicacion_poliza = doc_count.id_aplicacion_poliza
+    join BienesAseguradosPorUsuario on
+            BienesAseguradosPorUsuario.id_bien_del_usuario = polizaAplicacion.id_bien_asegurado
+    join BienesPorUsuario on
+            BienesPorUsuario.id_bien = BienesAseguradosPorUsuario.id_bien_del_usuario
+where
+    -- ? Filtrar por usuario
+    registro_usuarios.id_usuario = 1
 ORDER BY
     polizaAplicacion.fecha_de_aplicacion DESC;

@@ -7,6 +7,7 @@ import commentRoutes from './routes/endpoints-comentarios-de-polizas';
 import paymentRoutes from './routes/endpoints-pasarela-de-pagos';
 import reportRoutes from './routes/endpoints-de-reportes';
 import brokerRoutes from './routes/endpoints-brokers';
+import bienesRoutes from './routes/endpoints-bienes-usuarios';
 import cors from 'cors';
 
 
@@ -40,6 +41,8 @@ app.use('/api/comentarios', commentRoutes);
 app.use('/api/pagos', paymentRoutes);
 app.use('/api/reportes', reportRoutes);
 app.use('/api/brokers', brokerRoutes);
+app.use('/api/bienes', bienesRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Servidor ejecutandose en puerto ${PORT}`);

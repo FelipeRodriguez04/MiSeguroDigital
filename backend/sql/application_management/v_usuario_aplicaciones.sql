@@ -9,6 +9,7 @@ select
     aplicacionPoliza.id_aplicacion_poliza,
     aplicacionPoliza.fecha_de_aplicacion,
     aplicacionPoliza.estado_actual_aplicacion,
+    aplicacionPoliza.id_bien_asegurado,
     -- ? Informacion de la poliza
     polizas.nombre_de_la_poliza,
     polizas.tipo_de_poliza,

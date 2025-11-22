@@ -8,42 +8,62 @@ const router = Router();
  * @param {object} body - Parametros del cuerpo de la peticion.
  * @param {number} body.usuarioId - ID del usuario (numero).
  * @param {number} body.polizaId - ID de la poliza (numero).
+ * @param {number} body.bienId - ID de la poliza (numero).
  * @returns Retorna: confirmacion de creacion o error.
  */
 router.post('/usuarios/crear-aplicacion-a-poliza', async (req: Request, res: Response) => {
-  const { usuarioId, polizaId } = req.body;
+  const { usuarioId, polizaId, bienId } = req.body;
 
 	//? 1. Validamos la entrada de datos para que existan los ids (no sean nulos) y que sean mayores que cero
-	if (!usuarioId || !polizaId || usuarioId <= 0 || polizaId <= 0) {
+	if (!usuarioId || !polizaId || !bienId || usuarioId <= 0 || polizaId <= 0 || bienId <= 0) {
 		res.status(400).json(
-			{ message: 'Los IDs de usuario y poliza son requeridos, se pasaron como cero o negativos' }
+			{
+				success: false,
+				message: 'Error Code 0x001 - [Raised] Los parametros de entrada son invalidos, se enviaron valores nulos o negativos',
+				offender: (!usuarioId) ? 'ID de usuario' : (!polizaId) ? 'ID de poliza' : 'ID de bien'
+			}
 		);
-		return;
 	}
 	//? 2. Conitnuamos con la query normal
   try {
     const connection = await getConnection();
     await
         connection.execute(
-            'CALL MiSeguroDigital.crearAplicacionEnPolizaPorUsuario(?, ?, @codigoResultado)',
-            [usuarioId, polizaId]
+            'CALL MiSeguroDigital.crearAplicacionEnPolizaPorUsuario(?, ?, ?, @codigoResultado)',
+            [usuarioId, polizaId, bienId]
         );
-    
+
     const [result] = await connection.execute('SELECT @codigoResultado as codigo');
     await connection.end();
-    
+
     const codigo = Array.isArray(result) && result[0] ? (result[0] as any).codigo : 500;
-    
+
     if (codigo === 200) {
-      res.status(200).json({ success: true, message: 'Aplicacion creada correctamente' });
+      res.status(200).json({
+					success: true,
+					message: 'Aplicacion creada correctamente',
+					offender: ''
+			});
     } else if (codigo == 404){
-        res.status(404).json({ success: false, message: 'Error al crear aplicacion: Puede que ' +
-                'la poliza o el usuario ya no existan' });
+        res.status(404).json({
+					success: false,
+					message: 'Error Code 0x001 - [Raised] Error al crear aplicacion: No se encontraron datos de la poliza o bien especificado',
+					offender: "idPoliza o idUsuario o idBien"
+
+				});
     } else {
-        res.status(codigo).json({ success: false, message: 'Error al crear aplicacion' });
+        res.status(codigo).json({
+					success: false,
+					message: 'Error Code 0x001 - [Raised] Error al crear aplicacion: Error interno del servidor',
+					offender: ""
+				});
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    res.status(500).json({
+			success: false,
+			message: 'Error Code 0x001 - [Raised] Error interno del servidor',
+			offender: error
+		});
   }
 });
 
@@ -210,12 +230,13 @@ router.put('/brokers/procesar-aplicacion/:applicationId', async (req: Request, r
       'CALL MiSeguroDigital.procesarAplicacionEnPolizaPorUsuario(?, ?, ?, ?, @codigoResultado)',
       [applicationId, brokerAnalistaId, decision, razonRechazo]
     );
-    
-    const [result] = await connection.execute('SELECT @codigoResultado as codigo');
+
+
+    const [result] = await connection.execute('SELECT @codigoResultado as codigo ');
     await connection.end();
     
-    const codigo = Array.isArray(result) && result[0] ? (result[0] as any).codigo : 500;
-    
+    const  codigo = Array.isArray(result) ? (result[0] as any) : 500
+
     if (codigo === 200) {
       res.status(200).json({ success: true, message: 'Aplicacion procesada correctamente' });
     } else if (codigo === 409){

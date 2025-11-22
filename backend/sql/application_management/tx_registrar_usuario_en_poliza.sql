@@ -3,6 +3,7 @@
 
 create procedure registrarUsuarioEnPolizaPorAplicacion(
     in aplicacionPolizaId int,
+    in bienId int,
     in adminId int,
     out codigoResultado int
 )

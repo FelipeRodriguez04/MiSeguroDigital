@@ -8,32 +8,32 @@
 * ? y a final tiene toda la carga de datos iniciales de prueba
 */
 
--- DB INIT SCRIPT: sacado desdel el workbench 
+-- DB INIT SCRIPT: sacado desdel el workbench
 
-set @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-set @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-set @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-
--- -----------------------------------------------------
--- Schema MiSeguroDigital
--- -----------------------------------------------------
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
 -- Schema MiSeguroDigital
 -- -----------------------------------------------------
-CREATE SCHEMA if not EXISTS `MiSeguroDigital` default CHARACTER set utf8 ;
+
+-- -----------------------------------------------------
+-- Schema MiSeguroDigital
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `MiSeguroDigital` DEFAULT CHARACTER SET utf8 ;
 USE `MiSeguroDigital` ;
 
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Registro_SignUp_Global`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Registro_SignUp_Global` (
-  `id_identidad` int not NULL AUTO_INCREMENT,
-  `correo_registro` VARCHAR(255) not NULL,
-  `hashed_pwd_registro` VARCHAR(512) not NULL,
-  `hashed_pwd_salt_registro` VARCHAR(512) not NULL,
-  `estado_actividad_registro` ENUM('activo', 'inactivo') not NULL default 'activo',
-  `fecha_registro` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Registro_SignUp_Global` (
+  `id_identidad` INT NOT NULL AUTO_INCREMENT,
+  `correo_registro` VARCHAR(255) NOT NULL,
+  `hashed_pwd_registro` VARCHAR(512) NOT NULL,
+  `hashed_pwd_salt_registro` VARCHAR(512) NOT NULL,
+  `estado_actividad_registro` ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
+  `fecha_registro` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_identidad`),
   UNIQUE INDEX `correo_registro_UNIQUE` (`correo_registro` ASC) VISIBLE)
 ENGINE = InnoDB;
@@ -42,14 +42,14 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Registro_Global_Usuarios`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Registro_Global_Usuarios` (
-  `id_usuario` int not NULL AUTO_INCREMENT,
-  `id_identidad_registro` int not NULL,
-  `nombre_prim_usuario` VARCHAR(255) not NULL,
-  `apellido_prim_usuario` VARCHAR(255) not NULL,
-  `full_nombre_usuario` VARCHAR(512) not NULL,
-  `numero_telefono_usuario` VARCHAR(50) not NULL,
-  `fecha_nacimiento_usuario` DATE not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Registro_Global_Usuarios` (
+  `id_usuario` INT NOT NULL AUTO_INCREMENT,
+  `id_identidad_registro` INT NOT NULL,
+  `nombre_prim_usuario` VARCHAR(255) NOT NULL,
+  `apellido_prim_usuario` VARCHAR(255) NOT NULL,
+  `full_nombre_usuario` VARCHAR(512) NOT NULL,
+  `numero_telefono_usuario` VARCHAR(50) NOT NULL,
+  `fecha_nacimiento_usuario` DATE NOT NULL,
   PRIMARY KEY (`id_usuario`),
   UNIQUE INDEX `id_usuario_UNIQUE` (`id_usuario` ASC) VISIBLE,
   INDEX `fk_Registro_Global_Usuarios_Registro_SignUp_Global_idx` (`id_identidad_registro` ASC) VISIBLE,
@@ -65,16 +65,16 @@ AUTO_INCREMENT = 0;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Aseguradoras`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Aseguradoras` (
-  `id_aseguradora` int not NULL AUTO_INCREMENT,
-  `nombre_aseguradora` VARCHAR(255) not NULL,
-  `dominio_correo_aseguradora` VARCHAR(255) not NULL,
-  `calle_principal_aseguradora` VARCHAR(255) not NULL,
-  `calle_secundaria_aseguradora` VARCHAR(255) not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Aseguradoras` (
+  `id_aseguradora` INT NOT NULL AUTO_INCREMENT,
+  `nombre_aseguradora` VARCHAR(255) NOT NULL,
+  `dominio_correo_aseguradora` VARCHAR(255) NOT NULL,
+  `calle_principal_aseguradora` VARCHAR(255) NOT NULL,
+  `calle_secundaria_aseguradora` VARCHAR(255) NOT NULL,
   `edifico_aseguradora` VARCHAR(255) NULL,
-  `numero_oficina_aseguradora` VARCHAR(255) not NULL,
-  `telefono_aseguradora` VARCHAR(50) not NULL,
-  `sitio_web_aseguradora` VARCHAR(255) not NULL,
+  `numero_oficina_aseguradora` VARCHAR(255) NOT NULL,
+  `telefono_aseguradora` VARCHAR(50) NOT NULL,
+  `sitio_web_aseguradora` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id_aseguradora`),
   UNIQUE INDEX `dominio_correo_aseguradora_UNIQUE` (`dominio_correo_aseguradora` ASC) VISIBLE)
 ENGINE = InnoDB;
@@ -83,16 +83,16 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Registro_Global_Brokers`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Registro_Global_Brokers` (
-  `id_broker` int not NULL AUTO_INCREMENT,
-  `id_identidad_registro` int not NULL,
-  `id_aseguradora` int not NULL,
-  `nombre_prim_broker` VARCHAR(255) not NULL,
-  `apellido_prim_broker` VARCHAR(255) not NULL,
-  `full_nombre_broker` VARCHAR(512) not NULL,
-  `numero_telefono_broker` VARCHAR(50) not NULL,
-  `fecha_nacimiento_broker` DATE not NULL,
-  `estado_broker` ENUM('pendiente', 'rechazado', 'activo') not NULL default 'pendiente',
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Registro_Global_Brokers` (
+  `id_broker` INT NOT NULL AUTO_INCREMENT,
+  `id_identidad_registro` INT NOT NULL,
+  `id_aseguradora` INT NOT NULL,
+  `nombre_prim_broker` VARCHAR(255) NOT NULL,
+  `apellido_prim_broker` VARCHAR(255) NOT NULL,
+  `full_nombre_broker` VARCHAR(512) NOT NULL,
+  `numero_telefono_broker` VARCHAR(50) NOT NULL,
+  `fecha_nacimiento_broker` DATE NOT NULL,
+  `estado_broker` ENUM('pendiente', 'rechazado', 'activo') NOT NULL DEFAULT 'pendiente',
   PRIMARY KEY (`id_broker`),
   UNIQUE INDEX `id_usuario_UNIQUE` (`id_broker` ASC) VISIBLE,
   INDEX `fk_Registro_Global_Usuarios_Registro_SignUp_Global_idx` (`id_identidad_registro` ASC) VISIBLE,
@@ -114,10 +114,10 @@ AUTO_INCREMENT = 0;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Roles_Broker`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Roles_Broker` (
-  `id_rol_broker` int not NULL AUTO_INCREMENT,
-  `id_broker` int not NULL,
-  `rol_broker` ENUM('broker_superadmin', 'broker_admin', 'broker_analyst') not NULL default 'broker_analyst',
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Roles_Broker` (
+  `id_rol_broker` INT NOT NULL AUTO_INCREMENT,
+  `id_broker` INT NOT NULL,
+  `rol_broker` ENUM('broker_superadmin', 'broker_admin', 'broker_analyst') NOT NULL DEFAULT 'broker_analyst',
   PRIMARY KEY (`id_rol_broker`),
   INDEX `FK_broker_a_rol_idx` (`id_broker` ASC) VISIBLE,
   CONSTRAINT `FK_broker_a_rol`
@@ -131,18 +131,18 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`PolizasDeSeguro`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`PolizasDeSeguro` (
-  `id_poliza` int not NULL AUTO_INCREMENT,
-  `id_aseguradora` int not NULL,
-  `nombre_de_la_poliza` VARCHAR(255) not NULL,
-  `descripcion_de_la_poliza` TEXT not NULL,
-  `tipo_de_poliza` ENUM('seguro_automotriz', 'seguro_inmobiliario', 'seguro_de_vida', 'seguro_de_salud') not NULL,
-  `pago_mensual` DECIMAL(10,2) not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`PolizasDeSeguro` (
+  `id_poliza` INT NOT NULL AUTO_INCREMENT,
+  `id_aseguradora` INT NOT NULL,
+  `nombre_de_la_poliza` VARCHAR(255) NOT NULL,
+  `descripcion_de_la_poliza` TEXT NOT NULL,
+  `tipo_de_poliza` ENUM('seguro_automotriz', 'seguro_inmobiliario', 'seguro_de_vida', 'seguro_de_salud') NOT NULL,
+  `pago_mensual` DECIMAL(10,2) NOT NULL,
   `monto_cobertura_total` DECIMAL(15,2) NULL,
-  `duracion_de_contrato` int not NULL,
-  `porcentaje_de_aprobacion` DECIMAL(5,2) not NULL,
-  `importe_por_cancelacion` DECIMAL(10,2) not NULL,
-  `estado_de_poliza` ENUM('activa', 'pausada', 'despublicada') not NULL default 'activa',
+  `duracion_de_contrato` INT NOT NULL,
+  `porcentaje_de_aprobacion` DECIMAL(5,2) NOT NULL,
+  `importe_por_cancelacion` DECIMAL(10,2) NOT NULL,
+  `estado_de_poliza` ENUM('activa', 'pausada', 'despublicada') NOT NULL DEFAULT 'activa',
   PRIMARY KEY (`id_poliza`),
   INDEX `FK_AseguradoraToPoliza_idx` (`id_aseguradora` ASC) VISIBLE,
   CONSTRAINT `FK_AseguradoraToPoliza`
@@ -154,20 +154,41 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `MiSeguroDigital`.`BienesPorUsuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`BienesPorUsuario` (
+  `id_bien` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT NOT NULL,
+  `nombre_bien` VARCHAR(255) NOT NULL,
+  `tipo_de_bien` ENUM('bien_inmueble', 'bien_automotriz', 'otro') NOT NULL,
+  `valoracion_bien` DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (`id_bien`),
+  INDEX `FK_UserToBien_idx` (`id_usuario` ASC) VISIBLE,
+  CONSTRAINT `FK_UserToBien`
+    FOREIGN KEY (`id_usuario`)
+    REFERENCES `MiSeguroDigital`.`Registro_Global_Usuarios` (`id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`AplicacionAPoliza`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`AplicacionAPoliza` (
-  `id_aplicacion_poliza` int not NULL AUTO_INCREMENT,
-  `id_usuario` int not NULL,
-  `id_poliza` int not NULL,
-  `id_broker_que_reviso` int NULL,
-  `fecha_de_aplicacion` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
-  `estado_actual_aplicacion` ENUM('pendiente_procesar', 'aprobada', 'rechazada') not NULL default 'pendiente_procesar',
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`AplicacionAPoliza` (
+  `id_aplicacion_poliza` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT NOT NULL,
+  `id_poliza` INT NOT NULL,
+  `id_bien_asegurado` INT NOT NULL,
+  `id_broker_que_reviso` INT NULL,
+  `fecha_de_aplicacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `estado_actual_aplicacion` ENUM('pendiente_procesar', 'aprobada', 'rechazada') NOT NULL DEFAULT 'pendiente_procesar',
   `razon_de_rechazo` TEXT NULL,
   PRIMARY KEY (`id_aplicacion_poliza`),
   INDEX `FK_UserToApplication_idx` (`id_usuario` ASC) VISIBLE,
   INDEX `FK_PolizaToApplication_idx` (`id_poliza` ASC) VISIBLE,
   INDEX `FK_BrokerToApplication_idx` (`id_broker_que_reviso` ASC) VISIBLE,
+  INDEX `FK_BienToApplication_idx` (`id_bien_asegurado` ASC) VISIBLE,
   CONSTRAINT `FK_UserToApplication`
     FOREIGN KEY (`id_usuario`)
     REFERENCES `MiSeguroDigital`.`Registro_Global_Usuarios` (`id_usuario`)
@@ -182,6 +203,11 @@ CREATE TABLE if not EXISTS `MiSeguroDigital`.`AplicacionAPoliza` (
     FOREIGN KEY (`id_broker_que_reviso`)
     REFERENCES `MiSeguroDigital`.`Registro_Global_Brokers` (`id_broker`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `FK_BienToApplication`
+    FOREIGN KEY (`id_bien_asegurado`)
+    REFERENCES `MiSeguroDigital`.`BienesPorUsuario` (`id_bien`)
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -189,15 +215,15 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`RegistroDeUsuarioEnPoliza`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroDeUsuarioEnPoliza` (
-  `id_registro_en_poliza` int not NULL AUTO_INCREMENT,
-  `id_poliza` int not NULL,
-  `id_usuario` int not NULL,
-  `id_aplicacion_a_poliza` int not NULL,
-  `fecha_inicio_registro` DATE not NULL,
-  `fecha_finalizacion_registro` DATE not NULL,
-  `poliza_con_autorenew` TINYINT not NULL default 0,
-  `estado_de_registro` ENUM('registro_activo', 'registro_cancelado', 'registro_expirado') not NULL default 'registro_activo',
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`RegistroDeUsuarioEnPoliza` (
+  `id_registro_en_poliza` INT NOT NULL AUTO_INCREMENT,
+  `id_poliza` INT NOT NULL,
+  `id_usuario` INT NOT NULL,
+  `id_aplicacion_a_poliza` INT NOT NULL,
+  `fecha_inicio_registro` DATE NOT NULL,
+  `fecha_finalizacion_registro` DATE NOT NULL,
+  `poliza_con_autorenew` TINYINT NOT NULL DEFAULT 0,
+  `estado_de_registro` ENUM('registro_activo', 'registro_cancelado', 'registro_expirado') NOT NULL DEFAULT 'registro_activo',
   `fecha_de_cancelacion` DATE NULL,
   PRIMARY KEY (`id_registro_en_poliza`),
   INDEX `fk_PolizasDeSeguro_has_Registro_Global_Usuarios_Registro_Gl_idx` (`id_usuario` ASC) VISIBLE,
@@ -224,14 +250,14 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`PagosPorPoliza`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`PagosPorPoliza` (
-  `id_pago` int not NULL AUTO_INCREMENT,
-  `id_registro_poliza` int not NULL,
-  `cantidad_pago` DECIMAL(10,2) not NULL,
-  `metodo_de_pago` ENUM('tarjeta_credito', 'tarjeta_debito', 'efectivo', 'cheque', 'otro') not NULL,
-  `estado_del_pago` ENUM('pendiente', 'completado', 'fallido', 'reembolsado') not NULL default 'pendiente',
-  `motivo_del_pago` ENUM('pago_mensualidad', 'pago_importe_cancelacion') not NULL,
-  `fecha_de_pago` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`PagosPorPoliza` (
+  `id_pago` INT NOT NULL AUTO_INCREMENT,
+  `id_registro_poliza` INT NOT NULL,
+  `cantidad_pago` DECIMAL(10,2) NOT NULL,
+  `metodo_de_pago` ENUM('tarjeta_credito', 'tarjeta_debito', 'efectivo', 'cheque', 'otro') NOT NULL,
+  `estado_del_pago` ENUM('pendiente', 'completado', 'fallido', 'reembolsado') NOT NULL DEFAULT 'pendiente',
+  `motivo_del_pago` ENUM('pago_mensualidad', 'pago_importe_cancelacion') NOT NULL,
+  `fecha_de_pago` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_pago`),
   INDEX `FK_UsuarioAPago_idx` (`id_registro_poliza` ASC) VISIBLE,
   CONSTRAINT `FK_UsuarioAPago`
@@ -245,20 +271,20 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`RegistroAudit_RegistrosPolizas`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroAudit_RegistrosPolizas` (
-  `id_audit_registro` int not NULL AUTO_INCREMENT,
-  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') not NULL,
-  `id_registro_poliza` int not NULL,
-  `id_usuario` int not NULL,
-  `id_poliza` int not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`RegistroAudit_RegistrosPolizas` (
+  `id_audit_registro` INT NOT NULL AUTO_INCREMENT,
+  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
+  `id_registro_poliza` INT NOT NULL,
+  `id_usuario` INT NOT NULL,
+  `id_poliza` INT NOT NULL,
   `antiguo_autorenovacion` TINYINT NULL,
   `fech_registro_antiguo` DATE NULL,
   `fecha_finalizacion_registro_antiguo` DATE NULL,
   `estatus_antiguo` ENUM('activo', 'cancelado', 'expirado') NULL,
   `fecha_cancelacion_antiguo` DATE NULL,
-  `cambios_por_usuario_id` int NULL,
-  `cambios_por_broker_id` int NULL,
-  `fecha_de_modificacion` TIMESTAMP NULL default CURRENT_TIMESTAMP,
+  `cambios_por_usuario_id` INT NULL,
+  `cambios_por_broker_id` INT NULL,
+  `fecha_de_modificacion` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_audit_registro`))
 ENGINE = InnoDB;
 
@@ -266,23 +292,23 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`RegistroAudit_Polizas`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroAudit_Polizas` (
-  `id_audit_poliza` int not NULL AUTO_INCREMENT,
-  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') not NULL,
-  `id_poliza` int not NULL,
-  `id_aseguradora` int not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`RegistroAudit_Polizas` (
+  `id_audit_poliza` INT NOT NULL AUTO_INCREMENT,
+  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
+  `id_poliza` INT NOT NULL,
+  `id_aseguradora` INT NOT NULL,
   `antiguo_nombre_poliza` VARCHAR(255) NULL,
   `nuevo_nombre_poliza` VARCHAR(255) NULL,
   `antiguo_descripcion_poliza` TEXT NULL,
   `antiguo_pago_mensual` DECIMAL(10,2) NULL,
-  `antiguo_estatus_poliza` ENUM('activa', 'pausada', 'despublicada') NULL,
-  `cambios_por_broker_id` int not NULL,
-  `fecha_de_modificacion` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
+  `antiguo_estatus_poliza` ENUM('activa', 'pausada', 'unpublished') NULL,
+  `cambios_por_broker_id` INT NOT NULL,
+  `fecha_de_modificacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `antiguo_monto_cobertura_total` DECIMAL(15,2) NULL,
-  `antiguo_duracion_de_contrato` int NULL,
+  `antiguo_duracion_de_contrato` ENUM('activa', 'pausada', 'despublicada') NULL,
   `antiguo_porcentaje_aprobacion` DECIMAL(5,2) NULL,
   `antiguo_importe_por_cancelacion` DECIMAL(10,2) NULL,
-  `antiguo_estado_de_poliza` VARCHAR(45) NULL default 'activa',
+  `antiguo_estado_de_poliza` VARCHAR(45) NULL DEFAULT 'activa',
   PRIMARY KEY (`id_audit_poliza`))
 ENGINE = InnoDB;
 
@@ -290,11 +316,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`ReviewsDePolizas`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`ReviewsDePolizas` (
-  `id_review` int not NULL AUTO_INCREMENT,
-  `rating_del_usuario` int not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`ReviewsDePolizas` (
+  `id_review` INT NOT NULL AUTO_INCREMENT,
+  `rating_del_usuario` INT NOT NULL,
   `contexto_review` TEXT NULL,
-  `tiene_hidden_fees` TINYINT not NULL default 0,
+  `tiene_hidden_fees` TINYINT NOT NULL DEFAULT 0,
   `detalle_hidden_fees` TEXT NULL,
   PRIMARY KEY (`id_review`))
 ENGINE = InnoDB;
@@ -303,15 +329,15 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`RegistroAudit_EstadoAplicacionPoliza`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroAudit_EstadoAplicacionPoliza` (
-  `id_historial_aplicacion` int not NULL AUTO_INCREMENT,
-  `id_aplicacion_poliza` int not NULL,
-  `id_usuario` int not NULL,
-  `id_poliza` int not NULL,
-  `id_broker_modificador` int not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`RegistroAudit_EstadoAplicacionPoliza` (
+  `id_historial_aplicacion` INT NOT NULL AUTO_INCREMENT,
+  `id_aplicacion_poliza` INT NOT NULL,
+  `id_usuario` INT NOT NULL,
+  `id_poliza` INT NOT NULL,
+  `id_broker_modificador` INT NOT NULL,
   `estado_aplicacion_antiguo` ENUM('pendiente_procesar', 'aprobada', 'rechazada') NULL,
   `razon_rechazo_broker_antigua` TEXT NULL,
-  `fecha_de_modificacion` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
+  `fecha_de_modificacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_historial_aplicacion`))
 ENGINE = InnoDB;
 
@@ -319,12 +345,12 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Requerimientos_por_Poliza`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Requerimientos_por_Poliza` (
-  `id_requerimiento` int not NULL AUTO_INCREMENT,
-  `id_poliza` int not NULL,
-  `tipo_requerimiento` ENUM('registros_medicos', 'estados_de_cuenta', 'historial_crediticio', 'prueba_de_residencia', 'otro') not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Requerimientos_por_Poliza` (
+  `id_requerimiento` INT NOT NULL AUTO_INCREMENT,
+  `id_poliza` INT NOT NULL,
+  `tipo_requerimiento` ENUM('registros_medicos', 'estados_de_cuenta', 'historial_crediticio', 'prueba_de_residencia', 'otro') NOT NULL,
   `descripcion_requerimiento` TEXT NULL,
-  `requerimiento_obligatorio` TINYINT not NULL default 1,
+  `requerimiento_obligatorio` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id_requerimiento`),
   INDEX `FK_RequerimientoAPoliza_idx` (`id_poliza` ASC) VISIBLE,
   CONSTRAINT `FK_RequerimientoAPoliza`
@@ -338,13 +364,13 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Documentos_por_AplicacionPoliza`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Documentos_por_AplicacionPoliza` (
-  `id_documento_aplicacion` int not NULL AUTO_INCREMENT,
-  `id_de_usuario_carga` int not NULL,
-  `id_aplicacion_poliza` int not NULL,
-  `id_requerimiento_poliza` int not NULL,
-  `nombre_del_documento` VARCHAR(255) not NULL,
-  `fecha_de_carga` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Documentos_por_AplicacionPoliza` (
+  `id_documento_aplicacion` INT NOT NULL AUTO_INCREMENT,
+  `id_de_usuario_carga` INT NOT NULL,
+  `id_aplicacion_poliza` INT NOT NULL,
+  `id_requerimiento_poliza` INT NOT NULL,
+  `nombre_del_documento` VARCHAR(255) NOT NULL,
+  `fecha_de_carga` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_documento_aplicacion`),
   INDEX `FK_UserToDocumentUpload_idx` (`id_de_usuario_carga` ASC) VISIBLE,
   INDEX `FK_ApplicationToDocumentUpload_idx` (`id_aplicacion_poliza` ASC) VISIBLE,
@@ -370,10 +396,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`Roles_Users`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`Roles_Users` (
-  `id_rol_user` int not NULL AUTO_INCREMENT,
-  `id_usuario` int not NULL,
-  `rol_usuario` ENUM('global_superadmin', 'global_admin', 'global_user') not NULL default 'global_user',
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`Roles_Users` (
+  `id_rol_user` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT NOT NULL,
+  `rol_usuario` ENUM('global_superadmin', 'global_admin', 'global_user') NOT NULL DEFAULT 'global_user',
   PRIMARY KEY (`id_rol_user`),
   INDEX `FK_usuario_a_roles_idx` (`id_usuario` ASC) VISIBLE,
   CONSTRAINT `FK_usuario_a_roles`
@@ -387,11 +413,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`RegistroAudit_AccionesUsuarios`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroAudit_AccionesUsuarios` (
-  `id_audit_usuarios` int not NULL AUTO_INCREMENT,
-  `id_usuario` int not NULL,
-  `id_admin_modificacion` int NULL,
-  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`RegistroAudit_AccionesUsuarios` (
+  `id_audit_usuarios` INT NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT NOT NULL,
+  `id_admin_modificacion` INT NULL,
+  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
   `nombre_prim_antiguo` VARCHAR(255) NULL,
   `apellido_prim_antiguo` VARCHAR(255) NULL,
   `full_nombre_usuario_antiguo` VARCHAR(512) NULL,
@@ -402,7 +428,7 @@ CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroAudit_AccionesUsuarios` (
   `numero_telefono_nuevo` VARCHAR(50) NULL,
   `fecha_nacimiento_usuario_antiguo` DATE NULL,
   `fecha_nacimiento_usuario_nuevo` DATE NULL,
-  `fecha_modificacion_usuario` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
+  `fecha_modificacion_usuario` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_audit_usuarios`))
 ENGINE = InnoDB;
 
@@ -410,11 +436,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`RegistroAudit_AccionesBrokers`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroAudit_AccionesBrokers` (
-  `id_audit_brokers` int not NULL AUTO_INCREMENT,
-  `id_broker` int not NULL,
-  `id_admin_modificacion` int NULL,
-  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`RegistroAudit_AccionesBrokers` (
+  `id_audit_brokers` INT NOT NULL AUTO_INCREMENT,
+  `id_broker` INT NOT NULL,
+  `id_admin_modificacion` INT NULL,
+  `operacion_realizada` ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
   `nombre_prim_antiguo` VARCHAR(255) NULL,
   `apellido_prim_antiguo` VARCHAR(255) NULL,
   `full_nombre_usuario_antiguo` VARCHAR(512) NULL,
@@ -425,7 +451,7 @@ CREATE TABLE if not EXISTS `MiSeguroDigital`.`RegistroAudit_AccionesBrokers` (
   `numero_telefono_nuevo` VARCHAR(50) NULL,
   `fecha_nacimiento_usuario_antiguo` DATE NULL,
   `fecha_nacimiento_usuario_nuevo` DATE NULL,
-  `fecha_modificacion_usuario` TIMESTAMP not NULL default CURRENT_TIMESTAMP,
+  `fecha_modificacion_usuario` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_audit_brokers`))
 ENGINE = InnoDB;
 
@@ -433,11 +459,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`ReviewsDeUsuarios`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`ReviewsDeUsuarios` (
-  `id_review_poliza` int not NULL,
-  `id_usuario` int not NULL,
-  `id_poliza` int not NULL,
-  `fecha_creacion_review` DATE not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`ReviewsDeUsuarios` (
+  `id_review_poliza` INT NOT NULL,
+  `id_usuario` INT NOT NULL,
+  `id_poliza` INT NOT NULL,
+  `fecha_creacion_review` DATE NOT NULL,
   PRIMARY KEY (`id_review_poliza`),
   INDEX `FK_UsersToReviewsDataStore_idx` (`id_usuario` ASC) VISIBLE,
   INDEX `FK_PolizasToReviewsDataStore_idx` (`id_poliza` ASC) VISIBLE,
@@ -460,29 +486,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `MiSeguroDigital`.`BienesPorUsuario`
--- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`BienesPorUsuario` (
-  `id_bien` int not NULL AUTO_INCREMENT,
-  `id_usuario` int not NULL,
-  `valoracion_bien` DECIMAL(10,2) not NULL,
-  `tipo_de_bien` ENUM('bien_inmueble', 'bien_automotriz', 'otro') not NULL,
-  PRIMARY KEY (`id_bien`),
-  INDEX `FK_UserToBien_idx` (`id_usuario` ASC) VISIBLE,
-  CONSTRAINT `FK_UserToBien`
-    FOREIGN KEY (`id_usuario`)
-    REFERENCES `MiSeguroDigital`.`Registro_Global_Usuarios` (`id_usuario`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `MiSeguroDigital`.`BienesAseguradosPorUsuario`
 -- -----------------------------------------------------
-CREATE TABLE if not EXISTS `MiSeguroDigital`.`BienesAseguradosPorUsuario` (
-  `id_registro_en_poliza` int not NULL,
-  `id_bien_del_usuario` int not NULL,
+CREATE TABLE IF NOT EXISTS `MiSeguroDigital`.`BienesAseguradosPorUsuario` (
+  `id_registro_en_poliza` INT NOT NULL,
+  `id_bien_del_usuario` INT NOT NULL,
   `fecha_asociacion_cobertura_a_bien` DATE NULL,
   PRIMARY KEY (`id_registro_en_poliza`, `id_bien_del_usuario`),
   INDEX `fk_RegistroDeUsuarioEnPoliza_has_BienesPorUsuario_BienesPor_idx` (`id_bien_del_usuario` ASC) VISIBLE,
@@ -500,24 +508,30 @@ CREATE TABLE if not EXISTS `MiSeguroDigital`.`BienesAseguradosPorUsuario` (
 ENGINE = InnoDB;
 
 
-set SQL_MODE=@OLD_SQL_MODE;
-set FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-set UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
 -- ? Crea una nueva solicitud de poliza para un usuario y
 -- ? la registra con estado 'pendiente_procesar'
 
 delimiter $$
+-- ? Crea una nueva solicitud de poliza para un usuario y
+-- ? la registra con estado 'pendiente_procesar'
+
 create procedure crearAplicacionEnPolizaPorUsuario(
     in usuarioId int,
     in polizaId int,
+    in bienId int,
     out codigoResultado int
 )
 begin
     -- ? Declarar variables para validar existencia
     declare usuarioExiste int default 0;
     declare polizaExiste int default 0;
+    declare registroExiste int default 0;
+    declare bienPerteneceAlUsuario int default 0;
 
     -- ? Handler de errores SQL
     declare exit handler for sqlexception
@@ -531,43 +545,65 @@ begin
 
     start transaction;
 
-    -- ? Verificar existencia del usuario
+    -- ? Verificar que la poliza existe y esta activa
+select
+   1
+into polizaExiste
+from PolizasDeSeguro where id_poliza = polizaId
+and estado_de_poliza = 'activa';
+
+-- ? Validar que la tuple de valores no exista en la db
+select
+    1
+into registroExiste
+from AplicacionAPoliza
+where id_usuario = usuarioId
+and id_poliza = polizaId
+and id_bien_asegurado = bienId
+and estado_actual_aplicacion = 'pendiente_procesar';
+
+-- ? Verificar que el bien pertenece al usuario
+if bienId is not null then
     select
         1
-    into usuarioExiste
-    from Registro_Global_Usuarios where id_usuario = usuarioId;
-
-    -- ? Verificar que la poliza existe y esta activa
-    select
-       1
-    into polizaExiste
-    from PolizasDeSeguro where id_poliza = polizaId 
-    and estado_de_poliza = 'activa';
-
-    -- ? Validar existencia de usuario y poliza
-    if usuarioExiste = 0 then
-        set codigoResultado = 404;  -- Usuario no encontrado
+    into bienPerteneceAlUsuario
+    from BienesPorUsuario where id_bien = bienId
+    and id_usuario = usuarioId;
+    if bienPerteneceAlUsuario = 0 then
+        set codigoResultado = 409;
         rollback;
-    elseif polizaExiste = 0 then
-        set codigoResultado = 404; -- Poliza no existe
-        rollback;
-    else
-        -- ? ? Insertar nuevo registro de aplicacion
-        insert into AplicacionAPoliza (
-            id_usuario,
-            id_poliza,
-            fecha_de_aplicacion,
-            estado_actual_aplicacion
-        ) values (
-            usuarioId,
-            polizaId,
-            now(),
-            'pendiente_procesar'
-        );
-
-        commit;
     end if;
+end if;
+
+-- ? Validar existencia de usuario y poliza
+if usuarioExiste = 0 then
+    set codigoResultado = 404;  -- Usuario no encontrado
+    rollback;
+elseif polizaExiste = 0 then
+    set codigoResultado = 404; -- Poliza no existe
+    rollback;
+elseif registroExiste = 1 then
+    set codigoResultado = 409;
+    rollback;
+else
+    -- ? Insertar nuevo registro de aplicacion
+    insert into AplicacionAPoliza (
+        id_usuario,
+        id_poliza,
+        id_bien_asegurado,
+        fecha_de_aplicacion,
+        estado_actual_aplicacion
+    ) values (
+        usuarioId,
+        polizaId,
+        bienId,
+        now(),
+        'pendiente_procesar'
+    );
+    commit;
+end if;
 end $$
+
 delimiter ;
 -- ? Permite que un analista apruebe o rechace una solicitud de poliza
 -- ? Cambia el estado de la aplicacion y registra la decision en auditoria
@@ -584,6 +620,7 @@ begin
     declare estadoActual enum('pendiente_procesar', 'aprobada', 'rechazada');
     declare usuarioId int;
     declare polizaId int;
+    declare bienId int;
 
     -- ? Handler  de errores SQL
     declare exit handler for sqlexception
@@ -636,10 +673,10 @@ begin
             razonRechazo,
             now()
         );
-
         commit;
     end if;
 end $$
+
 delimiter ;
 -- ? Registra formalmente a un usuario en una poliza despues de la aprobacion y
 -- ? crea el registro en RegistroDeUsuarioEnPoliza que ancla pagos y comentarios en la data
@@ -658,6 +695,8 @@ begin
     declare registroExistente int default 0;
     declare fechaInicio date;
     declare fechaFin date;
+    declare idRegistroFinal int default 0;
+    declare idBienRegistrado int default 0;
 
     -- ? Handler de errores SQL
     declare exit handler for sqlexception
@@ -672,8 +711,8 @@ begin
     start transaction;
 
     -- ? Verificar que la aplicacion existe y esta aprobada
-    select estado_actual_aplicacion, id_usuario, id_poliza
-    into   estadoAplicacion, usuarioId, polizaId
+    select estado_actual_aplicacion, id_usuario, id_poliza, id_bien_asegurado
+    into   estadoAplicacion, usuarioId, polizaId,idBienRegistrado
     from   AplicacionAPoliza
     where  id_aplicacion_poliza = aplicacionPolizaId;
 
@@ -727,6 +766,8 @@ begin
                 'registro_activo'
             );
 
+            set idRegistroFinal = last_insert_id();
+
             -- ? Registrar accion en auditoria
             insert into RegistroAudit_RegistrosPolizas (
                 operacion_realizada,
@@ -744,6 +785,14 @@ begin
                 now()
             );
 
+
+            -- ? asentar poliza con bien asegurado
+            insert into
+                BienesAseguradosPorUsuario
+                (id_registro_en_poliza, id_bien_del_usuario, fecha_asociacion_cobertura_a_bien)
+                    values
+                (idRegistroFinal, idBienRegistrado, current_date);
+
             commit;
         end if;
     end if;
@@ -758,6 +807,10 @@ select
     polizaAplicacion.id_aplicacion_poliza,
     polizaAplicacion.fecha_de_aplicacion,
     polizaAplicacion.estado_actual_aplicacion,
+    polizaAplicacion.id_bien_asegurado,
+    BienesPorUsuario.nombre_bien,
+    BienesPorUsuario.tipo_de_bien,
+    BienesPorUsuario.valoracion_bien,
     -- ? Informacion del usuario
     registro_usuarios.id_usuario,
     registro_usuarios.full_nombre_usuario,
@@ -801,6 +854,13 @@ from
             id_aplicacion_poliza
     ) doc_count
         on polizaAplicacion.id_aplicacion_poliza = doc_count.id_aplicacion_poliza
+    join BienesAseguradosPorUsuario on
+            BienesAseguradosPorUsuario.id_bien_del_usuario = polizaAplicacion.id_bien_asegurado
+    join BienesPorUsuario on
+            BienesPorUsuario.id_bien = BienesAseguradosPorUsuario.id_bien_del_usuario
+where
+    -- ? Filtrar por usuario
+    registro_usuarios.id_usuario = 1
 ORDER BY
     polizaAplicacion.fecha_de_aplicacion DESC;
 
@@ -810,6 +870,10 @@ select
     aplicacionPoliza.id_aplicacion_poliza,
     aplicacionPoliza.fecha_de_aplicacion,
     aplicacionPoliza.estado_actual_aplicacion,
+    aplicacionPoliza.id_bien_asegurado,
+    BienesPorUsuario.nombre_bien,
+    BienesPorUsuario.tipo_de_bien,
+    BienesPorUsuario.valoracion_bien,
     -- ? Informacion del usuario que aplica
     registro_usuarios.id_usuario,
     registro_usuarios.full_nombre_usuario,
@@ -833,6 +897,10 @@ from
     -- ? Unir con aseguradoras para filtrar por broker
     join Aseguradoras aseguradoras
         on polizas.id_aseguradora = aseguradoras.id_aseguradora
+    join BienesAseguradosPorUsuario
+        on BienesAseguradosPorUsuario.id_bien_del_usuario = aplicacionPoliza.id_bien_asegurado
+    join BienesPorUsuario
+        on BienesPorUsuario.id_bien = BienesAseguradosPorUsuario.id_bien_del_usuario
 where
     -- ? Mostrar solo las que estan pendientes de procesar
     aplicacionPoliza.estado_actual_aplicacion = 'pendiente_procesar'
@@ -3290,6 +3358,422 @@ begin
 end $$
 delimiter ;
 
+delimiter $$
+create procedure obtenerBienesRegistradosPorUsuario(
+    in idUsuario int
+)
+
+begin
+    select
+        bienes_por_usuario.id_bien,
+        bienes_por_usuario.tipo_de_bien,
+        bienes_por_usuario.valoracion_bien
+    from BienesPorUsuario bienes_por_usuario
+    where bienes_por_usuario.id_usuario = idUsuario;
+end $$
+delimiter ;
+
+delimiter $$
+create procedure obtenerBienesRegistradosPorUsuarioYTipo(
+    in idUsuario int,
+    in tipoBien enum ('bien_inmueble', 'bien_automotriz', 'otro')
+)
+begin
+    select
+        bienes_por_usuario.id_bien,
+        bienes_por_usuario.tipo_de_bien,
+        bienes_por_usuario.valoracion_bien
+    from BienesPorUsuario bienes_por_usuario
+    where bienes_por_usuario.id_usuario = idUsuario and bienes_por_usuario.tipo_de_bien = tipoBien;
+end $$
+delimiter ;
+
+delimiter $$
+create procedure obtenerBienesAseguradosPorUsuario(
+    in idUsuario int
+)
+begin
+    select
+        bienes_asegurados.id_bien_del_usuario,
+        bienes_asegurados.id_registro_en_poliza,
+        bienes_por_usuario.tipo_de_bien,
+        bienes_por_usuario.valoracion_bien,
+        polizas.tipo_de_poliza,
+        polizas.monto_cobertura_total
+    from BienesAseguradosPorUsuario bienes_asegurados
+    join BienesPorUsuario bienes_por_usuario
+        on bienes_asegurados.id_bien_del_usuario = bienes_por_usuario.id_bien
+    join RegistroDeUsuarioEnPoliza registro
+        on bienes_asegurados.id_registro_en_poliza = registro.id_registro_en_poliza
+    join PolizasDeSeguro polizas
+        on registro.id_poliza = polizas.id_poliza
+    where bienes_por_usuario.id_usuario = idUsuario;
+end $$
+delimiter ;
+
+delimiter $$
+create procedure obtenerBienesAseguradosPorUsuarioYPoliza(
+    in idUsuario int,
+    in idPoliza int
+)
+begin
+    select
+        bienes_asegurados.id_bien_del_usuario,
+        bienes_asegurados.id_registro_en_poliza,
+        bienes_por_usuario.tipo_de_bien,
+        bienes_por_usuario.valoracion_bien,
+        polizas.tipo_de_poliza,
+        polizas.monto_cobertura_total
+    from BienesAseguradosPorUsuario bienes_asegurados
+    join BienesPorUsuario bienes_por_usuario
+        on bienes_asegurados.id_bien_del_usuario = bienes_por_usuario.id_bien
+    join RegistroDeUsuarioEnPoliza registro
+        on bienes_asegurados.id_registro_en_poliza = registro.id_registro_en_poliza
+    join PolizasDeSeguro polizas
+        on registro.id_poliza = polizas.id_poliza
+    where bienes_por_usuario.id_usuario = idUsuario and polizas.id_poliza = idPoliza;
+end $$
+delimiter ;
+
+-- ? Registra un nuevo bien para un usuario
+-- ? Valida que el usuario exista y que no haya duplicados de nombre_bien, valoracion_bien y tipo_de_bien
+delimiter $$
+create procedure registrarBienPorUsuario(
+    in iDUsuario INT,
+    in nombreBien VARCHAR(255),
+    in valoracionBien DECIMAL(10,2),
+    in tipoDeBien enum ('bien_inmueble', 'bien_automotriz', 'otro'),
+    out codigoOperacion INT,
+    out idBienRegistrado INT
+)
+begin
+    -- ? Declarar variables de control
+    declare usuarioExiste int default 0;
+    declare bienDuplicado int default 0;
+
+    -- ? Handler de errores SQL
+    declare exit handler for sqlexception
+    begin
+        set codigoOperacion = 500;
+        rollback;
+    end;
+
+    -- ? Inicializar codigo de resultado
+    set codigoOperacion = 200;
+    set idBienRegistrado = 0;
+
+    start transaction;
+
+    -- ? Validar que el usuario existe
+    select
+        1
+    into usuarioExiste
+    from   Registro_Global_Usuarios
+    where  id_usuario = iDUsuario;
+
+    if usuarioExiste = 0 then
+        set codigoOperacion = 404; -- Usuario no existe
+        rollback;
+    else
+        -- ? Verificar si ya existe un bien con la misma combinacion
+        select
+            1
+        into bienDuplicado
+        from   BienesPorUsuario
+        where  id_usuario = iDUsuario
+          and nombre_bien = nombreBien
+          and valoracion_bien = valoracionBien
+          and tipo_de_bien = tipoDeBien;
+
+        if bienDuplicado > 0 then
+            set codigoOperacion = 409; -- Bien duplicado
+            rollback;
+        else
+            -- ? Insertar nuevo bien
+            insert into BienesPorUsuario (
+                id_usuario,
+                nombre_bien,
+                valoracion_bien,
+                tipo_de_bien
+            ) values (
+                iDUsuario,
+                nombreBien,
+                valoracionBien,
+                tipoDeBien
+            );
+
+            set idBienRegistrado = last_insert_id();
+
+            commit;
+        end if;
+    end if;
+end $$
+delimiter ;
+
+
+-- ? Modifica un bien existente de un usuario
+-- ? Valida que el bien exista y pertenezca al usuario, y que no genere duplicados
+delimiter $$
+create procedure modificarBienRegistradoPorUsuario(
+    in idBien INT,
+    in iDUsuario INT,
+    in nombreBien VARCHAR(255),
+    in valoracionBien DECIMAL(10,2),
+    in tipoDeBien enum ('bien_inmueble', 'bien_automotriz', 'otro'),
+    out codigoOperacion INT
+)
+begin
+    -- ? Declarar variables de control
+    declare bienExiste int default 0;
+    declare bienDuplicado int default 0;
+
+    -- ? Handler de errores SQL
+    declare exit handler for sqlexception
+    begin
+        set codigoOperacion = 500;
+        rollback;
+    end;
+
+    -- ? Inicializar codigo de resultado
+    set codigoOperacion = 200;
+
+    start transaction;
+
+    -- ? Validar que el bien existe y pertenece al usuario
+    select
+        1
+    into bienExiste
+    from   BienesPorUsuario
+    where  id_bien = idBien
+      and id_usuario = iDUsuario;
+
+    if bienExiste = 0 then
+        set codigoOperacion = 404; -- Bien no existe o no pertenece al usuario
+        rollback;
+    else
+        -- ? Verificar duplicados excluyendo el bien actual
+        select
+           1
+        into bienDuplicado
+        from   BienesPorUsuario
+        where  id_usuario = iDUsuario
+          and nombre_bien = nombreBien
+          and valoracion_bien = valoracionBien
+          and tipo_de_bien = tipoDeBien
+          and id_bien != idBien;
+
+        if bienDuplicado > 0 then
+            set codigoOperacion = 409; -- Modificacion generaria duplicado
+            rollback;
+        else
+            -- ? Actualizar bien
+            update BienesPorUsuario
+            set nombre_bien = nombreBien,
+                valoracion_bien = valoracionBien,
+                tipo_de_bien = tipoDeBien
+            where id_bien = idBien
+              and id_usuario = iDUsuario;
+
+            commit;
+        end if;
+    end if;
+end $$
+delimiter ;
+
+-- ? Elimina un bien registrado de un usuario
+-- ? Valida que el bien exista y pertenezca al usuario
+delimiter $$
+
+create procedure eliminarBienRegistradoPorUsuario(
+    in idBien INT,
+    in iDUsuario INT,
+    out codigoOperacion INT
+)
+begin
+    -- ? Declarar variables de control
+    declare bienExiste int default 0;
+    declare bienAsegurado int default 0;
+
+    -- ? Handler de errores SQL
+    declare exit handler for sqlexception
+    begin
+        set codigoOperacion = 500;
+        rollback;
+    end;
+
+    -- ? Inicializar codigo de resultado
+    set codigoOperacion = 200;
+
+    start transaction;
+
+    -- ? Validar que el bien existe y pertenece al usuario
+    select
+        1
+    into bienExiste
+    from   BienesPorUsuario
+    where  id_bien = idBien
+      and id_usuario = iDUsuario;
+
+    select
+        1
+    into bienAsegurado
+    from   BienesAseguradosPorUsuario
+    where  id_bien_del_usuario = idBien;
+
+    if bienExiste = 0 then
+        set codigoOperacion = 404; -- Bien no existe o no pertenece al usuario
+        rollback;
+    else
+        if bienAsegurado = 1 then
+            set codigoOperacion = 403;
+            rollback;
+        end if;
+
+        -- ? Eliminar bien
+        delete from BienesPorUsuario
+        where id_bien = idBien
+          and id_usuario = iDUsuario;
+
+        commit;
+    end if;
+end $$
+delimiter ;
+
+-- ? Procedure para poder asegurar un biene existente por el usuario,
+-- ? para esto usamos el id del bien y el id de la poliza
+
+-- ? Asegura un bien registrado vinculandolo a un registro de poliza
+-- ? Valida que el bien y el registro existan y pertenezcan al mismo usuario
+
+delimiter $$
+create procedure asegurarBienRegistradoPorUsuario(
+    in idBienRegistradoPorUsuario INT,
+    in idRegistroEnPoliza INT,
+    out codigoOperacion INT
+)
+begin
+    -- ? Declarar variables de control
+    declare bienExiste int default 0;
+    declare registroExiste int default 0;
+    declare usuarioBien int;
+    declare usuarioRegistro int;
+    declare yaAsegurado int default 0;
+
+    -- ? Handler de errores SQL
+    declare exit handler for sqlexception
+    begin
+        set codigoOperacion = 500;
+        rollback;
+    end;
+
+    -- ? Inicializar codigo de resultado
+    set codigoOperacion = 200;
+
+    start transaction;
+
+    -- ? Validar que el bien existe y obtener su usuario
+    select
+        1, id_usuario
+    into bienExiste, usuarioBien
+    from   BienesPorUsuario
+    where  id_bien = idBienRegistradoPorUsuario;
+
+    -- ? Validar que el registro existe y obtener su usuario
+    select
+        1, id_usuario
+    into registroExiste, usuarioRegistro
+    from   RegistroDeUsuarioEnPoliza
+    where  id_registro_en_poliza = idRegistroEnPoliza
+      and estado_de_registro = 'registro_activo';
+
+    if bienExiste = 0 then
+        set codigoOperacion = 404; -- Bien no existe
+        rollback;
+    elseif registroExiste = 0 then
+        set codigoOperacion = 404; -- Registro no existe o no esta activo
+        rollback;
+    elseif usuarioBien != usuarioRegistro then
+        set codigoOperacion = 403; -- Bien y registro no pertenecen al mismo usuario
+        rollback;
+    else
+        -- ? Verificar si ya esta asegurado
+        select
+            1
+        into yaAsegurado
+        from   BienesAseguradosPorUsuario
+        where  id_bien_del_usuario = idBienRegistradoPorUsuario
+          and id_registro_en_poliza = idRegistroEnPoliza;
+
+        if yaAsegurado > 0 then
+            set codigoOperacion = 409; -- Ya esta asegurado
+            rollback;
+        else
+            -- ? Crear asociacion
+            insert into BienesAseguradosPorUsuario (
+                id_registro_en_poliza,
+                id_bien_del_usuario,
+                fecha_asociacion_cobertura_a_bien
+            ) values (
+                idRegistroEnPoliza,
+                idBienRegistradoPorUsuario,
+                curdate()
+            );
+
+            commit;
+        end if;
+    end if;
+end $$
+delimiter ;
+
+-- ? Elimina el seguro de un bien registrado
+-- ? Valida que la asociacion exista
+
+delimiter $$
+create procedure eliminarSeguroBienRegistradoPorUsuario(
+    in idBienRegistradoPorUsuario INT,
+    in idRegistroEnPoliza INT,
+    out codigoOperacion INT
+)
+begin
+    -- ? Declarar variables de control
+    declare asociacionExiste int default 0;
+
+    -- ? Handler de errores SQL
+    declare exit handler for sqlexception
+    begin
+        set codigoOperacion = 500;
+        rollback;
+    end;
+
+    -- ? Inicializar codigo de resultado
+    set codigoOperacion = 200;
+
+    start transaction;
+
+    -- ? Validar que la asociacion existe
+    select
+        1
+    into asociacionExiste
+    from   BienesAseguradosPorUsuario
+    where  id_bien_del_usuario = idBienRegistradoPorUsuario
+      and id_registro_en_poliza = idRegistroEnPoliza;
+
+    if asociacionExiste = 0 then
+        set codigoOperacion = 404; -- Asociacion no existe
+        rollback;
+    else
+        -- ? Eliminar asociacion
+        delete from BienesAseguradosPorUsuario
+        where id_bien_del_usuario = idBienRegistradoPorUsuario
+          and id_registro_en_poliza = idRegistroEnPoliza;
+
+        commit;
+    end if;
+end $$
+delimiter ;
+
+
+
 
 -- -------------------------------------------------------------------------------------
 -- Seccion Tres: Creacion de usuarios para el acceso a la base de datos
@@ -3452,6 +3936,24 @@ INSERT INTO PolizasDeSeguro (id_aseguradora, nombre_de_la_poliza, descripcion_de
 (10, 'Vida Panamerican Elite', 'Seguro de vida elite con multiples beneficios', 'seguro_de_vida', 150.00, 200000.00, 60, 78.0, 500.00, 'activa'),
 (10, 'Salud Panamerican Global', 'Cobertura de salud global con atencion mundial', 'seguro_de_salud', 350.75, 100000.00, 12, 80.0, 750.00, 'activa');
 
+-- Insertar bienes por usuario (basado en el tipo de poliza que tienen)
+INSERT INTO BienesPorUsuario (id_usuario, nombre_bien ,valoracion_bien, tipo_de_bien) VALUES
+-- Juan Perez (tiene seguro automotriz - Policy 1)
+(3, 'Chevrolet Aveo Family 2015',22000.00, 'bien_automotriz'),
+
+-- Maria Gonzalez (tiene seguro inmobiliario - Policy 3)
+(4, 'Apartamento 115 Edificio Unique', 95000.00, 'bien_inmueble'),
+
+-- Carlos Rodriguez (tiene seguro automotriz - Policy 5)
+(5, 'Chevrolet Aveo Spark 2010', 32000.00, 'bien_automotriz'),
+
+-- Ana Martinez (tiene seguro automotriz - Policy 7)
+(6, 'Chevrolet DMax 4x4', 26500.00, 'bien_automotriz'),
+
+-- Luis Fernandez (tiene seguro automotriz - Policy 9)
+(7, 'Chevrolet Tahoe LTD', 15000.00, 'bien_automotriz');
+
+
 
 -- Insertar requerimientos por poliza (uno por poliza)
 INSERT INTO Requerimientos_por_Poliza (id_poliza, tipo_requerimiento, descripcion_requerimiento, requerimiento_obligatorio) VALUES
@@ -3462,12 +3964,14 @@ INSERT INTO Requerimientos_por_Poliza (id_poliza, tipo_requerimiento, descripcio
 (5, 'historial_crediticio', 'Reporte del buro de credito actualizado', 1);
 
 -- Crear aplicaciones aprobadas (5 usuarios aplicando a diferentes polizas)
-INSERT INTO AplicacionAPoliza (id_usuario, id_poliza, id_broker_que_reviso, fecha_de_aplicacion, estado_actual_aplicacion, razon_de_rechazo) VALUES
-(3, 1, 2, '2024-10-15 10:30:00', 'aprobada', NULL),
-(4, 3, 3, '2024-10-18 14:20:00', 'aprobada', NULL),
-(5, 5, 4, '2024-10-22 09:15:00', 'aprobada', NULL),
-(6, 7, 5, '2024-10-25 16:45:00', 'aprobada', NULL),
-(7, 9, 6, '2024-10-28 11:30:00', 'aprobada', NULL);
+-- Crear aplicaciones aprobadas (5 usuarios aplicando a diferentes polizas con sus bienes)
+INSERT INTO AplicacionAPoliza (id_usuario, id_poliza, id_bien_asegurado, id_broker_que_reviso, fecha_de_aplicacion, estado_actual_aplicacion, razon_de_rechazo) VALUES
+(3, 1, 1, 2, '2024-10-15 10:30:00', 'aprobada', NULL),
+(4, 3, 2, 3, '2024-10-18 14:20:00', 'aprobada', NULL),
+(5, 5, 3, 4, '2024-10-22 09:15:00', 'aprobada', NULL),
+(6, 7, 4, 5, '2024-10-25 16:45:00', 'aprobada', NULL),
+(7, 9, 5, 6, '2024-10-28 11:30:00', 'aprobada', NULL);
+
 
 -- Insertar documentos por aplicacion (uno por aplicacion)
 INSERT INTO Documentos_por_AplicacionPoliza (id_de_usuario_carga, id_aplicacion_poliza, id_requerimiento_poliza, nombre_del_documento, fecha_de_carga) VALUES
@@ -3519,29 +4023,13 @@ INSERT INTO PagosPorPoliza (id_registro_poliza, cantidad_pago, metodo_de_pago, e
 
 
 
--- Insertar bienes por usuario (basado en el tipo de poliza que tienen)
-INSERT INTO BienesPorUsuario (id_usuario, valoracion_bien, tipo_de_bien) VALUES
--- Juan Perez (tiene seguro automotriz - Policy 1)
-(3, 22000.00, 'bien_automotriz'),
-
--- Maria Gonzalez (tiene seguro inmobiliario - Policy 3) 
-(4, 95000.00, 'bien_inmueble'),
-
--- Carlos Rodriguez (tiene seguro automotriz - Policy 5)
-(5, 32000.00, 'bien_automotriz'),
-
--- Ana Martinez (tiene seguro automotriz - Policy 7)
-(6, 26500.00, 'bien_automotriz'),
-
--- Luis Fernandez (tiene seguro automotriz - Policy 9)
-(7, 15000.00, 'bien_automotriz');
 
 -- Asociar bienes asegurados con registros de poliza (solo para seguros de auto e inmobiliario)
 INSERT INTO BienesAseguradosPorUsuario (id_registro_en_poliza, id_bien_del_usuario, fecha_asociacion_cobertura_a_bien) VALUES
 -- Juan Perez: Auto insurance - asociar vehiculo
 (1, 1, '2024-11-01'),
 
--- Maria Gonzalez: Property insurance - asociar inmueble  
+-- Maria Gonzalez: Property insurance - asociar inmueble
 (2, 2, '2024-11-01'),
 
 -- Carlos Rodriguez: Auto insurance - asociar vehiculo
