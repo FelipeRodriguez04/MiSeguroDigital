@@ -35,7 +35,6 @@ export default function PagarPolizaDetalle() {
   const [monto] = useState(poliza?.detalle.pago_mensual_de_la_poliza ?? 0);
   const [metodoPago, setMetodoPago] = useState(METODOS_PAGO[0]);
   const [motivoPago, setMotivoPago] = useState(MOTIVOS_PAGO[0]);
-  const [nota, setNota] = useState("");
 
   if (!poliza) {
     return (
@@ -90,7 +89,7 @@ export default function PagarPolizaDetalle() {
   e.preventDefault();
 
   const payload = {
-    registroPolizaId: poliza.id_poliza,
+    registroPolizaId: poliza.id_registro_en_poliza,
     cantidadPago: Number(monto),
     metodoPago: mapFrontaBack[metodoPago],
     motivoPago: mapFrontaBackMotivo[motivoPago],
@@ -173,12 +172,16 @@ export default function PagarPolizaDetalle() {
                 {poliza?.id_poliza}
               </div>
               <div>
-                <span className="font-semibold">Aseguradora:</span>{" "}
-                {poliza?.nombre_aseguradora}
+                <span className="font-semibold">N° de registro:</span>{" "}
+                {poliza?.id_registro_en_poliza}
               </div>
               <div>
                 <span className="font-semibold">Nombre:</span>{" "}
-                {poliza?.nombre_poliza}
+                {poliza?.nombre_de_la_poliza}
+              </div>
+              <div>
+                <span className="font-semibold">Aseguradora:</span>{" "}
+                {poliza?.nombre_aseguradora}
               </div>
               <div>
                 <span className="font-semibold">Monto pendiente:</span>{" "}

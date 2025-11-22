@@ -19,7 +19,8 @@ useEffect(() => {
       const resp = await fetch(
         `http://localhost:33761/api/aplicaciones/usuarios/aplicaciones-aceptadas-usuario/${userId}`
       );
-      const lista = await resp.json();
+      const data = await resp.json();
+      const lista = data.data;
 
       if (!resp.ok) {
         console.error("Error al obtener pólizas aceptadas:", lista.message);
@@ -122,6 +123,7 @@ useEffect(() => {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-green-100 bg-green-50/60">
+                    <th className="px-4 py-3 text-left font-semibold text-green-800">N° Registro</th>
                     <th className="px-4 py-3 text-left font-semibold text-green-800">N° Póliza</th>
                     <th className="px-4 py-3 text-left font-semibold text-green-800">Nombre</th>
                     <th className="px-4 py-3 text-left font-semibold text-green-800">Aseguradora</th>
@@ -138,15 +140,16 @@ useEffect(() => {
                       key={poliza.id_solicitud}
                       className="border-b border-green-100 hover:bg-green-50/60 transition"
                     >
+                      <td className="px-4 py-3 text-gray-800">{poliza.id_registro_en_poliza}</td>
                       <td className="px-4 py-3 text-gray-800">{poliza.id_poliza}</td>
-                      <td className="px-4 py-3 text-gray-800">{poliza.nombre_poliza}</td>
+                      <td className="px-4 py-3 text-gray-800">{poliza.nombre_de_la_poliza}</td>
                       <td className="px-4 py-3 text-gray-700">{poliza.nombre_aseguradora}</td>
-                      <td className="px-4 py-3 text-gray-700">{TiposPolizas[poliza.tipo_poliza]}</td>
+                      <td className="px-4 py-3 text-gray-700">{TiposPolizas[poliza.tipo_de_poliza]}</td>
                       <td className="px-4 py-3 text-gray-800 font-semibold">
                         ${poliza.detalle.pago_mensual_de_la_poliza} 
                       </td>
                       <td className="px-4 py-3 text-gray-800">
-                         {poliza.fecha_aplicacion_poliza}
+                         {poliza.fecha_de_aplicacion}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex flex-col md:flex-row gap-2 justify-center text-center items-center">
