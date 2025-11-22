@@ -53,6 +53,9 @@ router.post('/usuarios/crear-aplicacion-a-poliza', async (req: Request, res: Res
  * @param {number} params.userId - ID del usuario (numero).
  * @returns Retorna: lista de aplicaciones del usuario.
  */
+
+//LISTO!!
+
 router.get('/usuarios/aplicaciones-de-usuario/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
 	//? 1. Revisamos entradas de datos para ver que el id del usuario no este vacio
@@ -72,7 +75,6 @@ router.get('/usuarios/aplicaciones-de-usuario/:userId', async (req: Request, res
         );
     await connection.end();
     
-    //? En base a la respuesta creamos un  JSON especifico para el frontend
     let arrayOfPolizas = Array.isArray(rows) ? rows.map((poliza: any) => (
         {
             id_poliza: poliza.id_aplicacion_poliza,

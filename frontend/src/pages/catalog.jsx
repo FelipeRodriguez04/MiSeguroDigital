@@ -1,56 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Catalog() {
-  const [filter, setFilter] = useState("TODAS");
+  const [companyFilter, setCompanyFilter] = useState("TODAS");
+  const [typeFilter, setTypeFilter] = useState("TODOS");
+  const [nameFilter, setNameFilter] = useState("TODOS");
+  const [policies, setPolicies] = useState([]);
 
-  const policies = [
-    {
-      id_poliza: 101,
-      nombre_de_la_poliza: "Seguro de Vida Familiar",
-      tipo_de_poliza: "VIDA",
-      pago_mensual: 30,
-      duracion_contrato_meses: 12,
-      cobertura_base: 100000,
-      aseguradora: "Andes Seguros S.A.",
-      estado_de_poliza: "ACTIVA",
-      requisitos_count: 3,
-      image: "https://cdn-icons-png.flaticon.com/512/1048/1048945.png",
-    },
-    {
-      id_poliza: 102,
-      nombre_de_la_poliza: "Seguro Vehicular",
-      tipo_de_poliza: "AUTO",
-      pago_mensual: 45,
-      duracion_contrato_meses: 12,
-      cobertura_base: 20000,
-      aseguradora: "Quito Insurance",
-      estado_de_poliza: "ACTIVA",
-      requisitos_count: 4,
-      image: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-    },
-    {
-      id_poliza: 103,
-      nombre_de_la_poliza: "Seguro Médico Integral",
-      tipo_de_poliza: "SALUD",
-      pago_mensual: 60,
-      duracion_contrato_meses: 12,
-      cobertura_base: 50000,
-      aseguradora: "SaludTotal",
-      estado_de_poliza: "ACTIVA",
-      requisitos_count: 2,
-      image: "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
-    },
+  const EstadoPoliza = {
+    activa: "Activa",
+    pausada: "Pausada",
+    despublicada: "Despublicada",
+  };
+
+  const TiposPolizas = {
+    seguro_automotriz: "Seguro Automotriz",
+    seguro_inmobiliario: "Seguro Inmobiliario",
+    seguro_de_vida: "Seguro de Vida",
+    seguro_de_salud: "Seguro de Salud",
+  };
+
+  useEffect(() => {
+    const fetchPolicies = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:33761/api/polizas/catalogo-completo",
+          { method: "GET" }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error("Error al obtener pólizas:", data);
+          return;
+        }
+
+        setPolicies(data.polizas || []);
+      } catch (err) {
+        console.error("Error de red:", err);
+      }
+    };
+
+    fetchPolicies();
+  }, []);
+
+  const aseguradoras = [
+    "TODAS",
+    ...new Set(policies.map((p) => p.nombre_aseguradora)),
   ];
 
-  // Obtener lista única de aseguradoras
-  const aseguradoras = ["TODAS", ...new Set(policies.map((p) => p.aseguradora))];
+  const tipos = ["TODOS", ...Object.keys(TiposPolizas)];
 
-  // Filtrar
-  const filteredPolicies =
-    filter === "TODAS"
-      ? policies
-      : policies.filter((p) => p.aseguradora === filter);
+  const nombres = [
+    "TODOS",
+    ...new Set(policies.map((p) => p.nombre_poliza)),
+  ];
+
+  const filteredPolicies = policies.filter((p) => {
+    const matchCompany =
+      companyFilter === "TODAS" || p.nombre_aseguradora === companyFilter;
+
+    const matchType =
+      typeFilter === "TODOS" || p.tipo_poliza === typeFilter;
+
+    const matchName =
+      nameFilter === "TODOS" || p.nombre_poliza === nameFilter;
+
+    return matchCompany && matchType && matchName;
+  });
 
   return (
     <div
@@ -74,25 +91,59 @@ export default function Catalog() {
           Explora y elige la póliza que mejor se adapte a tus necesidades.
         </p>
 
-        {/* 🔍 FILTRO POR ASEGURADORA */}
-        <div className="bg-white/70 rounded-xl shadow-md p-4 mb-10 backdrop-blur-sm">
-          <label className="block text-green-700 font-semibold mb-2">
-            Filtrar por aseguradora
-          </label>
-          <select
-            className="border border-green-400 text-green-700 font-medium rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-600"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            {aseguradoras.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
+        <div className="bg-white/70 rounded-xl shadow-md p-4 mb-10 backdrop-blur-sm w-full max-w-5xl grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="block text-green-700 font-semibold mb-2">
+              Aseguradora
+            </label>
+            <select
+              className="w-full border border-green-400 text-green-700 font-medium rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-600"
+              value={companyFilter}
+              onChange={(e) => setCompanyFilter(e.target.value)}
+            >
+              {aseguradoras.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-green-700 font-semibold mb-2">
+              Tipo de póliza
+            </label>
+            <select
+              className="w-full border border-green-400 text-green-700 font-medium rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-600"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              {tipos.map((t) => (
+                <option key={t} value={t}>
+                  {t === "TODOS" ? "TODOS" : TiposPolizas[t]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-green-700 font-semibold mb-2">
+              Nombre de póliza
+            </label>
+            <select
+              className="w-full border border-green-400 text-green-700 font-medium rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-600"
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
+            >
+              {nombres.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* GRID DE PÓLIZAS FILTRADAS */}
         <div className="grid justify-items-center grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl px-6">
           {filteredPolicies.map((p) => (
             <article
@@ -100,45 +151,38 @@ export default function Catalog() {
               className="bg-white/70 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-200 backdrop-blur-sm w-full max-w-sm"
             >
               <div className="flex flex-col items-center">
-                <img
-                  src={p.image}
-                  alt={p.nombre_de_la_poliza}
-                  className="w-24 h-24 mb-4"
-                />
                 <h2 className="text-2xl font-bold text-green-700 mb-1 text-center">
-                  {p.nombre_de_la_poliza}
+                  {p.nombre_poliza}
                 </h2>
                 <p className="text-sm text-gray-500 mb-4">
-                  {p.tipo_de_poliza} • {p.estado_de_poliza}
+                  {TiposPolizas[p.tipo_poliza]} •{" "}
+                  {EstadoPoliza[p.estado_de_la_poliza]}
                 </p>
               </div>
 
               <ul className="text-gray-700 space-y-1 mb-4 text-center">
                 <li>
                   <span className="font-semibold">Aseguradora:</span>{" "}
-                  {p.aseguradora}
+                  {p.nombre_aseguradora}
                 </li>
                 <li>
                   <span className="font-semibold">Cobertura base:</span> $
-                  {p.cobertura_base.toLocaleString()}
+                  {p.monto_cobertura?.toLocaleString()}
                 </li>
                 <li>
                   <span className="font-semibold">Pago mensual:</span> $
-                  {p.pago_mensual}/mes
+                  {p.pago_mensual?.toLocaleString()}/mes
                 </li>
                 <li>
                   <span className="font-semibold">Duración:</span>{" "}
-                  {p.duracion_contrato_meses} meses
-                </li>
-                <li>
-                  <span className="font-semibold">Requisitos:</span>{" "}
-                  {p.requisitos_count} documentos
+                  {p.duracion_contrato} meses
                 </li>
               </ul>
 
               <div className="flex items-center justify-between">
                 <Link
                   to={`/catalog/details/${p.id_poliza}`}
+                  state={{ policy: p }}
                   className="underline !text-green-700 hover:!text-green-800"
                 >
                   Ver detalles

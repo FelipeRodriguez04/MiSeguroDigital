@@ -265,6 +265,9 @@ router.delete('/admin/eliminar-comentario-en-poliza/:reviewId', async (req: Requ
  * @param {number} params.policyId - ID de la poliza (numero).
  * @returns Retorna: lista de comentarios y reviews de la poliza.
  */
+
+//LISTO!!
+
 router.get('/obtener-comentarios-poliza/:policyId', async (req: Request, res: Response) => {
   const { policyId } = req.params;
 
@@ -282,20 +285,21 @@ router.get('/obtener-comentarios-poliza/:policyId', async (req: Request, res: Re
     const connection = await getConnection();
     const [rows] = await connection.execute('CALL MiSeguroDigital.obtenerComentariosPorIDPoliza(?)', [policyId]);
     await connection.end();
-    
-    //? 2.1 Como las rows son un solo objeto, vamos a iterar sobre las rows para obtene run arreglo
-		// de json
-		let arrayOfPolicyReviews = Array.isArray(rows) ? (rows as any[]).map(
-			(row: any)=> ({
-				id_review: row.id_review,
-				id_usuario: row.id_usuario,
-				rating_del_usuario: row.rating_del_usuario,
-				contexto_review: row.contexto_review,
-				tiene_hidden_fees: row.tiene_hidden_fees,
-				detalle_hidden_fees: row.detalle_hidden_fees,
-				fecha_creacion_review: row.fecha_creacion_review,
-				full_nombre_usuario: row.full_nombre_usuario
-		})) : [];
+
+	const resultRows = Array.isArray(rows) ? rows[0] : [];
+
+	let arrayOfPolicyReviews = Array.isArray(resultRows)
+	? resultRows.map((row: any) => ({
+		id_review: row.id_review,
+		rating_del_usuario: row.rating_del_usuario,
+		contexto_review: row.contexto_review,
+		tiene_hidden_fees: row.tiene_hidden_fees,
+		detalle_hidden_fees: row.detalle_hidden_fees,
+		fecha_creacion_review: row.fecha_creacion_review,
+		full_nombre_usuario: row.full_nombre_usuario
+		}))
+	: [];
+
 
 		if (arrayOfPolicyReviews.length === 0) {
 			res.status(404).json({

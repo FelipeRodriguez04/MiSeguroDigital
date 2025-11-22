@@ -19,6 +19,9 @@ const router = Router();
  * @param {string} body.password - Contrasena del usuario (string).
  * @returns Retorna: datos del usuario autenticado o error de credenciales.
  */
+
+
+//LISTO!!
 router.post('/iniciar-sesion', async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -82,6 +85,9 @@ router.post('/iniciar-sesion', async (req: Request, res: Response) => {
  * @param {string} body.fechaNacimiento - Fecha de nacimiento del usuario (string).
  * @returns Retorna: ID del usuario creado o error de registro.
  */
+
+//LISTO!!
+
 router.post('/usuarios/registrar-usuario', async (req: Request, res: Response) => {
   const { email, password, nombrePrim, apellidoPrim, fullNombre, telefono, fechaNacimiento } = req.body;
 

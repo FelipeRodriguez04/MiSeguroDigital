@@ -8,6 +8,9 @@ const router = Router();
  * @note Sin parametros.
  * @returns Retorna: lista completa de polizas en el catalogo.
  */
+
+//LISTO!!
+
 router.get('/catalogo-completo', async (req: Request, res: Response) => {
 	
 	//? 1. COmo no hay parametros procedemos internamente con el proceso general
@@ -67,6 +70,9 @@ router.get('/catalogo-completo', async (req: Request, res: Response) => {
  * [enum('seguro_automotriz', 'seguro_inmobiliario', 'seguro_de_vida', 'seguro_de_salud')].
  * @returns Retorna: polizas que coinciden con el tipo especificado.
  */
+
+//LiSTO!!
+
 router.get('/catalogo/buscar-por-tipo', async (req: Request, res: Response) => {
 	const { type } = req.query;
 
@@ -138,6 +144,9 @@ router.get('/catalogo/buscar-por-tipo', async (req: Request, res: Response) => {
  * @param {string} query.company - Nombre de la compania de seguros a buscar (string).
  * @returns Retorna: polizas que pertenecen a la compania especificada.
  */
+
+//LISTO!!
+
 router.get('/catalogo/buscar-por-aseguradora', async (req: Request, res: Response) => {
 	const { company } = req.query;
 
@@ -200,6 +209,9 @@ router.get('/catalogo/buscar-por-aseguradora', async (req: Request, res: Respons
  * @param {string} query.name - Nombre parcial de la poliza a buscar (string).
  * @returns Retorna: polizas que coinciden con el nombre parcial especificado.
  */
+
+//LISTO!!
+
 router.get('/catalogo/buscar-por-nombre', async (req: Request, res: Response) => {
 	const { name } = req.query;
 
@@ -774,6 +786,9 @@ function groupByInsuranceCompany(policiesByCompany: any[]): any[] {
  * @param {number} params.policyId - ID de la poliza (numero).
  * @returns Retorna: lista de requisitos de la poliza especificada.
  */
+
+//LISTO!!
+
 router.get('/usuarios/requerimientos-de-poliza/:policyId', async (req: Request, res: Response) => {
   const { policyId } = req.params;
 
@@ -786,7 +801,6 @@ router.get('/usuarios/requerimientos-de-poliza/:policyId', async (req: Request, 
 		});
 	}
 
-	//? 2. Ejecutamos codigo interno
   try {
     const connection = await getConnection();
 
