@@ -114,49 +114,70 @@ router.get('/usuarios/aplicaciones-de-usuario/:userId', async (req: Request, res
 });
 
 /**
- * @description Obtener aplicaciones aprobadas de un usuario especifico.
+ * @description Obtener polizas activas (registradas) de un usuario especifico. Esta ruta esta disenada
+ * para retornar todas las polizas que han sido aprobadas y formalizadas para un usuario, incluyendo
+ * la informacion del registro activo y los bienes asegurados asociados.
  * @param {object} params - Parametros de la URL.
  * @param {number} params.userId - ID del usuario (numero).
+ * @returns Retorna: lista de polizas activas del usuario con informacion de registro y bienes asegurados.
  */
-router.get('/usuarios/aplicaciones-aceptadas-usuario/:userId', async (req: Request, res: Response) => {
+router.get('/usuarios/aplicaciones-aceptadas/:userId', async (req: Request, res: Response) => {
 	const { userId } = req.params;
-	//? 1. Revisamos entradas de datos para ver que el id del usuario no este vacio
+
+	//? 1. Validamos que el ID del usuario no este vacio y sea mayor que cero
 	if (!userId || Number.parseInt(userId) <= 0) {
-		res.status(400).json(
-			{ message: 'El ID del usuario es requerido, se lo paso en blanco' }
-		);
-		return;
+		return res.status(400).json({
+			success: false,
+			message: 'Error Code 0x001 - [Raised] El ID del usuario es requerido y debe ser mayor que cero',
+			offender: 'userId'
+		});
 	}
-	//? 2. Continuams con el proceso normal
+
+	//? 2. Procedemos a obtener las polizas activas del usuario
 	try {
 		const connection = await getConnection();
-		const [rows] = await
-			connection.execute(
-				'SELECT * FROM MiSeguroDigital.viewAplicacionesPolizaPorUsuario WHERE id_usuario = ? and estado_actual_aplicacion = \'aprobada\'',
-				[userId]
-			);
+		const [resultingActivePolizas] = await connection.execute(
+			'SELECT * FROM MiSeguroDigital.ViewAplicacionesAceptadasPorUsuario WHERE id_usuario = ?',
+			[userId]
+		);
 		await connection.end();
 
-		//? En base a la respuesta creamos un  JSON especifico para el frontend
-		let arrayOfPolizas = Array.isArray(rows) ? rows.map((poliza: any) => (
-			{
-				id_poliza: poliza.id_aplicacion_poliza,
-				fecha_aplicacion_poliza: poliza.fecha_de_aplicacion,
-				estado_actual_aplicacion:  poliza.estado_actual_aplicacion,
-				nombre_poliza: poliza.nombre_de_la_poliza,
-				tipo_poliza: poliza.tipo_de_poliza,
-				nombre_aseguradora: poliza.nombre_aseguradora
-			}
-		)): [];
-		if (arrayOfPolizas.length === 0) {
-			res.status(404).json({ message: 'No se encontraron aplicaciones para el usuario especificado' });
+		//? 2.1 Basados en la data retornada, convertimos la tabla en un arreglo de entidades JSON
+		let arrayOfActivePolizas = Array.isArray(resultingActivePolizas) ? resultingActivePolizas.map((poliza: any) => ({
+			id_registro_en_poliza: poliza.id_registro_en_poliza,
+			id_aplicacion_poliza: poliza.id_aplicacion_poliza,
+			fecha_de_aplicacion: poliza.fecha_de_aplicacion,
+			estado_actual_aplicacion: poliza.estado_actual_aplicacion,
+			id_bien_asegurado: poliza.id_bien_asegurado,
+			nombre_de_la_poliza: poliza.nombre_de_la_poliza,
+			tipo_de_poliza: poliza.tipo_de_poliza,
+			nombre_aseguradora: poliza.nombre_aseguradora
+		})) : [];
+
+		//? 2.2 Retornamos la respuesta segun si encontramos data o no
+		if (arrayOfActivePolizas.length > 0) {
+			res.status(200).json({
+				success: true,
+				data: arrayOfActivePolizas,
+				message: 'Polizas activas del usuario obtenidas correctamente',
+				offender: ''
+			});
 		} else {
-			res.status(200).json(arrayOfPolizas);
+			res.status(404).json({
+				success: false,
+				message: 'Error Code 0x001 - [Raised] No se encontraron polizas activas para el usuario especificado',
+				offender: ''
+			});
 		}
 	} catch (error) {
-		res.status(500).json({ message: 'Error interno del servidor' });
+		res.status(500).json({
+			success: false,
+			message: 'Error Code 0x001 - [Raised] Error interno del servidor',
+			offender: error
+		});
 	}
-})
+});
+
 
 /**
  * @description Obtener aplicaciones pendientes para revision de broker.
