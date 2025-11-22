@@ -1,28 +1,58 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
-const MOCK_POLIZAS_ACEPTADAS = [
-  {
-    id_solicitud: 1,
-    numero_poliza: "VID-2025-001",
-    nombre_poliza: "Seguro de Vida Familiar",
-    aseguradora: "Andes Seguros S.A.",
-    pago_mensual: 30,
-    monto_pendiente: 120,
-    moneda: "USD",
-  },
-  {
-    id_solicitud: 2,
-    numero_poliza: "AUT-2025-045",
-    nombre_poliza: "Seguro Vehicular Todo Riesgo",
-    aseguradora: "Quito Insurance",
-    pago_mensual: 45,
-    monto_pendiente: 45,
-    moneda: "USD",
-  },
-];
 
 export default function PagarPolizas() {
-  const userName = localStorage.getItem("userName") || "Usuario";
+  const [polizasAceptadas, setPolizasAceptadas] = useState([]);
+
+  const TiposPolizas = {
+    seguro_automotriz: "Seguro Automotriz",
+    seguro_inmobiliario: "Seguro Inmobiliario",
+    seguro_de_vida: "Seguro de Vida",
+    seguro_de_salud: "Seguro de Salud",
+  };
+
+useEffect(() => {
+  const fetchPolizas = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const resp = await fetch(
+        `http://localhost:33761/api/aplicaciones/usuarios/aplicaciones-aceptadas-usuario/${userId}`
+      );
+      const lista = await resp.json();
+
+      if (!resp.ok) {
+        console.error("Error al obtener pólizas aceptadas:", lista.message);
+        return;
+      }
+
+      const detallesPromises = lista.map((poliza) => {
+        return fetch(
+          `http://localhost:33761/api/aplicaciones/usuarios/obtener-detalles-aplicacion/${poliza.id_poliza}/${userId}`
+        ).then((res) => res.json());
+      });
+
+      const detallesPlano = await Promise.all(detallesPromises);
+
+      const combinado = lista.map((poliza, index) => {
+        const detalle = Array.isArray(detallesPlano[index])
+          ? detallesPlano[index][0]
+          : detallesPlano[index];
+
+        return {
+          ...poliza,
+          detalle,
+        };
+      });
+
+      setPolizasAceptadas(combinado);
+    } catch (error) {
+      console.error("Error de red al obtener pólizas aceptadas:", error);
+    }
+  };
+
+  fetchPolizas();
+}, []);
 
   return (
     <div
@@ -73,7 +103,6 @@ export default function PagarPolizas() {
         </div>
       </header>
 
-      {/* MAIN */}
       <main className="relative flex-1 flex flex-col justify-center items-center px-4 z-10">
         <div className="max-w-4xl w-full bg-white/80 rounded-2xl shadow-lg p-8 backdrop-blur-md border border-green-100">
           <h1 className="text-3xl md:text-4xl font-extrabold text-green-700 mb-2 text-center md:text-left">
@@ -84,7 +113,7 @@ export default function PagarPolizas() {
             <span className="font-semibold">aceptadas</span> y realizar el pago con un clic.
           </p>
 
-          {MOCK_POLIZAS_ACEPTADAS.length === 0 ? (
+          {polizasAceptadas.length === 0 ? (
             <div className="text-center text-gray-600 py-10">
               No tienes pólizas aceptadas pendientes de pago.
             </div>
@@ -96,30 +125,32 @@ export default function PagarPolizas() {
                     <th className="px-4 py-3 text-left font-semibold text-green-800">N° Póliza</th>
                     <th className="px-4 py-3 text-left font-semibold text-green-800">Nombre</th>
                     <th className="px-4 py-3 text-left font-semibold text-green-800">Aseguradora</th>
+                    <th className="px-4 py-3 text-left font-semibold text-green-800">Tipo de póliza</th>
                     <th className="px-4 py-3 text-left font-semibold text-green-800">Pago mensual</th>
-                    <th className="px-4 py-3 text-left font-semibold text-green-800">Monto pendiente</th>
+                    <th className="px-4 py-3 text-left font-semibold text-green-800">Fecha de aplicación</th>
                     <th className="px-4 py-3 text-center font-semibold text-green-800">Acción</th>
                   </tr>
                 </thead>
 
                 <tbody className="bg-white/60">
-                  {MOCK_POLIZAS_ACEPTADAS.map((poliza) => (
+                  {polizasAceptadas.map((poliza) => (
                     <tr
                       key={poliza.id_solicitud}
                       className="border-b border-green-100 hover:bg-green-50/60 transition"
                     >
-                      <td className="px-4 py-3 text-gray-800">{poliza.numero_poliza}</td>
+                      <td className="px-4 py-3 text-gray-800">{poliza.id_poliza}</td>
                       <td className="px-4 py-3 text-gray-800">{poliza.nombre_poliza}</td>
-                      <td className="px-4 py-3 text-gray-700">{poliza.aseguradora}</td>
-                      <td className="px-4 py-3 text-gray-800">
-                        {poliza.pago_mensual.toFixed(2)} {poliza.moneda}
+                      <td className="px-4 py-3 text-gray-700">{poliza.nombre_aseguradora}</td>
+                      <td className="px-4 py-3 text-gray-700">{TiposPolizas[poliza.tipo_poliza]}</td>
+                      <td className="px-4 py-3 text-gray-800 font-semibold">
+                        ${poliza.detalle.pago_mensual_de_la_poliza} 
                       </td>
-                      <td className="px-4 py-3 text-gray-900 font-semibold">
-                        {poliza.monto_pendiente.toFixed(2)} {poliza.moneda}
+                      <td className="px-4 py-3 text-gray-800">
+                         {poliza.fecha_aplicacion_poliza}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <Link
-                          to={`/me/pagar_polizas/${poliza.id_solicitud}`}
+                          to={`/me/pagar_polizas/${poliza.id_poliza}`}
                           state={{ poliza }}
                           className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all shadow-sm hover:shadow-md"
                         >

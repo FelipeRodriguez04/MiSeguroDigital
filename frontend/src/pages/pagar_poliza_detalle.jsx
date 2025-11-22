@@ -1,50 +1,38 @@
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 
-const MOCK_POLIZAS_ACEPTADAS = [
-  {
-    id_solicitud: 1,
-    numero_poliza: "VID-2025-001",
-    nombre_poliza: "Seguro de Vida Familiar",
-    aseguradora: "Andes Seguros S.A.",
-    pago_mensual: 30,
-    monto_pendiente: 120,
-    moneda: "USD",
-  },
-  {
-    id_solicitud: 2,
-    numero_poliza: "AUT-2025-045",
-    nombre_poliza: "Seguro Vehicular Todo Riesgo",
-    aseguradora: "Quito Insurance",
-    pago_mensual: 45,
-    monto_pendiente: 45,
-    moneda: "USD",
-  },
-];
 
 const METODOS_PAGO = [
   "Tarjeta crédito",
   "Tarjeta débito",
   "Efectivo",
   "Cheque",
-  "Otro",
 ];
 
+
+
 const MOTIVOS_PAGO = ["Pago mensualidad", "Pago importe cancelación"];
+
 export default function PagarPolizaDetalle() {
   const { id_solicitud } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const polizaFromState = location.state?.poliza;
+  const mapFrontaBack = {
+  "Tarjeta crédito":"tarjeta_credito",
+  "Tarjeta débito":"tarjeta_debito",
+  "Efectivo":"efectivo",
+  "Cheque":"cheque",
+};
 
-  const poliza = useMemo(() => {
-    if (polizaFromState) return polizaFromState;
-    const idNum = Number(id_solicitud);
-    return MOCK_POLIZAS_ACEPTADAS.find((p) => p.id_solicitud === idNum);
-  }, [polizaFromState, id_solicitud]);
+  const mapFrontaBackMotivo = {
+  "Pago mensualidad":"pago_mensualidad",
+  "Pago importe cancelación":"pago_importe_cancelacion",
+};
 
-  const [monto] = useState(poliza?.monto_pendiente ?? 0);
+  const poliza = location.state?.poliza;
+
+  const [monto] = useState(poliza?.detalle.pago_mensual_de_la_poliza ?? 0);
   const [metodoPago, setMetodoPago] = useState(METODOS_PAGO[0]);
   const [motivoPago, setMotivoPago] = useState(MOTIVOS_PAGO[0]);
   const [nota, setNota] = useState("");
@@ -98,28 +86,50 @@ export default function PagarPolizaDetalle() {
     );
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const payload = {
-      id_solicitud: poliza.id_solicitud,
-      numero_poliza: poliza.numero_poliza,
-      monto: Number(monto),
-      metodoPago,
-      motivoPago,
-      nota,
-    };
-
-    console.log("Pagando póliza:", payload);
-
-    alert(
-      `Pago registrado:\nPóliza ${poliza.numero_poliza}\nMonto: ${monto} ${poliza.moneda}\nMétodo: ${metodoPago}\nMotivo: ${motivoPago}`
-    );
-
-    navigate("/me/pagar_polizas");
+  const payload = {
+    registroPolizaId: poliza.id_poliza,
+    cantidadPago: Number(monto),
+    metodoPago: mapFrontaBack[metodoPago],
+    motivoPago: mapFrontaBackMotivo[motivoPago],
   };
 
-  return (
+  console.log("Payload que se envía al backend:", payload);
+
+  try {
+    const response = await fetch(
+      "http://localhost:33761/api/pagos/usuario/registrar-pago",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await response.json();
+    console.log("Respuesta del backend:", data);
+
+    if (!response.ok) {
+      alert(
+        `Error al registrar el pago.\nCampo con problema: ${data.offender}\nMensaje: ${data.message}`
+      );
+      return;
+    }
+
+    alert("Pago registrado con éxito");
+    navigate("/me/pagar_polizas");
+  } catch (error) {
+    console.error("Error al registrar el pago:", error);
+    alert("Error al registrar el pago. Por favor, intenta nuevamente.");
+  }
+};
+
+
+  return (  
     <div
       className="relative min-h-screen w-screen bg-cover bg-center bg-no-repeat flex flex-col"
       style={{
@@ -160,24 +170,20 @@ export default function PagarPolizaDetalle() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-800">
               <div>
                 <span className="font-semibold">N° de póliza:</span>{" "}
-                {poliza.numero_poliza}
+                {poliza?.id_poliza}
               </div>
               <div>
                 <span className="font-semibold">Aseguradora:</span>{" "}
-                {poliza.aseguradora}
+                {poliza?.nombre_aseguradora}
               </div>
               <div>
                 <span className="font-semibold">Nombre:</span>{" "}
-                {poliza.nombre_poliza}
-              </div>
-              <div>
-                <span className="font-semibold">Pago mensual:</span>{" "}
-                {poliza.pago_mensual.toFixed(2)} {poliza.moneda}
+                {poliza?.nombre_poliza}
               </div>
               <div>
                 <span className="font-semibold">Monto pendiente:</span>{" "}
                 <span className="font-bold text-green-800">
-                  {poliza.monto_pendiente.toFixed(2)} {poliza.moneda}
+                  ${poliza?.detalle.pago_mensual_de_la_poliza}
                 </span>
               </div>
             </div>
@@ -237,19 +243,6 @@ export default function PagarPolizaDetalle() {
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">
-                Nota / referencia (opcional)
-              </label>
-              <textarea
-                value={nota}
-                onChange={(e) => setNota(e.target.value)}
-                rows={3}
-                className="w-full border border-green-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white/80"
-                placeholder="Ej. Pago correspondiente al mes de enero..."
-              />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

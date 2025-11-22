@@ -858,9 +858,6 @@ from
             BienesAseguradosPorUsuario.id_bien_del_usuario = polizaAplicacion.id_bien_asegurado
     join BienesPorUsuario on
             BienesPorUsuario.id_bien = BienesAseguradosPorUsuario.id_bien_del_usuario
-where
-    -- ? Filtrar por usuario
-    registro_usuarios.id_usuario = 1
 ORDER BY
     polizaAplicacion.fecha_de_aplicacion DESC;
 

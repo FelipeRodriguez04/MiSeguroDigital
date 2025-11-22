@@ -120,6 +120,9 @@ router.get('/usuarios/aplicaciones-de-usuario/:userId', async (req: Request, res
  * @param {object} params - Parametros de la URL.
  * @param {number} params.userId - ID del usuario (numero).
  */
+
+//LISTO!!
+
 router.get('/usuarios/aplicaciones-aceptadas-usuario/:userId', async (req: Request, res: Response) => {
 	const { userId } = req.params;
 	//? 1. Revisamos entradas de datos para ver que el id del usuario no este vacio
@@ -257,7 +260,10 @@ router.put('/brokers/procesar-aplicacion/:applicationId', async (req: Request, r
  * @param {number} params.userId - ID del usuario (numero).
  * @returns Retorna: detalles completos de la aplicacion incluyendo datos del usuario y poliza.
  */
-router.get('/usuarios/obtener-detalles-aplicacion/:applicationId', async (req: Request, res: Response) => {
+
+//LISTO!!
+
+router.get('/usuarios/obtener-detalles-aplicacion/:applicationId/:userId', async (req: Request, res: Response) => {
   const { applicationId, userId } = req.params;
 
 	//? 1. Validamos que el id de la aplicacion no este vacio o sea menor que cero
@@ -277,8 +283,8 @@ router.get('/usuarios/obtener-detalles-aplicacion/:applicationId', async (req: R
     const connection = await getConnection();
     // OJO: con esta query filtramos los registros para un usuario especifico con una aplicacion especifica
 		const [resultingRow] = await
-			connection.execute('select * from MiSeguroDigital.viewAplicacionesPolizaPorUsuario where id_aplicacion_poliza = ? and id_usuario = ?',
-				[applicationId]);
+			connection.execute('select * from MiSeguroDigital.viewDetallesDeAplicacionPorUsuarios where id_aplicacion_poliza = ? and id_usuario = ?',
+				[applicationId, userId]);
     await connection.end();
 
 		//? 2.1 Sacamos los resultados de la query
@@ -326,8 +332,8 @@ router.get('/brokers/obtener-detalles-aplicacion/:applicationId', async (req: Re
 		const connection = await getConnection();
 		// OJO: con esta query filtramos los registros para un usuario especifico con una aplicacion especifica
 		const [resultingRow] = await
-			connection.execute('select * from MiSeguroDigital.viewAplicacionesPolizaPorUsuario where id_aplicacion_poliza = ? and id_usuario = ?',
-				[applicationId]);
+			connection.execute('select * from MiSeguroDigital.viewDetallesDeAplicacionPorUsuarios where id_aplicacion_poliza = ? and id_usuario = ?',
+				[applicationId, userId]);
 		await connection.end();
 
 		//? 2.1 Sacamos los resultados de la query

@@ -85,6 +85,9 @@ router.get('/usuario/historial-de-pagos/:registryId', async (req: Request, res: 
  * [enum('pago_mensualidad', 'pago_importe_cancelacion')].
  * @returns Retorna: ID del pago registrado o error.
  */
+
+//LISTO!!
+
 router.post('/usuario/registrar-pago', async (req: Request, res: Response) => {
   const { registroPolizaId, cantidadPago, metodoPago, motivoPago } = req.body;
 
