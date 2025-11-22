@@ -291,6 +291,7 @@ router.get('/obtener-comentarios-poliza/:policyId', async (req: Request, res: Re
 	let arrayOfPolicyReviews = Array.isArray(resultRows)
 	? resultRows.map((row: any) => ({
 		id_review: row.id_review,
+		id_usuario: row.id_usuario,
 		rating_del_usuario: row.rating_del_usuario,
 		contexto_review: row.contexto_review,
 		tiene_hidden_fees: row.tiene_hidden_fees,
