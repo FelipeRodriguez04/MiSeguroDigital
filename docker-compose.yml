@@ -50,7 +50,7 @@ services:
     container_name: msd_backend
     environment:
         DB_HOST: mysql_database
-        DB_PORT: 61200
+        DB_PORT: 34761
         DB_USER: proj-UserBackend-DB
         DB_PASSWORD: s2764are0104@
         PORT: 33761

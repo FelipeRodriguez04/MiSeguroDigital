@@ -7,6 +7,10 @@ select
     aplicacionPoliza.id_aplicacion_poliza,
     aplicacionPoliza.fecha_de_aplicacion,
     aplicacionPoliza.estado_actual_aplicacion,
+    aplicacionPoliza.id_bien_asegurado,
+    BienesPorUsuario.nombre_bien,
+    BienesPorUsuario.tipo_de_bien,
+    BienesPorUsuario.valoracion_bien,
     -- ? Informacion del usuario que aplica
     registro_usuarios.id_usuario,
     registro_usuarios.full_nombre_usuario,
@@ -30,6 +34,10 @@ from
     -- ? Unir con aseguradoras para filtrar por broker
     join Aseguradoras aseguradoras
         on polizas.id_aseguradora = aseguradoras.id_aseguradora
+    join BienesAseguradosPorUsuario
+        on BienesAseguradosPorUsuario.id_bien_del_usuario = aplicacionPoliza.id_bien_asegurado
+    join BienesPorUsuario
+        on BienesPorUsuario.id_bien = BienesAseguradosPorUsuario.id_bien_del_usuario
 where
     -- ? Mostrar solo las que estan pendientes de procesar
     aplicacionPoliza.estado_actual_aplicacion = 'pendiente_procesar'
