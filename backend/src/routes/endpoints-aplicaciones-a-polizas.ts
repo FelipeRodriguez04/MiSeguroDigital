@@ -96,6 +96,51 @@ router.get('/usuarios/aplicaciones-de-usuario/:userId', async (req: Request, res
 });
 
 /**
+ * @description Obtener aplicaciones aprobadas de un usuario especifico.
+ * @param {object} params - Parametros de la URL.
+ * @param {number} params.userId - ID del usuario (numero).
+ */
+router.get('/usuarios/aplicaciones-aceptadas-usuario/:userId', async (req: Request, res: Response) => {
+	const { userId } = req.params;
+	//? 1. Revisamos entradas de datos para ver que el id del usuario no este vacio
+	if (!userId || Number.parseInt(userId) <= 0) {
+		res.status(400).json(
+			{ message: 'El ID del usuario es requerido, se lo paso en blanco' }
+		);
+		return;
+	}
+	//? 2. Continuams con el proceso normal
+	try {
+		const connection = await getConnection();
+		const [rows] = await
+			connection.execute(
+				'SELECT * FROM MiSeguroDigital.viewAplicacionesPolizaPorUsuario WHERE id_usuario = ? and estado_actual_aplicacion = \'aprobada\'',
+				[userId]
+			);
+		await connection.end();
+
+		//? En base a la respuesta creamos un  JSON especifico para el frontend
+		let arrayOfPolizas = Array.isArray(rows) ? rows.map((poliza: any) => (
+			{
+				id_poliza: poliza.id_aplicacion_poliza,
+				fecha_aplicacion_poliza: poliza.fecha_de_aplicacion,
+				estado_actual_aplicacion:  poliza.estado_actual_aplicacion,
+				nombre_poliza: poliza.nombre_de_la_poliza,
+				tipo_poliza: poliza.tipo_de_poliza,
+				nombre_aseguradora: poliza.nombre_aseguradora
+			}
+		)): [];
+		if (arrayOfPolizas.length === 0) {
+			res.status(404).json({ message: 'No se encontraron aplicaciones para el usuario especificado' });
+		} else {
+			res.status(200).json(arrayOfPolizas);
+		}
+	} catch (error) {
+		res.status(500).json({ message: 'Error interno del servidor' });
+	}
+})
+
+/**
  * @description Obtener aplicaciones pendientes para revision de broker.
  * @note Sin parametros.
  * @returns Retorna: lista de aplicaciones pendientes de aprobacion.
