@@ -9,6 +9,9 @@ const router = Router();
  * @param {number} params.userId - ID del usuario a obtener (numero).
  * @returns Retorna: datos completos del perfil del usuario.
  */
+
+//LISTO!!
+
 router.get('/obtener-perfil/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
 

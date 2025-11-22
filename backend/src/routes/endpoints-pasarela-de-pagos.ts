@@ -15,6 +15,8 @@ const router = Router();
  * @param {number} params.registryId - ID del registro de poliza del usuario (numero).
  * @returns Retorna: historial completo de pagos del usuario.
  */
+
+
 router.get('/usuario/historial-de-pagos/:registryId', async (req: Request, res: Response) => {
   const { registryId } = req.params;
 

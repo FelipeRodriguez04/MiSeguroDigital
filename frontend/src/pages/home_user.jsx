@@ -58,24 +58,33 @@ export default function HomeUser() {
             />
           </div>
 
-          <div className="flex flex-row justify-center items-center gap-4 mt-6">
+          <div className="flex flex-row flex-wrap justify-center items-center gap-4 mt-6">
             <Link
               to="/catalog"
               className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
             >
               Ver Catálogo de Pólizas
             </Link>
+
             <Link
               to="/me/applications"
               className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
             >
               Mis Solicitudes
             </Link>
+
             <Link
               to="/me/pagar_polizas"
               className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
             >
               Pagar
+            </Link>
+
+            <Link
+              to="/me/perfil"
+              className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
+            >
+              Mi Perfil
             </Link>
           </div>
         </div>

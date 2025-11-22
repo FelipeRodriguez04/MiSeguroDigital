@@ -35,6 +35,8 @@ import SolicitarP from "./pages/SolicitarP";
 import EditarGlobalUser from "./EditarGlobalUser";
 import EditarGlobalBroker from "./pages/EditarGlobalBroker";
 import EditarGlobalPoliza from "./pages/EditarGlobalPoliza";
+import HistorialPagos from "./pages/historial_pagos";
+import PerfilUsuario from "./pages/perfil_usuario";
 
 export default function App() {
   return (
@@ -151,6 +153,8 @@ export default function App() {
         <Route path="/me/pagar_polizas" element={<RequireRole role="global_user"><PagarPolizas /></RequireRole>} />
         <Route path="/me/pagar_polizas/:id_solicitud" element={<RequireRole role="global_user"><PagarPolizaDetalle /></RequireRole>} />
         <Route path="/broker/payments" element={<RequireRole role="analista"><BrokerPayments /></RequireRole>} />
+        <Route path="/me/historial_pagos" element={<RequireRole role="global_user"><HistorialPagos /></RequireRole>} />
+        <Route path="/me/perfil" element={<RequireRole role="global_user"><PerfilUsuario /></RequireRole>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
