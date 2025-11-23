@@ -103,7 +103,7 @@ export default function App() {
         <Route
           path="/analista"
           element={
-            <RequireRole role="analista">
+            <RequireRole role="broker_analyst">
               <HomeAnalista />
             </RequireRole>
           }

@@ -3142,93 +3142,99 @@ delimiter ;
 
 delimiter $$
      -- ? Procedure para autenticar usuario con email y password hash
-    create procedure loginUsuario(
-        in email varchar(255),
-        in passwordHash varchar(512),
-        out codigoResultado int,
-        out usuarioData json
-    )
-    begin
-        -- ? Declarar variables
-        declare usuarioCount int default 0;
-        declare storedSalt varchar(512);
-        declare storedHash varchar(512);
-        declare usuarioInfo json default JSON_OBJECT();
+    CREATE DEFINER=`root`@`localhost` PROCEDURE `loginUsuario`(
+    IN email VARCHAR(255),
+    IN passwordHash VARCHAR(512),
+    OUT codigoResultado INT,
+    OUT usuarioData JSON
+)
+BEGIN
+    -- Declarar variables
+    DECLARE usuarioCount INT DEFAULT 0;
+    DECLARE storedSalt VARCHAR(512);
+    DECLARE storedHash VARCHAR(512);
+    DECLARE usuarioInfo JSON;  -- SIN default JSON_OBJECT()
 
-        -- ? Handler de errores SQL
-        declare exit handler for sqlexception
-        begin
-            set codigoResultado = 500;
-            set usuarioData = null;
-        end;
+    -- Handler de errores SQL
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET codigoResultado = 500;
+        SET usuarioData = NULL;
+    END;
 
-        -- ? Inicializar codigo de resultado
-        set codigoResultado = 401;
-        set usuarioData = null;
+    -- Inicializar codigo de resultado
+    SET codigoResultado = 401;
+    SET usuarioData = NULL;
+    SET usuarioInfo = NULL;
 
-        -- ? Verificar si el usuario existe y esta activo
-        -- OJO esta primera verificacion busca encontrar el usuario dentro de los usuarios normales
-        -- por lo que si el usuario aparece enla tabla de registros principales vamos a buscar que tenga un registro
-        -- activo en los usuarios primero
-        select
-            1,
-            registro_identidad.hashed_pwd_salt_registro,
-            registro_identidad.hashed_pwd_registro
-        into
-            usuarioCount,
-            storedSalt,
-            storedHash
-        from Registro_SignUp_Global registro_identidad
-        where registro_identidad.correo_registro = email
-        and registro_identidad.estado_actividad_registro = 'activo';
+    -- Verificar si el usuario existe y está activo
+    SELECT
+        1,
+        registro_identidad.hashed_pwd_salt_registro,
+        registro_identidad.hashed_pwd_registro
+    INTO
+        usuarioCount,
+        storedSalt,
+        storedHash
+    FROM Registro_SignUp_Global registro_identidad
+    WHERE registro_identidad.correo_registro = email
+      AND registro_identidad.estado_actividad_registro = 'activo';
 
-        -- ? Si usuario existe, verificar password
-        if usuarioCount > 0 and storedHash = passwordHash then
-                select json_object(
-                    'id_usuario', registro_usuarios.id_usuario,
-                    'full_nombre_usuario', registro_usuarios.full_nombre_usuario,
-                    'rol_usuario', roles_usuarios.rol_usuario,
-                    'correo_registro', registro_identidad.correo_registro,
-                    'nombre_prim_usuario', registro_usuarios.nombre_prim_usuario,
-                    'apellido_prim_usuario', registro_usuarios.apellido_prim_usuario,
-                    'numero_telefono_usuario', registro_usuarios.numero_telefono_usuario
-                )
-                into usuarioInfo
-                from Registro_SignUp_Global registro_identidad
-                join Registro_Global_Usuarios registro_usuarios on registro_identidad.id_identidad = registro_usuarios.id_identidad_registro
-                join Roles_Users roles_usuarios on registro_usuarios.id_usuario = roles_usuarios.id_usuario
-                where registro_identidad.correo_registro = email;
+    -- Si usuario existe y password match
+    IF usuarioCount > 0 AND storedHash = passwordHash THEN
+        
+        -- 1) Intentar como usuario normal
+        SET usuarioInfo = NULL;
 
-                if usuarioInfo is not null then
-                    set codigoResultado = 200;
-                    set usuarioData = usuarioInfo;
-                else
-                    -- Ahora buscamos en el otro lado, buscamos si tal vez no es un usuario sino un broker
-                    select json_object(
-                        'id_broker', registro_brokers.id_broker,
-                        'full_nombre_broker', registro_brokers.full_nombre_broker,
-                        'rol_usuario', IFNULL(Roles_Broker.rol_broker, 'No Definido'),
-                        'correo_registro', registro_identidad.correo_registro,
-                        'nombre_prim_broker', registro_brokers.nombre_prim_broker,
-                        'apellido_prim_broker', registro_brokers.apellido_prim_broker,
-                        'numero_telefono_broker', registro_brokers.numero_telefono_broker,
-                        'estado_broker', registro_brokers.estado_broker
-                    )
-                    into usuarioInfo
-                    from Registro_SignUp_Global registro_identidad
-                    join Registro_Global_Brokers registro_brokers
-                        on registro_identidad.id_identidad = registro_brokers.id_identidad_registro
-                    left join Roles_Broker
-                        on registro_brokers.id_broker = Roles_Broker.id_broker
-                    where registro_identidad.correo_registro = email;
+        SELECT JSON_OBJECT(
+            'id_usuario', registro_usuarios.id_usuario,
+            'full_nombre_usuario', registro_usuarios.full_nombre_usuario,
+            'rol_usuario', roles_usuarios.rol_usuario,
+            'correo_registro', registro_identidad.correo_registro,
+            'nombre_prim_usuario', registro_usuarios.nombre_prim_usuario,
+            'apellido_prim_usuario', registro_usuarios.apellido_prim_usuario,
+            'numero_telefono_usuario', registro_usuarios.numero_telefono_usuario
+        )
+        INTO usuarioInfo
+        FROM Registro_SignUp_Global registro_identidad
+        JOIN Registro_Global_Usuarios registro_usuarios
+            ON registro_identidad.id_identidad = registro_usuarios.id_identidad_registro
+        JOIN Roles_Users roles_usuarios
+            ON registro_usuarios.id_usuario = roles_usuarios.id_usuario
+        WHERE registro_identidad.correo_registro = email;
 
-                    if usuarioInfo is not null then
-                        set codigoResultado = 200;
-                        set usuarioData = usuarioInfo;
-                    end if;
-                end if;
-        end if;
-    end $$
+        IF usuarioInfo IS NOT NULL THEN
+            SET codigoResultado = 200;
+            SET usuarioData = usuarioInfo;
+        ELSE
+            -- 2) Si no es usuario normal, intentar como broker
+            SET usuarioInfo = NULL;
+
+            SELECT JSON_OBJECT(
+                'id_broker', registro_brokers.id_broker,
+                'full_nombre_broker', registro_brokers.full_nombre_broker,
+                'rol_usuario', IFNULL(Roles_Broker.rol_broker, 'No Definido'),
+                'correo_registro', registro_identidad.correo_registro,
+                'nombre_prim_broker', registro_brokers.nombre_prim_broker,
+                'apellido_prim_broker', registro_brokers.apellido_prim_broker,
+                'numero_telefono_broker', registro_brokers.numero_telefono_broker,
+                'estado_broker', registro_brokers.estado_broker
+            )
+            INTO usuarioInfo
+            FROM Registro_SignUp_Global registro_identidad
+            JOIN Registro_Global_Brokers registro_brokers
+                ON registro_identidad.id_identidad = registro_brokers.id_identidad_registro
+            LEFT JOIN Roles_Broker
+                ON registro_brokers.id_broker = Roles_Broker.id_broker
+            WHERE registro_identidad.correo_registro = email;
+
+            IF usuarioInfo IS NOT NULL THEN
+                SET codigoResultado = 200;
+                SET usuarioData = usuarioInfo;
+            END IF;
+        END IF;
+    END IF;
+END $$
 delimiter ;
 
 
@@ -3904,14 +3910,13 @@ INSERT INTO Roles_Users (id_usuario, rol_usuario) VALUES
 
 -- Insertar registros de identidad para brokers
 INSERT INTO Registro_SignUp_Global (correo_registro, hashed_pwd_registro, hashed_pwd_salt_registro) VALUES
-('broker.admin@bolivar.com.ec', '', ''),
-('pedro.silva@equinoccial.com', '', ''),
-('sofia.torres@sucre.com.ec', '', ''),
-('miguel.herrera@liberty.com.ec', '', ''),
-('laura.castro@qbe.com.ec', '', ''),
-('diego.morales@unidos.com.ec', '', ''),
-('analyst@mapfre.com.ec', '', '');
-
+('broker.admin@bolivar.com.ec', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('pedro.silva@equinoccial.com', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('sofia.torres@sucre.com.ec', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('miguel.herrera@liberty.com.ec', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('laura.castro@qbe.com.ec', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('diego.morales@unidos.com.ec', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803'),
+('analyst@mapfre.com.ec', 'e1f2edb1f9c90b236a93aa7fae4eeba9c459f492e1aaa57aacc7688babebbfe0', 'f63e7f6976e0c2d75dc2c7677ee6fae70914f33cb64a135e7f141f238f00e803');
 -- Insertar brokers
 INSERT INTO Registro_Global_Brokers (id_identidad_registro, id_aseguradora, nombre_prim_broker, apellido_prim_broker, full_nombre_broker, numero_telefono_broker, fecha_nacimiento_broker, estado_broker) VALUES
 (8, 1, 'Broker', 'Admin', 'Broker Admin Bolivar', '0998765432', '1983-04-10', 'activo'),

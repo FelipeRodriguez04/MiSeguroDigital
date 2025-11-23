@@ -18,23 +18,15 @@ export default function Login() {
   const redirectByRole = (role) => {
     let normalizedRole = role;
 
-    if (
-      role === "broker_superadmin" ||
-      role === "broker_admin" ||
-      role === "broker_analyst"
-    ) {
-      normalizedRole = "broker";
-    }
-
     if (role === "global_superadmin" || role === "global_admin") {
       normalizedRole = "user_admin";
     }
 
     switch (normalizedRole) {
-      case "admin":
+      case "broker_admin":
         navigate("/admin");
         break;
-      case "analista":
+      case "broker_analyst":
         navigate("/analista");
         break;
       case "global_user":
@@ -77,6 +69,7 @@ export default function Login() {
       }
 
       const user = data.user || {};
+      console.log("Usuario autenticado:", user);
 
       const role =
         user.role ||
@@ -86,7 +79,7 @@ export default function Login() {
         "usuario";
 
       const userId =
-        user.id_usuario || user.id || user.email || user.correo_registro || "";
+        user.id_usuario || user.id || user.email || user.correo_registro || user.id_broker || "";
       const userName =
         user.full_nombre_usuario ||
         user.full_nombre_broker ||
@@ -99,7 +92,7 @@ export default function Login() {
       localStorage.setItem("userName", userName);
 
       if (user.id_aseguradora) {
-        localStorage.setItem("id_aseguradora", String(user.id_aseguradora));
+        localStorage.setItem("id_aseguradora", user.id_aseguradora);
       } else {
         localStorage.removeItem("id_aseguradora");
       }
