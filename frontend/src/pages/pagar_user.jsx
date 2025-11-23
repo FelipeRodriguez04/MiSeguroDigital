@@ -71,7 +71,7 @@ useEffect(() => {
 
           <Link
             to="/usuario"
-            className="text-green-700 hover:text-green-900 transition flex items-center gap-1 no-underline"
+            className="!text-green-700 hover:text-green-900 transition flex items-center gap-1 no-underline"
             title="Volver"
           >
             <svg
@@ -106,16 +106,16 @@ useEffect(() => {
       <main className="relative flex-1 flex flex-col justify-center items-center px-4 z-10">
         <div className="max-w-4xl w-full bg-white/80 rounded-2xl shadow-lg p-8 backdrop-blur-md border border-green-100">
           <h1 className="text-3xl md:text-4xl font-extrabold text-green-700 mb-2 text-center md:text-left">
-            Pagar pólizas aceptadas
+            Pagar pólizas aceptadas y hacer reviews de ellas
           </h1>
           <p className="text-gray-700 text-sm md:text-base mb-6 text-center md:text-left">
             Aquí puedes ver todas tus pólizas{" "}
-            <span className="font-semibold">aceptadas</span> y realizar el pago con un clic.
+            <span className="font-semibold">aceptadas</span>, hacer reviews de ellas y realizar el pago con un clic.
           </p>
 
           {polizasAceptadas.length === 0 ? (
             <div className="text-center text-gray-600 py-10">
-              No tienes pólizas aceptadas pendientes de pago.
+              No tienes pólizas aceptadas.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -149,13 +149,23 @@ useEffect(() => {
                          {poliza.fecha_aplicacion_poliza}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <Link
-                          to={`/me/pagar_polizas/${poliza.id_poliza}`}
-                          state={{ poliza }}
-                          className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all shadow-sm hover:shadow-md"
-                        >
-                          Pagar
-                        </Link>
+                        <div className="flex flex-col md:flex-row gap-2 justify-center text-center items-center">
+                          <Link
+                            to={`/crear_review/${poliza.id_poliza}`}
+                            state={poliza}
+                            className="border-2 border-green-600 !text-green-700 hover:bg-green-600 hover:text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-sm text-xs md:text-sm"
+                          >
+                            Crear Review
+                          </Link>
+
+                          <Link
+                            to={`/me/pagar_polizas/${poliza.id_poliza}`}
+                            state={{ poliza }}
+                            className="border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all shadow-sm hover:shadow-md"
+                          >
+                            Pagar
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ))}

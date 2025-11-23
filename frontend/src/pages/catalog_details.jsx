@@ -5,9 +5,11 @@ export default function CatalogDetails() {
   const { id } = useParams();
   console.log("CatalogDetails ID:", id);
   const location = useLocation();
-  const policy = location.state?.policy;
+  const policy = location.state?.policy || location.state; // soporte state={policy} o state={{policy}}
   const [reviews, setReviews] = useState([]);
   const [requirements, setRequirements] = useState([]);
+
+  const userId = localStorage.getItem("userId"); // 👈 ID del usuario logueado
 
   const EstadoPoliza = {
     activa: "Activa",
@@ -99,6 +101,22 @@ export default function CatalogDetails() {
 
       <header className="relative flex justify-between items-center px-8 py-4 text-green-700 font-semibold z-10">
         <div className="text-xl">MiSeguroDigital</div>
+          <Link
+            to="/catalog"
+            className="flex items-center gap-2 no-underline !text-green-700 hover:text-green-900 !transition font-semibold"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Catálogo
+          </Link>
       </header>
 
       <main className="relative z-10 flex-1 flex justify-center px-6 py-10">
@@ -180,12 +198,22 @@ export default function CatalogDetails() {
                       {new Date(rew.fecha_creacion_review).toLocaleDateString()}
                     </li>
                   </ul>
+
+                  {String(rew.id_usuario) === String(userId) && (
+                    <Link
+                      to={`/me/edit_review/${rew.id_review}`}
+                      state={{ review: rew, policy }}
+                      className="inline-block mt-3 border-2 border-green-600 !text-green-700 hover:bg-green-600 hover:!text-white px-4 py-1 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                    >
+                      Editar review
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>
           )}
 
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center gap-4 mt-6">
             <Link
               to={`/me/apply/${policy.id_poliza}`}
               className="border-2 border-green-600 !text-green-700 hover:bg-green-600 hover:text-white px-6 py-2 rounded-lg font-semibold transition-all shadow-sm"

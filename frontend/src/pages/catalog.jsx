@@ -81,6 +81,22 @@ export default function Catalog() {
 
       <header className="relative flex justify-between items-center px-8 py-4 text-green-700 font-semibold z-10">
         <div className="text-xl">MiSeguroDigital</div>
+        <Link
+            to="/usuario"
+            className="flex items-center gap-2 no-underline !text-green-700 hover:text-green-900 !transition font-semibold"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Home
+          </Link>
       </header>
 
       <main className="flex-1 flex flex-col items-center px-6 z-10">

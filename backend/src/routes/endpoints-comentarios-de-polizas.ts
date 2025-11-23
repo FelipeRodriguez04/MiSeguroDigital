@@ -18,6 +18,9 @@ const router = Router();
  * @param {string} [body.detalleHiddenFees] - Detalle de las tarifas ocultas (string opcional).
  * @returns Retorna: ID del review creado o error.
  */
+
+//LISTO!!
+
 router.post('/usuarios/crear-comentario-en-poliza', async (req: Request, res: Response) => {
 	const {
 		usuarioId, polizaId, rating,
@@ -116,6 +119,10 @@ router.post('/usuarios/crear-comentario-en-poliza', async (req: Request, res: Re
  * @param {string} [body.detalleHiddenFees] - Detalle de las tarifas ocultas (string opcional).
  * @returns Retorna: ID del review creado o error.
  */
+
+
+//LISTO!!
+
 router.put('/usuarios/actualizar-comentario-en-poliza/:reviewId', async (req: Request, res: Response) => {
 	const { reviewId } = req.params;
 	const { usuarioId, rating, contexto, tieneHiddenFees, detalleHiddenFees } = req.body;

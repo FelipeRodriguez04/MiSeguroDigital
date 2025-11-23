@@ -204,7 +204,7 @@ export default function EditarPerfilUsuario() {
                 <div className="pt-4 flex justify-between gap-3">
                   <button
                     type="button"
-                    onClick={() => navigate("/usuario/perfil")}
+                    onClick={() => navigate("/me/perfil")}
                     className="w-1/2 px-4 py-2 rounded-lg border border-green-600 text-green-700 font-semibold hover:bg-green-50 transition"
                   >
                     Cancelar

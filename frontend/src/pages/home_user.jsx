@@ -77,7 +77,7 @@ export default function HomeUser() {
               to="/me/pagar_polizas"
               className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
             >
-              Pagar
+              Aplicaciones Aceptadas
             </Link>
 
             <Link

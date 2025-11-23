@@ -48,7 +48,7 @@ export default function PerfilUsuario() {
 
         <Link
           to="/usuario"
-          className="text-green-700 hover:text-green-900 transition no-underline font-semibold"
+          className="!text-green-700 hover:text-green-900 transition no-underline font-semibold"
         >
           ← Volver
         </Link>

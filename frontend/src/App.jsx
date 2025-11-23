@@ -38,6 +38,8 @@ import EditarGlobalPoliza from "./pages/EditarGlobalPoliza";
 import HistorialPagos from "./pages/historial_pagos";
 import PerfilUsuario from "./pages/perfil_usuario";
 import EditarPerfilUsuario from "./pages/editar_perfil";
+import CreateReview from "./pages/crear_review";
+import EditReview from "./pages/editar_review";
 
 export default function App() {
   return (
@@ -151,12 +153,14 @@ export default function App() {
         <Route path="/global_broker/equipo" element={<RequireRole role="global_broker"><GlobalBrokerEquipo /></RequireRole>} />
         <Route path="/global_broker/polizas" element={<RequireRole role="global_broker"><GlobalBrokerPolizas /></RequireRole>} />
         <Route path="/global_broker/solicitudes" element={<RequireRole role="global_broker"><GlobalBrokerSolicitudesEquipo /></RequireRole>} />
-        <Route path="/me/pagar_polizas" element={<RequireRole role="global_user"><PagarPolizas /></RequireRole>} />
+        <Route path="/me/pagar_polizas" element={<PagarPolizas />} />
         <Route path="/me/pagar_polizas/:id_solicitud" element={<RequireRole role="global_user"><PagarPolizaDetalle /></RequireRole>} />
         <Route path="/broker/payments" element={<RequireRole role="analista"><BrokerPayments /></RequireRole>} />
         <Route path="/me/historial_pagos" element={<RequireRole role="global_user"><HistorialPagos /></RequireRole>} />
         <Route path="/me/perfil" element={<PerfilUsuario />} />
         <Route path="/usuario/editar_perfil" element={<RequireRole role="global_user"><EditarPerfilUsuario /></RequireRole>} />
+        <Route path="/crear_review/:id_poliza" element={<RequireRole role="global_user"><CreateReview /></RequireRole>} />
+        <Route path="/me/edit_review/:id_review" element={<RequireRole role="global_user"><EditReview /></RequireRole>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
