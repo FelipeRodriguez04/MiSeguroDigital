@@ -91,6 +91,7 @@ export default function Login() {
       localStorage.setItem("userId", String(userId));
       localStorage.setItem("userName", userName);
 
+
       if (user.id_aseguradora) {
         localStorage.setItem("id_aseguradora", user.id_aseguradora);
       } else {

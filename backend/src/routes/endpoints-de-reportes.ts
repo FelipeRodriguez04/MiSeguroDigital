@@ -12,6 +12,9 @@ const router = Router();
  * @param {number} params.idAseguradora - ID de la aseguradora (numero).
  * @returns Retorna: reporte completo de aplicaciones de polizas.
  */
+
+//LISTO!!
+
 router.get('/broker/reporte-solicitudes-totales/:idAseguradora', async (req: Request, res: Response) =>
 	{
 		const { idAseguradora } = req.params;
@@ -87,6 +90,9 @@ router.get('/broker/reporte-solicitudes-totales/:idAseguradora', async (req: Req
  * @note Sin parametros.
  * @returns Retorna: estadisticas completas de rendimiento de brokers.
  */
+
+//LISTO!!
+
 router.get('/broker/estadistica-solicitudes-por-poliza', async (req: Request, res: Response) => {
   try {
     const connection = await getConnection();
@@ -102,7 +108,7 @@ router.get('/broker/estadistica-solicitudes-por-poliza', async (req: Request, re
 			descripcion_de_la_poliza: reporte.descripcion_de_la_poliza,
 			total_aplicaciones: reporte.total_aplicaciones,
 			aplicaciones_pendientes: reporte.aplicaciones_pendientes,
-			cantidad_rechazadas: reporte.aplicaciones_aprobadas,
+			aprobadas: reporte.aplicaciones_aprobadas,
 			aplicaciones_rechazadas: reporte.aplicaciones_rechazadas
 		})) : [];
 

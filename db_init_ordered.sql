@@ -906,38 +906,39 @@ where
 order by
     -- ? Ordenar por fecha de aplicacion ascendente para procesar las mas antiguas primero
     aplicacionPoliza.fecha_de_aplicacion asc;
-create or replace view viewEstadisticasDeSolicitudesReporteParaBrokers as
-select
-    -- ? Agrupar por aseguradora para reportes especificos del broker
+    
+CREATE OR REPLACE VIEW viewEstadisticasDeSolicitudesReporteParaBrokers AS
+SELECT
     poliza.id_aseguradora,
     aseguradora.nombre_aseguradora,
+    poliza.id_poliza,
     poliza.nombre_de_la_poliza,
     poliza.estado_de_poliza,
     poliza.descripcion_de_la_poliza,
-    -- ? Contar el total de aplicaciones
-    count(aplicacionPoliza.id_aplicacion_poliza) as total_aplicaciones,
-    -- ? Contar las aplicaciones pendientes
-    sum(case
-        when aplicacionPoliza.estado_actual_aplicacion = 'pendiente_procesar'
-            then 1 else 0 end) as aplicaciones_pendientes,
-    -- ? Contar las aplicaciones aprobadas
-    sum(case
-        when aplicacionPoliza.estado_actual_aplicacion = 'aprobada'
-            then 1 else 0 end) as aplicaciones_aprobadas,
-    -- ? Contar las aplicaciones rechazadas
-    sum(case
-        when aplicacionPoliza.estado_actual_aplicacion = 'rechazada'
-            then 1 else 0 end) as aplicaciones_rechazadas
-from
+    COUNT(aplicacionPoliza.id_aplicacion_poliza) AS total_aplicaciones,
+    SUM(CASE
+        WHEN aplicacionPoliza.estado_actual_aplicacion = 'pendiente_procesar'
+            THEN 1 ELSE 0 END) AS aplicaciones_pendientes,
+    SUM(CASE
+        WHEN aplicacionPoliza.estado_actual_aplicacion = 'aprobada'
+            THEN 1 ELSE 0 END) AS aplicaciones_aprobadas,
+    SUM(CASE
+        WHEN aplicacionPoliza.estado_actual_aplicacion = 'rechazada'
+            THEN 1 ELSE 0 END) AS aplicaciones_rechazadas
+FROM
     AplicacionAPoliza aplicacionPoliza
-    -- ? Unir con polizas para poder agrupar por aseguradora
-    join PolizasDeSeguro poliza
-        on aplicacionPoliza.id_poliza = poliza.id_poliza
-    join Aseguradoras aseguradora
-        on poliza.id_aseguradora = aseguradora.id_aseguradora
-group by
-    -- ? Agrupar los conteos por aseguradora
-    poliza.id_aseguradora;
+    JOIN PolizasDeSeguro poliza
+        ON aplicacionPoliza.id_poliza = poliza.id_poliza
+    JOIN Aseguradoras aseguradora
+        ON poliza.id_aseguradora = aseguradora.id_aseguradora
+GROUP BY
+    poliza.id_aseguradora,
+    aseguradora.nombre_aseguradora,
+    poliza.id_poliza,
+    poliza.nombre_de_la_poliza,
+    poliza.estado_de_poliza,
+    poliza.descripcion_de_la_poliza;
+
 -- ? Vista para que un usuario vea sus solicitudes de poliza
 -- ? Muestra el historial de solicitudes de un usuario especifico
 
@@ -3218,7 +3219,8 @@ BEGIN
                 'nombre_prim_broker', registro_brokers.nombre_prim_broker,
                 'apellido_prim_broker', registro_brokers.apellido_prim_broker,
                 'numero_telefono_broker', registro_brokers.numero_telefono_broker,
-                'estado_broker', registro_brokers.estado_broker
+                'estado_broker', registro_brokers.estado_broker,
+                'id_aseguradora', registro_brokers.id_aseguradora
             )
             INTO usuarioInfo
             FROM Registro_SignUp_Global registro_identidad

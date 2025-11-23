@@ -42,7 +42,7 @@ export default function HomeAnalyst() {
       <main className="relative flex-1 flex flex-col items-center justify-center px-6 text-center z-10">
         <div className="max-w-2xl w-full bg-white/85 rounded-2xl shadow-xl p-10 backdrop-blur-md mx-4 border border-green-100">
           <h1 className="text-5xl font-extrabold text-green-700 mb-4">
-            Bienvenido, Analista
+            Bienvenido, {localStorage.getItem("userName")}
           </h1>
           <p className="text-gray-700 text-lg max-w-xl mx-auto mb-8">
             Supervisa y analiza las solicitudes de pólizas. Revisa documentos y registra tus decisiones con precisión.
