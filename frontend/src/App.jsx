@@ -40,6 +40,9 @@ import PerfilUsuario from "./pages/perfil_usuario";
 import EditarPerfilUsuario from "./pages/editar_perfil";
 import CreateReview from "./pages/crear_review";
 import EditReview from "./pages/editar_review";
+import MisBienes from "./pages/bienes_user";
+import RegistrarBien from "./pages/registrar_bien";
+import EditarBienUsuario from "./pages/editar_bien";
 
 export default function App() {
   return (
@@ -161,6 +164,9 @@ export default function App() {
         <Route path="/usuario/editar_perfil" element={<RequireRole role="global_user"><EditarPerfilUsuario /></RequireRole>} />
         <Route path="/crear_review/:id_poliza" element={<RequireRole role="global_user"><CreateReview /></RequireRole>} />
         <Route path="/me/edit_review/:id_review" element={<RequireRole role="global_user"><EditReview /></RequireRole>} />
+        <Route path="/me/bienes" element={<MisBienes />} />
+        <Route path="/me/bienes/nuevo" element={<RegistrarBien />} />
+        <Route path="/me/bienes/editar/:idBien" element={<EditarBienUsuario />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

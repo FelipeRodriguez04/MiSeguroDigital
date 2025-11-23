@@ -9,10 +9,12 @@ const router = Router();
  * @param {number} params.userId - ID del usuario (numero).
  * @returns Retorna: lista de bienes registrados por el usuario.
  */
+
+//LISTO!!
+
 router.get('/usuario/bienes-registrados/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
 
-  //? 1. Validamos que el parametro sea un numero y no sea menor que cero
   if (!userId || Number.parseInt(userId) <= 0) {
     return res.status(400).json({
       success: false,
@@ -21,20 +23,23 @@ router.get('/usuario/bienes-registrados/:userId', async (req: Request, res: Resp
     });
   }
 
-  //? 2. Continuamos con el proceso
   try {
     const connection = await getConnection();
-    const [rows] = await connection.execute(
-      'CALL MiSeguroDigital.obtenerBienesRegistradosPorUsuario(?)', [userId]
+    const [rows]: any = await connection.execute(
+      'CALL MiSeguroDigital.obtenerBienesRegistradosPorUsuario(?)',
+      [userId]
     );
     await connection.end();
 
-    //? 2.1 Transformamos la respuesta en un arreglo de objetos JSON
-    let arrayOfBienes = Array.isArray(rows) ? rows.map((bien: any) => ({
-      id_bien: bien.id_bien,
-      tipo_de_bien: bien.tipo_de_bien,
-      valoracion_bien: bien.valoracion_bien
-    })) : [];
+    const resultRows = Array.isArray(rows) ? rows[0] : [];
+
+    let arrayOfBienes = Array.isArray(resultRows)
+      ? resultRows.map((bien: any) => ({
+          id_bien: bien.id_bien,
+          tipo_de_bien: bien.tipo_de_bien,
+          valoracion_bien: bien.valoracion_bien
+        }))
+      : [];
 
     if (arrayOfBienes.length > 0) {
       res.status(200).json({
@@ -60,6 +65,7 @@ router.get('/usuario/bienes-registrados/:userId', async (req: Request, res: Resp
   }
 });
 
+
 /**
  * @description Obtener bienes registrados por usuario filtrados por tipo.
  * @param {object} params - Parametros de la URL.
@@ -68,6 +74,9 @@ router.get('/usuario/bienes-registrados/:userId', async (req: Request, res: Resp
  * @param {string} body.tipo - Tipo de bien a filtrar (string) [enum('bien_inmueble', 'bien_automotriz', 'otro')].
  * @returns Retorna: lista de bienes registrados por el usuario del tipo especificado.
  */
+
+//LISTO!!
+
 router.get('/usuario/bienes-registrados-por-tipo/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { tipo } = req.body;
@@ -135,6 +144,9 @@ router.get('/usuario/bienes-registrados-por-tipo/:userId', async (req: Request, 
  * @param {number} params.userId - ID del usuario (numero).
  * @returns Retorna: lista de bienes asegurados por el usuario con informacion de poliza.
  */
+
+//LISTO!!
+
 router.get('/usuario/bienes-asegurados/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
 
@@ -155,8 +167,11 @@ router.get('/usuario/bienes-asegurados/:userId', async (req: Request, res: Respo
     );
     await connection.end();
 
+      const resultRows = Array.isArray(rows) ? rows[0] : [];
+
+
     //? 2.1 Transformamos la respuesta en un arreglo de objetos JSON
-    let arrayOfBienesAsegurados = Array.isArray(rows) ? rows.map((bien: any) => ({
+    let arrayOfBienesAsegurados = Array.isArray(resultRows) ? resultRows.map((bien: any) => ({
       id_bien_del_usuario: bien.id_bien_del_usuario,
       id_registro_en_poliza: bien.id_registro_en_poliza,
       tipo_de_bien: bien.tipo_de_bien,
@@ -196,6 +211,9 @@ router.get('/usuario/bienes-asegurados/:userId', async (req: Request, res: Respo
  * @param {number} params.polizaId - ID de la poliza (numero).
  * @returns Retorna: lista de bienes asegurados por el usuario en la poliza especificada.
  */
+
+//LISTO!!
+
 router.get('/usuario/bienes-asegurados-por-poliza/:userId/:polizaId', async (req: Request, res: Response) => {
   const { userId, polizaId } = req.params;
 
@@ -268,6 +286,9 @@ router.get('/usuario/bienes-asegurados-por-poliza/:userId/:polizaId', async (req
  * @param {string} body.tipoDeBien - Tipo de bien [enum('bien_inmueble', 'bien_automotriz', 'otro')].
  * @returns Retorna: confirmacion del registro y ID del bien creado.
  */
+
+//LISTO!!
+
 router.post('/usuario/registrar-bien', async (req: Request, res: Response) => {
   const { userId, nombreBien, valoracionBien, tipoDeBien } = req.body;
 
@@ -365,6 +386,9 @@ router.post('/usuario/registrar-bien', async (req: Request, res: Response) => {
  * @param {string} body.tipoDeBien - Tipo de bien [enum('bien_inmueble', 'bien_automotriz', 'otro')].
  * @returns Retorna: confirmacion de la modificacion.
  */
+
+//LISTO!!
+
 router.put('/usuario/modificar-bien', async (req: Request, res: Response) => {
   const { idBien, userId, nombreBien, valoracionBien, tipoDeBien } = req.body;
 
@@ -467,6 +491,9 @@ router.put('/usuario/modificar-bien', async (req: Request, res: Response) => {
  * @param {number} body.userId - ID del usuario (numero).
  * @returns Retorna: confirmacion de la eliminacion.
  */
+
+
+
 router.delete('/usuario/eliminar-bien', async (req: Request, res: Response) => {
   const { idBien, userId } = req.body;
 
@@ -502,32 +529,32 @@ router.delete('/usuario/eliminar-bien', async (req: Request, res: Response) => {
     const { codigo } = (result as any)[0];
 
     if (codigo === 200) {
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: 'Bien eliminado correctamente',
         offender: ''
       });
     } else if (codigo === 404) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] Bien no encontrado o no pertenece al usuario',
         offender: 'idBien'
       });
     } else if (codigo === 403) {
-      res.status(403).json({
+      return res.status(403).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] No se puede eliminar un bien que esta asegurado',
         offender: 'bienAsegurado'
       });
     } else {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] Error interno del servidor',
         offender: 'servidor'
       });
     }
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error Code 0x001 - [Raised] Error interno del servidor al eliminar bien',
       offender: error
