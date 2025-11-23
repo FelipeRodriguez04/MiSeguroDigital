@@ -11,6 +11,9 @@ const router = Router();
  * @param {number} body.bienId - ID de la poliza (numero).
  * @returns Retorna: confirmacion de creacion o error.
  */
+
+//LISTO!!
+
 router.post('/usuarios/crear-aplicacion-a-poliza', async (req: Request, res: Response) => {
   const { usuarioId, polizaId, bienId } = req.body;
 
@@ -39,27 +42,27 @@ router.post('/usuarios/crear-aplicacion-a-poliza', async (req: Request, res: Res
     const codigo = Array.isArray(result) && result[0] ? (result[0] as any).codigo : 500;
 
     if (codigo === 200) {
-      res.status(200).json({
+      return res.status(200).json({
 					success: true,
 					message: 'Aplicacion creada correctamente',
 					offender: ''
 			});
     } else if (codigo == 404){
-        res.status(404).json({
+        return res.status(404).json({
 					success: false,
 					message: 'Error Code 0x001 - [Raised] Error al crear aplicacion: No se encontraron datos de la poliza o bien especificado',
 					offender: "idPoliza o idUsuario o idBien"
 
 				});
     } else {
-        res.status(codigo).json({
+        return res.status(codigo).json({
 					success: false,
 					message: 'Error Code 0x001 - [Raised] Error al crear aplicacion: Error interno del servidor',
 					offender: ""
 				});
     }
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
 			success: false,
 			message: 'Error Code 0x001 - [Raised] Error interno del servidor',
 			offender: error

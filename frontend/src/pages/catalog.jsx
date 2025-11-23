@@ -206,6 +206,7 @@ export default function Catalog() {
 
                 <Link
                   to={`/me/apply/${p.id_poliza}`}
+                  state={{ policy: p }}
                   className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-6 py-2 rounded-lg text-base font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   Solicitar

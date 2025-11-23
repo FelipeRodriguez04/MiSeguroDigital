@@ -545,6 +545,10 @@ begin
 
     start transaction;
 
+select 1 
+into usuarioExiste
+from Registro_Global_Usuarios where id_usuario = usuarioId;
+
     -- ? Verificar que la poliza existe y esta activa
 select
    1
@@ -562,7 +566,6 @@ and id_poliza = polizaId
 and id_bien_asegurado = bienId
 and estado_actual_aplicacion = 'pendiente_procesar';
 
--- ? Verificar que el bien pertenece al usuario
 if bienId is not null then
     select
         1
@@ -575,7 +578,6 @@ if bienId is not null then
     end if;
 end if;
 
--- ? Validar existencia de usuario y poliza
 if usuarioExiste = 0 then
     set codigoResultado = 404;  -- Usuario no encontrado
     rollback;

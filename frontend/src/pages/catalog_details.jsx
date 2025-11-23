@@ -216,6 +216,7 @@ export default function CatalogDetails() {
           <div className="flex justify-center gap-4 mt-6">
             <Link
               to={`/me/apply/${policy.id_poliza}`}
+              state={{ policy: policy }}
               className="border-2 border-green-600 !text-green-700 hover:bg-green-600 hover:text-white px-6 py-2 rounded-lg font-semibold transition-all shadow-sm"
             >
               Solicitar
