@@ -492,7 +492,7 @@ router.put('/usuario/modificar-bien', async (req: Request, res: Response) => {
  * @returns Retorna: confirmacion de la eliminacion.
  */
 
-
+//LISTO!!
 
 router.delete('/usuario/eliminar-bien', async (req: Request, res: Response) => {
   const { idBien, userId } = req.body;

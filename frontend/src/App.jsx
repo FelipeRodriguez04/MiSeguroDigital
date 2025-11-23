@@ -159,7 +159,7 @@ export default function App() {
         <Route path="/me/pagar_polizas" element={<PagarPolizas />} />
         <Route path="/me/pagar_polizas/:id_solicitud" element={<RequireRole role="global_user"><PagarPolizaDetalle /></RequireRole>} />
         <Route path="/broker/payments" element={<RequireRole role="analista"><BrokerPayments /></RequireRole>} />
-        <Route path="/me/historial_pagos" element={<RequireRole role="global_user"><HistorialPagos /></RequireRole>} />
+        <Route path="/me/historial_pagos/:registryID" element={<HistorialPagos />} />
         <Route path="/me/perfil" element={<PerfilUsuario />} />
         <Route path="/usuario/editar_perfil" element={<RequireRole role="global_user"><EditarPerfilUsuario /></RequireRole>} />
         <Route path="/crear_review/:id_poliza" element={<RequireRole role="global_user"><CreateReview /></RequireRole>} />

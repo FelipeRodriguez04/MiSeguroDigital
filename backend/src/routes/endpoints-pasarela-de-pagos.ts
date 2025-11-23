@@ -16,6 +16,7 @@ const router = Router();
  * @returns Retorna: historial completo de pagos del usuario.
  */
 
+//LISTO!!
 
 router.get('/usuario/historial-de-pagos/:registryId', async (req: Request, res: Response) => {
   const { registryId } = req.params;
@@ -39,9 +40,10 @@ router.get('/usuario/historial-de-pagos/:registryId', async (req: Request, res: 
 			await connection.execute(
 				'CALL MiSeguroDigital.obtenerPagosRealizadosPorUsuario(?)', [registryId]);
     await connection.end();
-    
+				
+	const rowsData = Array.isArray(rows) && rows.length > 0 ? rows[0] : [];
     //? 2.1 Si tenemos informacion en la respuesta lo transforammos en un arreglo y lo retornamos, si no retornamos un error
-		let arrayOfPayments = Array.isArray(rows) ? rows.map((payment: any) => ({
+		let arrayOfPayments = Array.isArray(rowsData) ? rowsData.map((payment: any) => ({
 			id_pago: payment.id_pago,
 			cantidad_pago: payment.cantidad_pago,
 			fecha_de_pago: payment.fecha_de_pago,

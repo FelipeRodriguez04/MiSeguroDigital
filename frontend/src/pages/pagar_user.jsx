@@ -168,6 +168,15 @@ useEffect(() => {
                           >
                             Pagar
                           </Link>
+
+                          <Link
+                            to={`/me/historial_pagos/${poliza.id_registro_en_poliza}`}
+                            state={{ poliza }}
+                            className="border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-4 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all shadow-sm hover:shadow-md"
+                          >
+                            Historial de Pagos
+                          </Link>
+
                         </div>
                       </td>
                     </tr>
@@ -180,7 +189,6 @@ useEffect(() => {
         </div>
       </main>
 
-      {/* FOOTER */}
       <footer className="relative py-6 text-gray-600 text-sm text-center z-10">
         © 2025 MiSeguroDigital — Tu confianza, nuestra prioridad.
       </footer>

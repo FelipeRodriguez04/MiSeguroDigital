@@ -81,18 +81,19 @@ export default function HomeUser() {
             </Link>
 
             <Link
+              to="/me/bienes"
+              className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
+            >
+              Mis Bienes
+            </Link>
+
+            <Link
               to="/me/perfil"
               className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
             >
               Mi Perfil
             </Link>
 
-            <Link
-              to="/me/bienes"
-              className="inline-block no-underline border-2 border-green-600 !text-green-700 hover:!text-white hover:!bg-green-600 px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-sm hover:shadow-md"
-            >
-              Mis Bienes
-            </Link>
           </div>
         </div>
       </main>
