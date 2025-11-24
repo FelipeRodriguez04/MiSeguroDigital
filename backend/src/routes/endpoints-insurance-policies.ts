@@ -565,6 +565,9 @@ router.delete('/admin/eliminar-poliza/:policyId', async (req: Request, res: Resp
  * @note Sin parametros.
  * @returns Retorna: vista de solo lectura de polizas para analisis.
  */
+
+//LISTO!!
+
 router.get('/analyst/dashboard', async (req: Request, res: Response) => {
   try {
       const connection = await getConnection();
@@ -585,7 +588,7 @@ router.get('/analyst/dashboard', async (req: Request, res: Response) => {
           estadoPoliza: row.estado_de_poliza,
           nombreAseguradora: row.nombre_aseguradora,
           totalAplicaciones: row.total_aplicaciones,
-          totalPendientes: row.apliaciones_pendientes,
+          totalPendientes: row.aplicaciones_pendientes,
           totalAprobadas: row.aplicaciones_aprobadas,
           totalRechazadas: row.aplicaciones_rechazadas
           })) : [];

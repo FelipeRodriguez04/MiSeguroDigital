@@ -79,7 +79,7 @@ export default function Login() {
         "usuario";
 
       const userId =
-        user.id_usuario || user.id || user.email || user.correo_registro || user.id_broker || "";
+        user.id_usuario || user.id_broker || "";
       const userName =
         user.full_nombre_usuario ||
         user.full_nombre_broker ||

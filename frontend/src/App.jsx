@@ -43,6 +43,8 @@ import EditReview from "./pages/editar_review";
 import MisBienes from "./pages/bienes_user";
 import RegistrarBien from "./pages/registrar_bien";
 import EditarBienUsuario from "./pages/editar_bien";
+import AnalystDashboard from "./pages/analista_dashboard";
+import BrokerProfile from "./pages/broker_profile";
 
 export default function App() {
   return (
@@ -167,6 +169,8 @@ export default function App() {
         <Route path="/me/bienes" element={<MisBienes />} />
         <Route path="/me/bienes/nuevo" element={<RegistrarBien />} />
         <Route path="/me/bienes/editar/:idBien" element={<EditarBienUsuario />} />
+        <Route path="/broker/dashboard" element={<AnalystDashboard />} />
+        <Route path="/broker/profile" element={<BrokerProfile />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

@@ -505,82 +505,104 @@ router.put('/admin/actualizar-estado-broker/:brokerId', async (req: Request, res
  * @param {number} params.brokerId - ID del broker (numero).
  * @returns Retorna: datos del perfil del broker en formato JSON.
  */
-router.get('obtener-datos/:brokerId', async (req: Request, res: Response) => {
-    const { brokerId } = req.params;
-	
-		//? 1. Validamos que la data enviada no este vacia y que el id no sea negativo
-		if (!brokerId) {
-			return res.status(400).json({
-				message: 'Error Code 0x001 - [Raised] Existe uno o mas campos que se encuentran vacios en la request',
-				offender: 'brokerId'
-			});
-		}
-		if (Number.parseInt(brokerId) < 0) {
-			return res.status(400).json({
-				message: 'Error Code 0x001 - [Raised] Los ids no deben ser negativos',
-				offender: 'brokerId'
-			})
-		}
-		
-		//? 2. Procedemos a obtener los datos del broker
-    try {
-        const connection = await getConnection();
 
-        const [dataBroker] =
-					await connection.execute(
-						'CALL MiSeguroDigital.getBrokerDataPerBrokerID(?, @ResultCode)', [brokerId]);
-        const [resultCode] = await connection.execute('SELECT @ResultCode as codigo');
+//LISTO!!
 
-        await connection.end();
+router.get('/obtener-datos/:brokerId', async (req: Request, res: Response) => {
+  const { brokerId } = req.params;
 
-        const codigo = Array.isArray(resultCode) && resultCode[0] ? (resultCode[0] as any).codigo : 500;
+  if (!brokerId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Error Code 0x001 - [Raised] El brokerId no puede estar vacío',
+      offender: 'brokerId'
+    });
+  }
 
-        if (codigo === 200 && Array.isArray(dataBroker) && dataBroker.length > 0) {
-            const brokerData = dataBroker[0] as any;
-            res.status(200).json(
-							{
-								success: true,
-								data: {
-									id_broker: brokerData.id_broker,
-									email: brokerData.email,
-									nombre_prim_broker: brokerData.nombre_prim_broker,
-									apellido_prim_broker: brokerData.apellido_prim_broker,
-									full_nombre_broker: brokerData.full_nombre_broker,
-									numero_telefono_broker: brokerData.numero_telefono_broker,
-									fecha_nacimiento_broker: brokerData.fecha_nacimiento_broker,
-									estado_broker: brokerData.estado_broker,
-									is_active: brokerData.is_active,
-									created_at: brokerData.created_at,
-									aseguradora: {
-										id_aseguradora: brokerData.id_aseguradora,
-										nombre_aseguradora: brokerData.nombre_aseguradora,
-										dominio_correo_aseguradora: brokerData.dominio_correo_aseguradora
-									},
-									broker_role: brokerData.broker_role
-								},
-								message: 'Datos del broker obtenidos correctamente'
-            });
-        } else if (codigo === 404){
-            res.status(404).json({
-							success: false,
-							message: 'Error Code 0x001 - [Raised] Broker no encontrado',
-							offender: 'brokerId'
-						});
-        } else {
-					res.status(500).json({
-						success: false,
-						message: 'Error Code 0x001 - [Raied] API Error al obtener datos del broker',
-						offender: 'API Error'
-					});
-				}
-    } catch (error) {
-        res.status(500).json({
-					success: false,
-					message: 'Error Code 0x001 - [Raised] Error interno del servidor',
-					offender: error
-				});
+  if (Number.parseInt(brokerId) < 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Error Code 0x001 - [Raised] El brokerId no puede ser negativo',
+      offender: 'brokerId'
+    });
+  }
+
+  try {
+    const connection = await getConnection();
+
+    const [dataBroker]: any = await connection.execute(
+      'CALL MiSeguroDigital.getBrokerDataPerBrokerID(?, @ResultCode)',
+      [brokerId]
+    );
+
+    const [resultCode]: any = await connection.execute(
+      'SELECT @ResultCode AS codigo'
+    );
+
+    await connection.end();
+
+    const codigo = resultCode?.[0]?.codigo ?? 500;
+
+    let rows: any[] = [];
+
+    if (Array.isArray(dataBroker)) {
+      if (Array.isArray(dataBroker[0])) {
+        rows = dataBroker[0]; 
+      } else {
+        rows = dataBroker; 
+      }
     }
+
+    if (codigo === 200 && rows.length > 0) {
+      const brokerData = rows[0];
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          id_broker: brokerData.id_broker,
+          email: brokerData.email,
+          nombre_prim_broker: brokerData.nombre_prim_broker,
+          apellido_prim_broker: brokerData.apellido_prim_broker,
+          full_nombre_broker: brokerData.full_nombre_broker,
+          numero_telefono_broker: brokerData.numero_telefono_broker,
+          fecha_nacimiento_broker: brokerData.fecha_nacimiento_broker,
+          estado_broker: brokerData.estado_broker,
+          is_active: brokerData.is_active,
+          created_at: brokerData.created_at,
+          aseguradora: {
+            id_aseguradora: brokerData.id_aseguradora,
+            nombre_aseguradora: brokerData.nombre_aseguradora,
+            dominio_correo_aseguradora: brokerData.dominio_correo_aseguradora
+          },
+          broker_role: brokerData.broker_role
+        },
+        message: 'Datos del broker obtenidos correctamente'
+      });
+    }
+
+    if (codigo === 404) {
+      return res.status(404).json({
+        success: false,
+        message: 'Error Code 0x001 - [Raised] Broker no encontrado',
+        offender: 'brokerId'
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Error Code 0x001 - [Raised] Error al obtener datos del broker',
+      offender: 'API Error'
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error Code 0x001 - [Raised] Error interno del servidor',
+      offender: error
+    });
+  }
 });
+
 
 
 /**
