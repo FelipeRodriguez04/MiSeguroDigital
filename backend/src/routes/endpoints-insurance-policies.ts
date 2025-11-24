@@ -611,123 +611,103 @@ router.get('/analyst/dashboard', async (req: Request, res: Response) => {
  * agrupacion por aseguradora y metricas consolidadas para administradores broker.
  */
 router.get('/admin/polizas-dashboard', async (req: Request, res: Response) => {
-	//? 1. Como no hay parametros de entrada, procedemos directamente con la obtencion de datos
-	try {
-		const connection = await getConnection();
+  try {
+    const connection = await getConnection();
 
-		//? 2. Ejecutamos las consultas para obtener informacion basica de polizas y agrupacion por aseguradoras
-		const [basicRows] = await connection.execute('SELECT * FROM MiSeguroDigital.viewInformacionPolizaBasica');
-		const [byCompanyRows] = await connection.execute('SELECT * FROM MiSeguroDigital.viewPolizaInfoPorAseguradora');
+    // 1) Vista REAL existente
+    const [basicRows] = await connection.execute(
+      'SELECT * FROM MiSeguroDigital.viewInformacionPolizaBasica'
+    );
 
-		await connection.end();
+    // 2) Vista REAL que sustituye a viewPolizaInfoPorAseguradora
+    const [byCompanyRows] = await connection.execute(
+      'SELECT * FROM MiSeguroDigital.viewEstadisticasDeSolicitudesReporteParaBrokers'
+    );
 
-		//? 3. Validamos que las consultas hayan retornado datos validos
-		if (!Array.isArray(basicRows) || !Array.isArray(byCompanyRows)) {
-			return res.status(500).json({
-				success: false,
-				message: 'Error Code 0x001 - [Raised] Error en la estructura de datos retornada por la base de datos',
-				offender: 'database_structure'
-			});
-		}
+    await connection.end();
 
-		//? 4. Transformamos la informacion basica de polizas en formato JSON estructurado
-		const basicPolicies = basicRows.map((row: any) => {
-			//? 4.1 Validamos que cada fila tenga los campos requeridos
-			if (!row || typeof row !== 'object') {
-				return null;
-			}
+    if (!Array.isArray(basicRows) || !Array.isArray(byCompanyRows)) {
+      return res.status(500).json({
+        success: false,
+        message: 'Error en estructura de datos DB',
+        offender: 'database_structure',
+      });
+    }
 
-			return {
-				id_poliza: row.id_poliza,
-				nombre_poliza: row.nombre_de_la_poliza,
-				descripcion: row.descripcion_de_la_poliza,
-				tipo_poliza: row.tipo_de_poliza,
-				pago_mensual: row.pago_mensual,
-				monto_cobertura_total: row.monto_cobertura_total,
-				duracion_contrato: row.duracion_de_contrato,
-				porcentaje_aprobacion: row.porcentaje_de_aprobacion,
-				importe_cancelacion: row.importe_por_cancelacion,
-				estado_poliza: row.estado_de_poliza,
-				aseguradora: {
-					id_aseguradora: row.id_aseguradora,
-					nombre_aseguradora: row.nombre_aseguradora,
-					dominio_correo: row.dominio_correo_aseguradora || ''
-				},
-				estadisticas_aplicaciones: {
-					total_aplicaciones: row.total_aplicaciones,
-					aplicaciones_pendientes: row.aplicaciones_pendientes,
-					aplicaciones_aprobadas: row.aplicaciones_aprobadas
-				}
-			};
-		}).filter(policy => policy !== null); // Filtramos registros nulos
+    // ---------- Transformación de información básica ----------
+    const basicPolicies = basicRows.map((row: any) => ({
+      id_poliza: row.id_poliza,
+      nombre_poliza: row.nombre_de_la_poliza,
+      descripcion: row.descripcion_de_la_poliza,
+      tipo_poliza: row.tipo_de_poliza,
+      pago_mensual: row.pago_mensual,
+      monto_cobertura_total: row.monto_cobertura_total,
+      duracion_contrato: row.duracion_de_contrato,
+      porcentaje_aprobacion: row.porcentaje_de_aprobacion,
+      importe_cancelacion: row.importe_por_cancelacion,
+      estado_poliza: row.estado_de_poliza,
+      aseguradora: {
+        id_aseguradora: row.id_aseguradora,
+        nombre_aseguradora: row.nombre_aseguradora,
+        dominio_correo: row.dominio_correo_aseguradora || '',
+      },
+      estadisticas_aplicaciones: {
+        total_aplicaciones: Number(row.total_aplicaciones),
+        aplicaciones_pendientes: Number(row.aplicaciones_pendientes),
+        aplicaciones_aprobadas: Number(row.aplicaciones_aprobadas),
+      },
+    }));
 
-		//? 5. Transformamos la informacion agrupada por aseguradoras en formato JSON estructurado
-		const policiesByCompany = byCompanyRows.map((row: any) => {
-			//? 5.1 Validamos que cada fila tenga los campos requeridos
-			if (!row || typeof row !== 'object') {
-				return null;
-			}
+    const policiesByCompany = byCompanyRows.map((row: any) => ({
+      aseguradora: {
+        id_aseguradora: row.id_aseguradora,
+        nombre_aseguradora: row.nombre_aseguradora,
+      },
+      poliza: {
+        id_poliza: row.id_poliza,
+        nombre_poliza: row.nombre_de_la_poliza,
+        estado_poliza: row.estado_de_poliza,
+      },
+      metricas: {
+        total_aplicaciones: row.total_aplicaciones,
+      },
+    }));
 
-			return {
-				aseguradora: {
-					id_aseguradora: row.id_aseguradora,
-					nombre_aseguradora: row.nombre_aseguradora
-				},
-				poliza: {
-					id_poliza: row.id_poliza,
-					nombre_poliza: row.nombre_de_la_poliza,
-					tipo_poliza: row.tipo_de_poliza,
-					pago_mensual: row.pago_mensual,
-					monto_cobertura_total: row.monto_cobertura_total,
-					estado_poliza: row.estado_de_poliza,
-					porcentaje_aprobacion: row.porcentaje_de_aprobacion
-				},
-				metricas: {
-					total_aplicaciones: row.total_aplicaciones,
-					registros_activos: row.registros_activos,
-					popularidad_poliza: row.popularidad_poliza
-				}
-			};
-		}).filter(policy => policy !== null); // Filtramos registros nulos
+    // ---------- Resumen general ----------
+    const resumenGeneral = {
+      total_polizas: basicPolicies.length,
+      polizas_activas: basicPolicies.filter((p) => p.estado_poliza === 'activa').length,
+      polizas_pausadas: basicPolicies.filter((p) => p.estado_poliza === 'pausada').length,
+      polizas_despublicadas: basicPolicies.filter((p) => p.estado_poliza === 'despublicada').length,
+      total_aplicaciones_pendientes: basicPolicies.reduce(
+        (sum, p) => sum + (p.estadisticas_aplicaciones.aplicaciones_pendientes || 0),
+        0
+      ),
+      total_aplicaciones_aprobadas: basicPolicies.reduce(
+        (sum, p) => sum + (p.estadisticas_aplicaciones.aplicaciones_aprobadas || 0),
+        0
+      ),
+    };
 
-		//? 6. Calculamos metricas del resumen general con validaciones de seguridad
-		const resumenGeneral = {
-			total_polizas: basicPolicies.length,
-			polizas_activas: basicPolicies.filter(p => p.estado_poliza === 'activa').length,
-			polizas_pausadas: basicPolicies.filter(p => p.estado_poliza === 'pausada').length,
-			polizas_despublicadas: basicPolicies.filter(p => p.estado_poliza === 'despublicada').length,
-			total_aplicaciones_pendientes: basicPolicies.reduce((sum, p) => {
-				return sum + (p.estadisticas_aplicaciones?.aplicaciones_pendientes || 0);
-			}, 0),
-			total_aplicaciones_aprobadas: basicPolicies.reduce((sum, p) => {
-				return sum + (p.estadisticas_aplicaciones?.aplicaciones_aprobadas || 0);
-			}, 0)
-		};
-
-		//? 7. Construimos el objeto de respuesta del dashboard
-		const dashboardData = {
-			resumen_general: resumenGeneral,
-			polizas_detalladas: basicPolicies,
-			polizas_por_aseguradora: policiesByCompany,
-			metricas_por_aseguradora: groupByInsuranceCompany(policiesByCompany)
-		};
-
-		//? 8. Retornamos respuesta exitosa con los datos del dashboard
-		res.status(200).json({
-			success: true,
-			message: 'Dashboard de administrador generado correctamente',
-			data: dashboardData,
-			offender: ''
-		});
-
-	} catch (error) {
-		res.status(500).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] Error interno del servidor al generar dashboard',
-			offender: error
-		});
-	}
+    // ---------- Estructura final ----------
+    res.status(200).json({
+      success: true,
+      message: 'Dashboard de administrador generado correctamente',
+      data: {
+        resumen_general: resumenGeneral,
+        polizas_detalladas: basicPolicies,
+        metricas_por_aseguradora: groupByInsuranceCompany(policiesByCompany),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error interno al generar dashboard',
+      offender: error,
+    });
+  }
 });
+
 
 /**
  * @description Funcion auxiliar para agrupar metricas por aseguradora. Esta funcion procesa

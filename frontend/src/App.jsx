@@ -10,7 +10,7 @@ import BrokerApplications from "./pages/analista_applications";
 import BrokerReports from "./pages/broker_reports";
 import BrokerPolicies from "./pages/broker_policies";
 import BrokerNewPolicy from "./pages/new_policy";
-import BrokerVersioning from "./pages/versionamiento";
+import AdminDashboard from "./pages/admin_dashboard";
 import AdminApplications from "./pages/admin_applications";
 import BrokerReviews from "./pages/analista_reviews";
 import GlobalUserHome from "./pages/global_user_home";
@@ -73,7 +73,7 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <RequireRole role="admin">
+            <RequireRole role="broker_admin">
               <HomeAdmin />
             </RequireRole>
           }
@@ -89,7 +89,7 @@ export default function App() {
         <Route
           path="/broker/policies"
           element={
-            <RequireRole role="admin">
+            <RequireRole role="broker_admin">
               <BrokerPolicies />
             </RequireRole>
           }
@@ -98,7 +98,7 @@ export default function App() {
         <Route
           path="/broker/policies/new"
           element={
-            <RequireRole role="admin">
+            <RequireRole role="broker_admin">
               <BrokerNewPolicy />
             </RequireRole>
           }
@@ -126,10 +126,10 @@ export default function App() {
         />
 
         <Route
-          path="/broker/versions"
+          path="/broker/dashboard"
           element={
-            <RequireRole role="admin">
-              <BrokerVersioning />
+            <RequireRole role="broker_admin">
+              <AdminDashboard />
             </RequireRole>
           }
         />
@@ -143,8 +143,8 @@ export default function App() {
           }
         />
         <Route path="/catalog" element={<RequireRole role="global_user"><Catalog /></RequireRole>} />
-        <Route path="/admin/applications" element={<RequireRole role="admin"><AdminApplications /></RequireRole>} />  
-
+        <Route path="/broker/applications" element={<RequireRole role="broker_admin"><BrokerApplications /></RequireRole>} />  
+          
         <Route path="/me/applications" element={<RequireRole role="global_user"><MyApplications /></RequireRole>} />
         <Route path="/broker/reviews" element={<RequireRole role="analista"><BrokerReviews /></RequireRole>} />
 
