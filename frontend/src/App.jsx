@@ -45,6 +45,8 @@ import RegistrarBien from "./pages/registrar_bien";
 import EditarBienUsuario from "./pages/editar_bien";
 import AnalystDashboard from "./pages/analista_dashboard";
 import BrokerProfile from "./pages/broker_profile";
+import PendientesAnalyst from "./pages/solicitudes_pendientes";
+import DetalleSolicitud from "./pages/detalle_solicitud";
 
 export default function App() {
   return (
@@ -105,9 +107,7 @@ export default function App() {
         <Route
           path="/analista"
           element={
-            <RequireRole role="broker_analyst">
               <HomeAnalista />
-            </RequireRole>
           }
         />
 
@@ -171,6 +171,8 @@ export default function App() {
         <Route path="/me/bienes/editar/:idBien" element={<EditarBienUsuario />} />
         <Route path="/broker/dashboard" element={<AnalystDashboard />} />
         <Route path="/broker/profile" element={<BrokerProfile />} />
+        <Route path="/broker/solicitudes-pendientes" element={<PendientesAnalyst />} />
+<Route path="/analista/solicitud/:id/:id_user" element={<DetalleSolicitud />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

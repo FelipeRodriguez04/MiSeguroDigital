@@ -193,6 +193,9 @@ router.get('/usuarios/aplicaciones-aceptadas-usuario/:userId', async (req: Reque
  * @note Sin parametros.
  * @returns Retorna: lista de aplicaciones pendientes de aprobacion.
  */
+
+//LISTO!!
+
 router.get('/brokers/aplicaciones-pendientes', async (req: Request, res: Response) => {
   try {
         const connection = await getConnection();
@@ -214,7 +217,7 @@ router.get('/brokers/aplicaciones-pendientes', async (req: Request, res: Respons
         })) : [];
 
         if (arrayOfApplications.length === 0) {
-            res.status(404).json({ message: 'No se encontraron aplicaciones pendientes de aprobacion' });
+            res.status(404).json({ message: 'No se encontraron aplicaciones pendientes de aprobación' });
         } else {
             res.status(200).json(arrayOfApplications);
         }
@@ -234,48 +237,74 @@ router.get('/brokers/aplicaciones-pendientes', async (req: Request, res: Respons
  * @param {string} [body.razonRechazo] - Razon de rechazo (string opcional).
  * @returns Retorna: confirmacion de procesamiento o error.
  */
+
+//LISTO!!
+
 router.put('/brokers/procesar-aplicacion/:applicationId', async (req: Request, res: Response) => {
   const { applicationId } = req.params;
   const { brokerAnalistaId, decision, razonRechazo } = req.body;
-    //? 1. Validamos que todos los parametros existan y que el enum se cumpla. La razon puede estar vacia
-    if (!brokerAnalistaId || !decision && !(decision in ['aprobada', 'rechazada'])) {
-        return res.status(400)
-					.json(
-						{ success: false,
-							message: 'Parametros invalidos' });
-    }
-		if (decision === 'rechazada' && !razonRechazo) {
-			return res.status(400)
-				.json(
-					{ success: false,
-						message: 'Razon de rechazo es requerida para aplicacion rechazada' });
-		}
-		//? 2. Continuamos con el proceso normal
-  try {
 
+  //? 1. Validamos que todos los parametros existan y que el enum se cumpla. La razon puede estar vacia
+  if (!brokerAnalistaId || !decision || !['aprobada', 'rechazada'].includes(decision)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Parametros invalidos'
+    });
+  }
+
+  if (decision === 'rechazada' && !razonRechazo) {
+    return res.status(400).json({
+      success: false,
+      message: 'Razon de rechazo es requerida para aplicacion rechazada'
+    });
+  }
+
+  //? 2. Continuamos con el proceso normal
+  try {
     const connection = await getConnection();
+
     await connection.execute(
       'CALL MiSeguroDigital.procesarAplicacionEnPolizaPorUsuario(?, ?, ?, ?, @codigoResultado)',
       [applicationId, brokerAnalistaId, decision, razonRechazo]
     );
 
-
-    const [result] = await connection.execute('SELECT @codigoResultado as codigo ');
+    const [result] = await connection.execute('SELECT @codigoResultado as codigo');
     await connection.end();
-    
-    const  codigo = Array.isArray(result) ? (result[0] as any) : 500
+
+    // result suele ser RowDataPacket[] → tomamos el valor numérico
+    const codigoRow = Array.isArray(result) ? (result[0] as any) : { codigo: 500 };
+    const codigo = Number(codigoRow.codigo);
+
+    console.log('Codigo SP procesarAplicacionEnPolizaPorUsuario:', codigo);
 
     if (codigo === 200) {
-      res.status(200).json({ success: true, message: 'Aplicacion procesada correctamente' });
-    } else if (codigo === 409){
-			res.status(409)
-				.json({ success: false,
-					message: 'Error al procesar aplicacion: La aplicacion ya fue procesada' });
-		}
+      return res.status(200).json({
+        success: true,
+        message: 'Aplicacion procesada correctamente'
+      });
+    }
+
+    if (codigo === 409) {
+      return res.status(409).json({
+        success: false,
+        message: 'Error al procesar aplicacion: La aplicacion ya fue procesada'
+      });
+    }
+
+    // Caso por defecto: el SP retornó algo inesperado
+    return res.status(500).json({
+      success: false,
+      message: 'Error desconocido al procesar aplicacion'
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    console.error('Error interno en procesar-aplicacion:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
   }
 });
+
 
 /**
  * @description Obtener detalles completos de una aplicacion especifica con el usuario en mente,
@@ -336,8 +365,9 @@ router.get('/usuarios/obtener-detalles-aplicacion/:applicationId/:userId', async
   }
 });
 
+//LISTO!!
 
-router.get('/brokers/obtener-detalles-aplicacion/:applicationId', async (req: Request, res: Response) => {
+router.get('/brokers/obtener-detalles-aplicacion/:applicationId/:userId', async (req: Request, res: Response) => {
 	const { applicationId, userId } = req.params;
 
 	//? 1. Validamos que el id de la aplicacion no este vacio o sea menor que cero
@@ -399,45 +429,75 @@ router.get('/brokers/obtener-detalles-aplicacion/:applicationId', async (req: Re
  * @param {number} body.brokerId - ID del broker que formaliza el registro (numero).
  * @returns Retorna: confirmacion de registro formalizado o error.
  */
-router.post('broker/registrar-aprobacion-aplicacion/:applicationId', async (req: Request, res: Response) => {
-  const { applicationId } = req.params;
-	const { brokerId } = req.body;
 
-	//? 1. Revisamos que el broker id y la application id no sean nulos ni que sean menores que cero
-	if (!brokerId || !applicationId || brokerId <= 0 || Number.parseInt(applicationId) <= 0) {
-		res.status(400).json(
-			{
-				message: 'Los datos de entrada son incorrectos',
-				reason: (brokerId <= 0) ? 'El ID del broker no puede ser menor o igual a cero':
-					'El ID de la aplicacion no puede ser menor o igual a cero'
-			});
-	}
+//LISTO!!
 
-	//? 2. Continuamos con el proceso normal
-  try {
-    const connection = await getConnection();
-		const [result] =
-			await connection.execute('call MiSeguroDigital.registrarUsuarioEnPolizaPorAplicacion(?, ?, @codigoResultado) ',
-				[
-				applicationId, brokerId
-			])
-    await connection.end();
+router.post(
+  '/brokers/registrar-aprobacion-aplicacion/:applicationId',
+  async (req: Request, res: Response) => {
+    const { applicationId } = req.params;
+    const { brokerId } = req.body;
 
-		//? 1. Procesamos salida en forma de codigo de error
-		const codigo = Array.isArray(result) && result[0] ? (result[0] as any).codigo : 500;
+    if (
+      !brokerId ||
+      !applicationId ||
+      Number(brokerId) <= 0 ||
+      Number.parseInt(applicationId) <= 0
+    ) {
+      return res.status(400).json({
+        message: 'Los datos de entrada son incorrectos',
+        reason:
+          Number(brokerId) <= 0
+            ? 'El ID del broker no puede ser menor o igual a cero'
+            : 'El ID de la aplicacion no puede ser menor o igual a cero',
+      });
+    }
 
-		if (codigo === 404){
-			res.status(404).json({ message: 'No se encontro la aplicacion definida' });
-		} else if (codigo === 409) {
-			res.status(409).json({ message: 'La aplicacion ya fue formalizada' });
-		} else if (codigo ==  500) {
-			res.status(500).json({ message: 'Error interno del servidor' });
-		}else {
-			res.status(200).json({ success: true, message: 'Registro formalizado correctamente' });
-		}
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    try {
+      const connection = await getConnection();
+
+      await connection.execute(
+        'CALL MiSeguroDigital.registrarUsuarioEnPolizaPorAplicacion(?, ?, @codigoResultado)',
+        [applicationId, brokerId]
+      );
+
+      const [rows] = await connection.execute(
+        'SELECT @codigoResultado AS codigo'
+      );
+
+      await connection.end();
+
+      const codigo =
+        Array.isArray(rows) && rows[0] ? (rows[0] as any).codigo : 500;
+
+      console.log('codigo Resultado registrarUsuarioEnPolizaPorAplicacion:', codigo);
+
+      if (codigo === 404) {
+        return res
+          .status(404)
+          .json({ message: 'No se encontro la aplicacion definida' });
+      } else if (codigo === 409) {
+        return res
+          .status(409)
+          .json({ message: 'La aplicacion ya fue formalizada' });
+      } else if (codigo === 500) {
+        return res
+          .status(500)
+          .json({ message: 'Error interno del servidor' });
+      } else {
+        return res.status(200).json({
+          success: true,
+          message: 'Registro formalizado correctamente',
+        });
+      }
+    } catch (error) {
+      console.error('Error en registrar-aprobacion-aplicacion:', error);
+      return res
+        .status(500)
+        .json({ success: false, message: 'Error interno del servidor' });
+    }
   }
-});
+);
+
 
 export default router;
