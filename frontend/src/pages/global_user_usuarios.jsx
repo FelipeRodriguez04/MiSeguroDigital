@@ -31,6 +31,43 @@ export default function GlobalUserUsuarios() {
     fetchUsers();
   }, []);
 
+  const handleDelete = async (userId) => {
+    try {
+      const adminId = localStorage.getItem("userId");
+
+      if (!adminId) {
+        alert("No se encontró el ID del administrador (adminId).");
+        return;
+      }
+
+      const resp = await fetch(
+        `http://localhost:33761/api/usuarios/admin/eliminar-usuario/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ adminId }),
+        }
+      );
+
+      const data = await resp.json();
+
+      if (!resp.ok || !data.success) {
+        alert(data.message || "Error al eliminar el usuario.");
+        return;
+      }
+      setUsuarios((prev) =>
+        prev.filter((u) => u.id_usuario !== userId)
+      );
+
+      alert("Usuario eliminado correctamente.");
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+      alert("Error interno al intentar eliminar el usuario.");
+    }
+  };
+
   return (
     <div
       className="min-h-screen w-screen flex flex-col bg-cover bg-center bg-no-repeat"
@@ -56,7 +93,6 @@ export default function GlobalUserUsuarios() {
 
         <main className="flex-1 flex flex-col justify-start items-center px-6 mt-6">
           <div className="max-w-6xl w-full bg-white/85 rounded-2xl shadow-xl p-10 border border-green-100">
-
             <div className="overflow-x-auto rounded-xl shadow border border-gray-200">
               <table className="min-w-max w-full text-sm">
                 <thead className="bg-green-50 text-green-900">
@@ -83,32 +119,41 @@ export default function GlobalUserUsuarios() {
                         {u.id_usuario}
                       </td>
                       <td className="border px-3 py-2">{u.nombre_primario}</td>
-                      <td className="border px-3 py-2">{u.apellido_primario}</td>
-                      <td className="border px-3 py-2">{u.nombre_completo}</td>
-                      <td className="border px-3 py-2">{u.correo_registro}</td>
+                      <td className="border px-3 py-2">
+                        {u.apellido_primario}
+                      </td>
+                      <td className="border px-3 py-2">
+                        {u.nombre_completo}
+                      </td>
+                      <td className="border px-3 py-2">
+                        {u.correo_registro}
+                      </td>
                       <td className="border px-3 py-2">{u.telefono}</td>
                       <td className="border px-3 py-2">
                         {Estado[u.estado_registro]}
                       </td>
-                      <td className="border px-3 py-2">{u.fecha_registro}</td>
+                      <td className="border px-3 py-2">
+                        {u.fecha_registro}
+                      </td>
 
                       <td className="border px-3 py-2 text-center space-x-3">
                         <button
                           className="px-3 py-1 !bg-yellow-500 !text-white text-xs rounded-lg hover:!bg-yellow-700 transition"
-                            onClick={() =>
-                              navigate(`/global/edit-user/${u.id_usuario}`, {
-                                state: { usuario: u },   
-                              })
-                            }
+                          onClick={() =>
+                            navigate(
+                              `/global/edit-user/${u.id_usuario}`,
+                              {
+                                state: { usuario: u },
+                              }
+                            )
+                          }
                         >
                           Editar
                         </button>
 
                         <button
                           className="px-3 py-1 !bg-red-600 !text-white text-xs rounded-lg hover:!bg-red-700 transition"
-                          onClick={() =>
-                            alert(`Eliminar usuario ${u.id_usuario}`)
-                          }
+                          onClick={() => handleDelete(u.id_usuario)}
                         >
                           Eliminar
                         </button>
@@ -129,7 +174,6 @@ export default function GlobalUserUsuarios() {
                 </tbody>
               </table>
             </div>
-
           </div>
         </main>
 

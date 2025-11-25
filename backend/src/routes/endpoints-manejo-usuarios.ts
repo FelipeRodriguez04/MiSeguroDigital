@@ -204,20 +204,23 @@ router.put('/admin/actualizar-perfil-usuario/:userId', async (req: Request, res:
  * @param {number} body.adminId - ID del administrador que elimina el usuario (numero).
  * @returns Retorna: confirmacion de eliminacion o error.
  */
-router.delete('admin/eliminar-usuario/:userId', async (req: Request, res: Response) => {
+
+//LISTO!!
+
+router.delete('/admin/eliminar-usuario/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { adminId } = req.body;
 
 	//? 1.1 Revisamos que todos los parametros esten presentes (no nulos) y mayores a cero
 	if (!userId || !adminId) {
-		res.status(400).json({
+		return res.status(400).json({
 			success: false,
 			message: 'Error Code 0x001 - [Raised] Datos de entrada no validos',
 			offender: (!userId) ? 'userId' : (!adminId) ? 'adminId' : ''
 		});
 	}
 	if (Number(userId) <= 0 || Number(adminId) <= 0) {
-		res.status(400).json({
+		return res.status(400).json({
 			success: false,
 			message: 'Error Code 0x001 - [Raised] ID de usuario o administrador no valido',
 			offender: (Number(userId) <= 0) ? 'userId' : 'adminId'
@@ -230,7 +233,7 @@ router.delete('admin/eliminar-usuario/:userId', async (req: Request, res: Respon
     await connection.execute(
             'CALL MiSeguroDigital.eliminarUnUsuarioAdminOnlyManual(?,?, @codigoResultado)',
             [userId, adminId]);
-    const [resultCode] = await connection.execute('SELECT @ResultCode as codigo');
+    const [resultCode] = await connection.execute('SELECT @codigoResultado as codigo');
     await connection.end();
 
     const codigoSalida = Array.isArray(resultCode) && resultCode[0] ?
@@ -238,32 +241,32 @@ router.delete('admin/eliminar-usuario/:userId', async (req: Request, res: Respon
 
 		//? 2.1 Retornamos informacion en base al id y el resultado en codigo
     if (codigoSalida === 200) {
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: 'Usuario eliminado correctamente',
         offender: ''
       });
     } else if (codigoSalida === 404) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] Usuario no encontrado',
         offender: 'userId'
       });
     } else if (codigoSalida === 403){
-			res.status(403).json({
+		return	res.status(403).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] Acceso denegado, no se puede eliminar al unico admin registrado',
         offender: 'adminId'
       });
 		}else {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: 'Error Code 0x001 - [Raised] API Error al realizar la eliminacion de datos',
         offender: 'API Error'
       });
     }
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error Code 0x001 - [Raised] Error interno del servidor',
       offender: error
