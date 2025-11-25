@@ -44,7 +44,7 @@ export default function GlobalUserHome() {
           <div className="max-w-2xl w-full bg-white/85 rounded-2xl shadow-xl p-10 text-center">
 
             <h1 className="text-5xl font-extrabold text-green-700 mb-4">
-              Bienvenido,<br /> Usuario Global
+              Bienvenido,<br /> {localStorage.getItem("userName")}
             </h1>
 
             <p className="text-gray-700 text-lg mb-8">

@@ -610,6 +610,9 @@ router.get('/analyst/dashboard', async (req: Request, res: Response) => {
  * @returns Retorna: objeto JSON con dashboard completo incluyendo resumen general, polizas detalladas,
  * agrupacion por aseguradora y metricas consolidadas para administradores broker.
  */
+
+//LISTO!!
+
 router.get('/admin/polizas-dashboard', async (req: Request, res: Response) => {
   try {
     const connection = await getConnection();

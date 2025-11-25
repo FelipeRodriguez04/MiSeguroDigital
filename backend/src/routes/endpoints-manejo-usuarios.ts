@@ -437,6 +437,9 @@ router.get('/admin/usuarios-por-rol', async (req: Request, res: Response) => {
  * para mostrar solo usuarios con rol 'global_user' y retorna el listado completo.
  * @returns Retorna: lista de todos los usuarios registrados con rol global_user.
  */
+
+
+
 router.get('/admin/usuarios-registrados', async (req: Request, res: Response) => {
 	try {
 		const connection = await getConnection();

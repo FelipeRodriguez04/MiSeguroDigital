@@ -148,15 +148,15 @@ export default function App() {
         <Route path="/me/applications" element={<RequireRole role="global_user"><MyApplications /></RequireRole>} />
         <Route path="/broker/reviews" element={<RequireRole role="analista"><BrokerReviews /></RequireRole>} />
 
-        <Route path="/global_user" element={<RequireRole role="user_admin"><GlobalUserHome /></RequireRole>} />
+        <Route path="/global_user" element={<GlobalUserHome />} />
         <Route path="/global_broker" element={<RequireRole role="global_broker"><GlobalBrokerHome /></RequireRole>} />
 
-        <Route path="/global_user/usuarios" element={<RequireRole role="user_admin"><GlobalUserUsuarios /></RequireRole>} />
+        <Route path="/global_user/usuarios" element={<GlobalUserUsuarios />} />
 
-        <Route path="/global_user/brokers" element={<RequireRole role="user_admin"><GlobalUserBrokers /></RequireRole>} />
-        <Route path="/global_user/polizas" element={<RequireRole role="user_admin"><GlobalUserPolizas /></RequireRole>} />
-        <Route path="/global_broker/equipo" element={<RequireRole role="global_broker"><GlobalBrokerEquipo /></RequireRole>} />
-        <Route path="/global_broker/polizas" element={<RequireRole role="global_broker"><GlobalBrokerPolizas /></RequireRole>} />
+        <Route path="/global_user/brokers" element={<GlobalUserBrokers />} />
+        <Route path="/global_user/polizas" element={<GlobalUserPolizas />} />
+        <Route path="/global_broker/equipo" element={<GlobalBrokerEquipo />} />
+        <Route path="/global_broker/polizas" element={<GlobalBrokerPolizas />} />
         <Route path="/global_broker/solicitudes" element={<RequireRole role="global_broker"><GlobalBrokerSolicitudesEquipo /></RequireRole>} />
         <Route path="/me/pagar_polizas" element={<PagarPolizas />} />
         <Route path="/me/pagar_polizas/:id_solicitud" element={<RequireRole role="global_user"><PagarPolizaDetalle /></RequireRole>} />
