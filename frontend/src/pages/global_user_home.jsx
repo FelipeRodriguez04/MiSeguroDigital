@@ -48,7 +48,7 @@ export default function GlobalUserHome() {
             </h1>
 
             <p className="text-gray-700 text-lg mb-8">
-              Accede a todo el sistema: usuarios, brokers y pólizas en un solo lugar.
+              Accede a todo el sistema de los usuarios.
             </p>
 
             <div className="flex justify-center mb-8">
@@ -69,26 +69,6 @@ export default function GlobalUserHome() {
                 duration-200 shadow-sm hover:shadow-md"
               >
                 Ver Usuarios
-              </Link>
-
-              <Link
-                to="/global_user/brokers"
-                className="inline-block no-underline border-2 border-green-600 !text-green-700 
-                visited:!text-green-700 focus:!text-green-700 hover:!text-white hover:!bg-green-600 
-                active:!text-green-800 px-6 py-2 rounded-lg text-base font-semibold transition-all 
-                duration-200 shadow-sm hover:shadow-md"
-              >
-                Ver Brokers
-              </Link>
-
-              <Link
-                to="/global_user/polizas"
-                className="inline-block no-underline border-2 border-green-600 !text-green-700 
-                visited:!text-green-700 focus:!text-green-700 hover:!text-white hover:!bg-green-600 
-                active:!text-green-800 px-6 py-2 rounded-lg text-base font-semibold transition-all 
-                duration-200 shadow-sm hover:shadow-md"
-              >
-                Ver Pólizas
               </Link>
 
             </div>

@@ -196,6 +196,9 @@ router.post('/usuario/registrar-pago', async (req: Request, res: Response) => {
  * @param {object} params - Parametros de la URL de la peticion.
  * @param {number} params.pagoId - ID del pago a reembolsar (numero).
  */
+
+
+//LISTO!!
 router.put('/admin/reembolsar-pago/:pagoId', async (req: Request, res: Response) => {
 	const { pagoId } = req.params;
 
@@ -272,6 +275,8 @@ router.put('/admin/reembolsar-pago/:pagoId', async (req: Request, res: Response)
  * @param {number} params.pagoId - ID del pago a eliminar (numero).
  * @returns Codigo de salida del proceso interno.
  */
+
+//LISTO!!
 router.delete('/admin/eliminar-pago/:pagoId', async (req: Request, res: Response) => {
 	const { pagoId } = req.params;
 

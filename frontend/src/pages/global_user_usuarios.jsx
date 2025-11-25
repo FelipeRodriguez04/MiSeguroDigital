@@ -154,6 +154,18 @@ export default function GlobalUserUsuarios() {
                       </td>
 
                       <td className="border px-3 py-2 text-center space-x-3">
+
+                      <button
+                          className="px-3 py-1 !bg-blue-600 !text-white text-xs rounded-lg hover:!bg-blue-700 transition"
+                          onClick={() =>
+                            navigate(`/global/aplicaciones_aceptadas/${u.id_usuario}`, {
+                              state: { usuario: u },
+                            })
+                          }
+                        >
+                          Ver Aplicaciones Aceptadas
+                        </button>
+
                         <button
                           className="px-3 py-1 !bg-yellow-500 !text-white text-xs rounded-lg hover:!bg-yellow-700 transition"
                           onClick={() =>

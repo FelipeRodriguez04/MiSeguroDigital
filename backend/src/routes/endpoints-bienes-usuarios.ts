@@ -569,6 +569,9 @@ router.delete('/usuario/eliminar-bien', async (req: Request, res: Response) => {
  * @param {number} body.idRegistroEnPoliza - ID del registro en poliza (numero).
  * @returns Retorna: confirmacion de la eliminacion del seguro.
  */
+
+//LISTO!!
+
 router.delete('/admin/eliminar-seguro-bien', async (req: Request, res: Response) => {
   const { idBien, idRegistroEnPoliza } = req.body;
 

@@ -71,7 +71,7 @@ export default function HomeAdmin() {
               </Link>
 
               <Link
-                to="/broker/dashboard"
+                to="/admin/dashboard"
                 className="inline-block no-underline border-2 border-green-600 !text-green-700 visited:!text-green-700 focus:!text-green-700 hover:!text-white hover:!bg-green-600 active:!text-green-800 px-6 py-2 rounded-lg text-base font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Ver Dashboard
