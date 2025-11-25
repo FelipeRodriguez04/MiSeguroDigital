@@ -1,85 +1,126 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function BrokerNewPolicy() {
-  const [name, setName] = useState("");
-  const [coverage, setCoverage] = useState("");
-  const [price, setPrice] = useState("");
+  // Campos obligatorios del backend
+  const [nombrePoliza, setNombrePoliza] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [tipoPoliza, setTipoPoliza] = useState("");
+  const [pagoMensual, setPagoMensual] = useState("");
+  const [montoCobertura, setMontoCobertura] = useState("");
+  const [duracionContrato, setDuracionContrato] = useState("");
+  const [porcentajeAprobacion, setPorcentajeAprobacion] = useState("");
+  const [importeCancelacion, setImporteCancelacion] = useState("");
+  const [estadoInicial, setEstadoInicial] = useState("");
 
-  // Contenedor de requerimientos creados (simulación)
-  const [requirements, setRequirements] = useState([]);
+  // IDs del login
+  const [brokerId, setBrokerId] = useState(null);
+  const [aseguradoraId, setAseguradoraId] = useState(null);
 
-  // Estado para mostrar/ocultar el formulario de requerimiento
-  const [showRequirementForm, setShowRequirementForm] = useState(false);
+  useEffect(() => {
+    setBrokerId(localStorage.getItem("userId"));
+    setAseguradoraId(localStorage.getItem("id_aseguradora"));
+  }, []);
 
-  // Campos del requerimiento actual
-  const [requirementType, setRequirementType] = useState("");
-  const [requirementDescription, setRequirementDescription] = useState("");
-  const [isMandatory, setIsMandatory] = useState(false);
-
-  const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
-  const [reqErrors, setReqErrors] = useState({});
+  const [message, setMessage] = useState("");
 
   const validateMain = () => {
     const e = {};
 
-    if (!name.trim()) e.name = "Ingresa el nombre de la póliza.";
-    if (!coverage.trim()) e.coverage = "Describe la cobertura.";
+    if (!nombrePoliza.trim()) e.nombrePoliza = "Ingresa el nombre de la póliza.";
+    if (!descripcion.trim()) e.descripcion = "Ingresa la descripción.";
+    if (!tipoPoliza) e.tipoPoliza = "Selecciona el tipo de póliza.";
 
-    if (price === "") e.price = "Ingresa el precio mensual.";
-    const n = parseFloat(price);
-    if (price !== "" && (Number.isNaN(n) || n < 0)) {
-      e.price = "Ingresa un precio válido (>= 0).";
-    }
+    if (pagoMensual === "") e.pagoMensual = "Ingresa el pago mensual.";
+    if (montoCobertura === "") e.montoCobertura = "Ingresa el monto de cobertura.";
+    if (duracionContrato === "") e.duracionContrato = "Ingresa la duración del contrato.";
+    if (porcentajeAprobacion === "") e.porcentajeAprobacion = "Ingresa el porcentaje.";
+    if (importeCancelacion === "") e.importeCancelacion = "Ingresa el importe de cancelación.";
+    if (!estadoInicial) e.estadoInicial = "Selecciona el estado inicial.";
+
+    if (!aseguradoraId) e.aseguradora = "No se encontró aseguradoraId en sesión.";
+    if (!brokerId) e.brokerId = "No se encontró brokerId en sesión.";
 
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const validateReq = () => {
-    const e = {};
-
-    if (!requirementType) e.requirementType = "Selecciona un tipo de requerimiento.";
-    if (!requirementDescription.trim())
-      e.requirementDescription = "Ingresa la descripción del requerimiento.";
-
-    setReqErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleSaveRequirement = () => {
-    if (!validateReq()) return;
-
-    const newReq = {
-      type: requirementType,
-      description: requirementDescription,
-      mandatory: isMandatory,
-    };
-
-    setRequirements([...requirements, newReq]);
-
-    // Limpiar campos del requerimiento
-    setRequirementType("");
-    setRequirementDescription("");
-    setIsMandatory(false);
-
-    // Ocultar formulario
-    setShowRequirementForm(false);
-    setReqErrors({});
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-
     if (!validateMain()) return;
 
-    setMessage("✅ Póliza creada exitosamente (simulación).");
+    setMessage("Procesando...");
 
-    setName("");
-    setCoverage("");
-    setPrice("");
-    setRequirements([]); // reset
+    const brokerId = Number(localStorage.getItem("userId"));
+    const aseguradoraId = Number(localStorage.getItem("id_aseguradora"));
+
+    console.log("➡️ Enviando póliza con:");
+    console.log("brokerId:", brokerId);
+    console.log("aseguradoraId:", aseguradoraId);
+
+    const payload = {
+      aseguradoraId,
+      nombrePoliza,
+      descripcion,
+      tipoPoliza,
+      pagoMensual,
+      montoCobertura,
+      duracionContrato,
+      porcentajeAprobacion,
+      importeCancelacion,
+      estadoInicial,
+      brokerId,
+    };
+
+    console.log("➡️ Payload enviado:", payload);
+
+    try {
+      const res = await fetch("http://localhost:33761/api/polizas/admin/crear-poliza", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const rawText = await res.text();
+      console.log("📌 RAW RESPONSE BODY:", rawText);
+
+      let data = {};
+      try {
+        data = JSON.parse(rawText);
+      } catch (err) {
+        console.error("❌ ERROR PARSEANDO JSON:", err);
+      }
+
+      console.log("📌 Parsed JSON:", data);
+      console.log("📌 Status HTTP:", res.status);
+
+      if (!res.ok || !data.success) {
+        console.error("❌ ERROR DESDE API:", data);
+        setMessage(
+          `❌ Error: ${data.message || "Fallo desconocido"} (campo: ${
+            data.offender || "?"
+          })`
+        );
+        return;
+      }
+
+      setMessage("✅ Póliza creada exitosamente.");
+
+      // Reset form
+      setNombrePoliza("");
+      setDescripcion("");
+      setTipoPoliza("");
+      setPagoMensual("");
+      setMontoCobertura("");
+      setDuracionContrato("");
+      setPorcentajeAprobacion("");
+      setImporteCancelacion("");
+      setEstadoInicial("");
+
+    } catch (err) {
+      console.error("❌ ERROR DE CONEXIÓN:", err);
+      setMessage("❌ No se pudo conectar con la API.");
+    }
   };
 
   return (
@@ -96,180 +137,108 @@ export default function BrokerNewPolicy() {
         </header>
 
         <main className="flex-1 flex flex-col justify-center items-center px-4">
-          <div className="max-w-lg w-full bg-white/80 rounded-2xl shadow-lg p-8 backdrop-blur-sm mx-4">
+          <div className="max-w-lg w-full bg-white/80 rounded-2xl shadow-lg p-8">
             <h1 className="text-4xl font-extrabold text-green-700 mb-6 text-center">
               Crear Nueva Póliza
             </h1>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {/* CAMPOS DE LA POLIZA */}
+              <input
+                type="text"
+                placeholder="Nombre de la póliza"
+                value={nombrePoliza}
+                onChange={(e) => setNombrePoliza(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              />
+              {errors.nombrePoliza && <p className="text-red-600 text-sm">{errors.nombrePoliza}</p>}
 
-              {/* Nombre */}
-              <div>
-                <input
-                  type="text"
-                  placeholder="Nombre de la póliza"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={`w-full border-2 rounded-lg px-4 py-2 outline-none transition ${
-                    errors.name
-                      ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                      : "border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                  }`}
-                />
-                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
-              </div>
+              <textarea
+                placeholder="Descripción / Cobertura"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                className="w-full min-h-[90px] border-2 rounded-lg px-4 py-2 border-green-300"
+              />
+              {errors.descripcion && <p className="text-red-600 text-sm">{errors.descripcion}</p>}
 
-              {/* Cobertura */}
-              <div>
-                <textarea
-                  placeholder="Cobertura / Descripción"
-                  value={coverage}
-                  onChange={(e) => setCoverage(e.target.value)}
-                  className={`w-full min-h-[120px] border-2 rounded-lg px-4 py-2 outline-none transition ${
-                    errors.coverage
-                      ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                      : "border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                  }`}
-                />
-                {errors.coverage && (
-                  <p className="text-red-600 text-sm mt-1">{errors.coverage}</p>
-                )}
-              </div>
+              <select
+                value={tipoPoliza}
+                onChange={(e) => setTipoPoliza(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              >
+                <option value="">Tipo de póliza</option>
+                <option value="seguro_automotriz">Seguro Automotriz</option>
+                <option value="seguro_inmobiliario">Seguro Inmobiliario</option>
+                <option value="seguro_de_vida">Seguro de Vida</option>
+                <option value="seguro_de_salud">Seguro de Salud</option>
+              </select>
+              {errors.tipoPoliza && <p className="text-red-600 text-sm">{errors.tipoPoliza}</p>}
 
-              {/* Precio */}
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">
-                  Precio mensual (USD)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="Ej: 29.99"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className={`w-full border-2 rounded-lg px-4 py-2 outline-none transition ${
-                    errors.price
-                      ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                      : "border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                  }`}
-                />
-                {errors.price && (
-                  <p className="text-red-600 text-sm mt-1">{errors.price}</p>
-                )}
-              </div>
+              <input
+                type="number"
+                placeholder="Pago mensual"
+                value={pagoMensual}
+                onChange={(e) => setPagoMensual(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              />
+              {errors.pagoMensual && <p className="text-red-600 text-sm">{errors.pagoMensual}</p>}
 
-              {/* -------------------------------------------- */}
-              {/* BOTÓN PARA ABRIR EL FORM DE REQUERIMIENTO */}
-              {/* -------------------------------------------- */}
-              {!showRequirementForm && (
-                <button
-                  type="button"
-                  onClick={() => setShowRequirementForm(true)}
-                  className="!bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg shadow-md transition"
-                >
-                  + Agregar requerimiento
-                </button>
-              )}
+              <input
+                type="number"
+                placeholder="Monto de cobertura"
+                value={montoCobertura}
+                onChange={(e) => setMontoCobertura(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              />
+              {errors.montoCobertura && <p className="text-red-600 text-sm">{errors.montoCobertura}</p>}
 
-              {/* -------------------------------------------- */}
-              {/* FORMULARIO DE AGREGAR REQUERIMIENTO */}
-              {/* -------------------------------------------- */}
-              {showRequirementForm && (
-  <div className="border border-green-300 p-5 rounded-xl bg-white/60 mt-4 space-y-4">
-    <h2 className="text-xl font-bold text-green-700">Nuevo Requerimiento</h2>
+              <input
+                type="number"
+                placeholder="Duración del contrato (meses)"
+                value={duracionContrato}
+                onChange={(e) => setDuracionContrato(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              />
+              {errors.duracionContrato && <p className="text-red-600 text-sm">{errors.duracionContrato}</p>}
 
-    {/* Tipo */}
-    <div className="space-y-2">
-      <label className="block text-sm text-gray-600">
-        Tipo de Requerimiento
-      </label>
-      <select
-        value={requirementType}
-        onChange={(e) => setRequirementType(e.target.value)}
-        className={`w-full border-2 rounded-lg px-4 py-2 outline-none transition ${
-          reqErrors.requirementType
-            ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-            : "border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-        }`}
-      >
-        <option value="">Selecciona una opción</option>
-        <option value="registros_medicos">Registros médicos</option>
-        <option value="estados_de_cuenta">Estados de cuenta</option>
-        <option value="historial_crediticio">Historial crediticio</option>
-        <option value="prueba_de_residencia">Prueba de residencia</option>
-        <option value="otro">Otro</option>
-      </select>
-      {reqErrors.requirementType && (
-        <p className="text-red-600 text-sm">{reqErrors.requirementType}</p>
-      )}
-    </div>
+              <input
+                type="number"
+                placeholder="Porcentaje de aprobación"
+                value={porcentajeAprobacion}
+                onChange={(e) => setPorcentajeAprobacion(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              />
+              {errors.porcentajeAprobacion && <p className="text-red-600 text-sm">{errors.porcentajeAprobacion}</p>}
 
-    {/* Descripción */}
-    <div className="space-y-2">
-      <label className="block text-sm text-gray-600">
-        Descripción del requerimiento
-      </label>
-      <textarea
-        placeholder="Descripción del requerimiento"
-        value={requirementDescription}
-        onChange={(e) => setRequirementDescription(e.target.value)}
-        className={`w-full min-h-[90px] border-2 rounded-lg px-4 py-2 outline-none transition ${
-          reqErrors.requirementDescription
-            ? "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-            : "border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-        }`}
-      />
-      {reqErrors.requirementDescription && (
-        <p className="text-red-600 text-sm">{reqErrors.requirementDescription}</p>
-      )}
-    </div>
+              <input
+                type="number"
+                placeholder="Importe de cancelación"
+                value={importeCancelacion}
+                onChange={(e) => setImporteCancelacion(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              />
+              {errors.importeCancelacion && <p className="text-red-600 text-sm">{errors.importeCancelacion}</p>}
 
-    {/* Obligatorio */}
-    <div className="flex items-center gap-3 pt-2">
-      <input
-        type="checkbox"
-        checked={isMandatory}
-        onChange={() => setIsMandatory(!isMandatory)}
-        className="h-5 w-5 text-green-600"
-      />
-      <label className="text-gray-700">¿Requerimiento obligatorio?</label>
-    </div>
+              <select
+                value={estadoInicial}
+                onChange={(e) => setEstadoInicial(e.target.value)}
+                className="w-full border-2 rounded-lg px-4 py-2 border-green-300"
+              >
+                <option value="">Estado inicial</option>
+                <option value="activa">Activa</option>
+                <option value="pausada">Pausada</option>
+                <option value="despublicada">Despublicada</option>
+              </select>
+              {errors.estadoInicial && <p className="text-red-600 text-sm">{errors.estadoInicial}</p>}
 
-    {/* Botón Guardar */}
-    <button
-      type="button"
-      onClick={handleSaveRequirement}
-      className="!bg-green-600 hover:bg-green-700 text-white font-semibold mt-2 py-2 rounded-lg shadow-md transition w-full"
-    >
-      Guardar requerimiento
-    </button>
-  </div>
-)}
+              {errors.aseguradora && <p className="text-red-600 text-sm">{errors.aseguradora}</p>}
+              {errors.brokerId && <p className="text-red-600 text-sm">{errors.brokerId}</p>}
 
-
-              {/* LISTA DE REQUERIMIENTOS AGREGADOS */}
-              {requirements.length > 0 && (
-                <div className="mt-4 bg-white/50 p-3 rounded-xl border border-green-300">
-                  <h3 className="font-bold text-green-700 mb-2">Requerimientos agregados:</h3>
-                  <ul className="list-disc list-inside text-gray-700">
-                    {requirements.map((r, i) => (
-                      <li key={i}>
-                        <strong>{r.type}</strong> — {r.description}{" "}
-                        {r.mandatory && <span className="text-red-600">(Obligatorio)</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {message && (
-                <p className="text-center text-green-700 font-medium mt-2">{message}</p>
-              )}
+              {message && <p className="text-center font-medium">{message}</p>}
 
               <button
                 type="submit"
-                className="!bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg shadow-md transition"
+                className="!bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow-md"
               >
                 Guardar Póliza
               </button>

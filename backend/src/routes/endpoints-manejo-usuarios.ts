@@ -95,6 +95,9 @@ router.get('/obtener-perfil/:userId', async (req: Request, res: Response) => {
  * @param {number} body.adminId - ID del administrador que realiza la actualizacion (numero).
  * @returns Retorna: confirmacion de actualizacion o error.
  */
+
+//LISTO!!
+
 router.put('/admin/actualizar-perfil-usuario/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params;
   const {   comingFrom, nombrePrim, apellidoPrim,
@@ -151,7 +154,7 @@ router.put('/admin/actualizar-perfil-usuario/:userId', async (req: Request, res:
       	[userId, nombrePrim, apellidoPrim,
         	fullNombre, telefono, fechaNacimiento, rolUsuario,
 					comingFrom === 'admin'? comingFrom : 'admin', adminId]);
-    const [resultCode] = await connection.execute('SELECT @ResultCode as codigo');
+    const [resultCode] = await connection.execute('SELECT @codigoResultado as codigo');
     await connection.end();
     
     //? 2.1 Con la respuesta de la llamada vamos a revisar el estado interno
@@ -375,6 +378,9 @@ router.put('/actualizar-mi-perfil', async (req: Request, res: Response) => {
  * @param {string} body.rol - Rol a filtrar (string).
  * @returns Retorna: lista de usuarios con el rol especificado.
  */
+
+//LISTO!!
+
 router.get('/admin/usuarios-por-rol', async (req: Request, res: Response) => {
   const { rol } = req.body;
 
@@ -438,7 +444,7 @@ router.get('/admin/usuarios-por-rol', async (req: Request, res: Response) => {
  * @returns Retorna: lista de todos los usuarios registrados con rol global_user.
  */
 
-
+//LISTO!!
 
 router.get('/admin/usuarios-registrados', async (req: Request, res: Response) => {
 	try {

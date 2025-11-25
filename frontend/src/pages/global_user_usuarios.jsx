@@ -95,9 +95,11 @@ export default function GlobalUserUsuarios() {
                       <td className="border px-3 py-2 text-center space-x-3">
                         <button
                           className="px-3 py-1 !bg-yellow-500 !text-white text-xs rounded-lg hover:!bg-yellow-700 transition"
-                          onClick={() =>
-                            navigate(`/global/edit-user/${u.id_usuario}`)
-                          }
+                            onClick={() =>
+                              navigate(`/global/edit-user/${u.id_usuario}`, {
+                                state: { usuario: u },   
+                              })
+                            }
                         >
                           Editar
                         </button>
