@@ -47,6 +47,7 @@ import AnalystDashboard from "./pages/analista_dashboard";
 import BrokerProfile from "./pages/broker_profile";
 import PendientesAnalyst from "./pages/solicitudes_pendientes";
 import DetalleSolicitud from "./pages/detalle_solicitud";
+import GlobalUserCreateUsuarios from "./pages/global_crear_usuario";
 
 export default function App() {
   return (
@@ -173,6 +174,7 @@ export default function App() {
         <Route path="/broker/profile" element={<BrokerProfile />} />
         <Route path="/broker/solicitudes-pendientes" element={<PendientesAnalyst />} />
 <Route path="/analista/solicitud/:id/:id_user" element={<DetalleSolicitud />} />
+<Route path="/global/create-user" element={<GlobalUserCreateUsuarios />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

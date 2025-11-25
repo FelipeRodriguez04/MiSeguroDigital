@@ -57,6 +57,7 @@ export default function GlobalUserUsuarios() {
         alert(data.message || "Error al eliminar el usuario.");
         return;
       }
+
       setUsuarios((prev) =>
         prev.filter((u) => u.id_usuario !== userId)
       );
@@ -79,6 +80,22 @@ export default function GlobalUserUsuarios() {
       <div className="bg-white/70 flex flex-col min-h-screen backdrop-blur-sm">
         <header className="flex justify-between items-center px-8 py-4 text-green-700 font-semibold">
           <div className="text-xl">MiSeguroDigital</div>
+          <Link
+            to="/global_user"
+            className="flex items-center gap-2 no-underline !text-green-700 hover:text-green-900 !transition font-semibold"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Home
+          </Link>
         </header>
 
         <div className="px-6 mt-6 text-center">
@@ -140,12 +157,9 @@ export default function GlobalUserUsuarios() {
                         <button
                           className="px-3 py-1 !bg-yellow-500 !text-white text-xs rounded-lg hover:!bg-yellow-700 transition"
                           onClick={() =>
-                            navigate(
-                              `/global/edit-user/${u.id_usuario}`,
-                              {
-                                state: { usuario: u },
-                              }
-                            )
+                            navigate(`/global/edit-user/${u.id_usuario}`, {
+                              state: { usuario: u },
+                            })
                           }
                         >
                           Editar
@@ -173,6 +187,15 @@ export default function GlobalUserUsuarios() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                className="px-4 py-2 !bg-green-600 !text-white text-sm font-semibold rounded-lg shadow hover:!bg-green-700 transition"
+                onClick={() => navigate("/global/create-user")}
+              >
+                Crear usuario
+              </button>
             </div>
           </div>
         </main>

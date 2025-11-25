@@ -160,6 +160,9 @@ router.post('/usuarios/registrar-usuario', async (req: Request, res: Response) =
  * @param {number} body.adminId - ID del administrador que registra al usuario (numero).
  * @returns Retorna: ID del usuario creado o error de registro.
  */
+
+//LISTO!!
+
 router.post('/admins/registrar-usuario', async (req: Request, res: Response) => {
   const { email, password,
 		nombrePrim, apellidoPrim,

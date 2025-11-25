@@ -287,6 +287,9 @@ router.get('/catalogo/buscar-por-nombre', async (req: Request, res: Response) =>
  * @param {number} body.brokerId - ID del broker que crea la poliza (numero).
  * @returns Retorna: ID de la poliza creada o error.
  */
+
+//LISTO!!
+
 router.post('/admin/crear-poliza', async (req: Request, res: Response) => {
   const {
       aseguradoraId, nombrePoliza,
@@ -488,6 +491,9 @@ router.put('/admin/actualizar-poliza/:policyId', async (req: Request, res: Respo
  * @param {number} body.brokerId - ID del broker administrador que elimina la poliza (numero).
  * @returns Retorna: confirmacion de eliminacion o error.
  */
+
+//LISTO!!
+
 router.delete('/admin/eliminar-poliza/:policyId', async (req: Request, res: Response) => {
 	const { policyId } = req.params;
 	const { brokerId } = req.body;
