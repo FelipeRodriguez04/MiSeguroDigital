@@ -43,6 +43,7 @@ import DetalleSolicitud from "./pages/detalle_solicitud";
 import GlobalUserCreateUsuarios from "./pages/global_crear_usuario";
 import AplicacionesAceptadas from "./pages/global_user_aplicaciones_aceptadas";
 import HistorialPagosGlobal from "./pages/ver_pagos_global_user";
+import CrearBroker from "./pages/crear_broker";
 
 export default function App() {
   return (
@@ -63,6 +64,15 @@ export default function App() {
 <Route path="/broker_edit_policy/:id" element={<BrokerEditPolicy />} />
 <Route path="/editar-poliza/:id" element={<EditarGlobalPoliza />} />
 
+
+<Route
+  path="/admin/crear-broker"
+  element={
+    <RequireRole role="broker_admin">
+      <CrearBroker />
+    </RequireRole>
+  }
+/>
 
 
         <Route

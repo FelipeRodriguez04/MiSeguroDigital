@@ -25,117 +25,132 @@ const router = Router();
  * @returns Retorna: ID del broker creado o error de registro.
  */
 router.post('/admin/registrar-broker', async (req: Request, res: Response) => {
-  const {
-      email,password,
-      nombrePrim, apellidoPrim,
-      fullNombre, telefono,
-      fechaNacimiento, aseguradoraId,
-      rolBroker, adminId } = req.body;
-  let estadoBroker = req.body.estadoBroker;
-
-	//? 1. Validamos que toda la data este presente y mostramos el offender
-	if (!email || !password || !nombrePrim || !apellidoPrim || !fullNombre || !telefono || !fechaNacimiento || !aseguradoraId || !rolBroker || !adminId) {
-		return res.status(400).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] Existe uno o mas campos que se encuentran vacios en la request',
-			offender: (!email)? 'admin' : (!password)? 'admin' : (!nombrePrim)? 'admin' : (!apellidoPrim)? 'admin' :
-				(!fullNombre)? 'admin' : (!telefono)? 'admin' :
-					(!fechaNacimiento)? 'admin' : (!aseguradoraId)? 'admin' : (!rolBroker)? 'admin' : 'admin'
-		});
+	const {
+	  email, password,
+	  nombrePrim, apellidoPrim,
+	  fullNombre, telefono,
+	  fechaNacimiento, aseguradoraId,
+	  rolBroker, adminId
+	} = req.body;
+  
+	let estadoBroker = req.body.estadoBroker;
+  
+	// 1. Validación de campos obligatorios
+	if (
+	  !email || !password || !nombrePrim || !apellidoPrim || !fullNombre ||
+	  !telefono || !fechaNacimiento || !aseguradoraId || !rolBroker || !adminId
+	) {
+	  return res.status(400).json({
+		success: false,
+		message: 'Error Code 0x001 - [Raised] Existe uno o mas campos vacíos',
+		offender: 'admin'
+	  });
 	}
-
-	//? 1.1 Validamos que el estado del broker y el rol del broker esten en sus enums
-	if (!(estadoBroker in ['activo', 'pendiente', 'rechazado'])) {
-		res.status(400).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] El estado del broker no es valido, debe ser activo, pendiente o rechazado',
-			offender: 'estadoBroker'
-		})
+  
+	// 1.1 Validar ENUM de estadoBroker
+	const validEstados = ['activo', 'pendiente', 'rechazado'];
+	if (!validEstados.includes(estadoBroker)) {
+	  return res.status(400).json({
+		success: false,
+		message: 'Error Code 0x001 - [Raised] El estado del broker no es valido, debe ser activo, pendiente o rechazado',
+		offender: 'estadoBroker'
+	  });
 	}
-	if (!(rolBroker in ['broker_superadmin', 'broker_admin', 'broker_analyst'])) {
-		res.status(400).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] El rol del broker no es valido, debe ser broker_superadmin, broker_admin o broker_analyst',
-			offender: 'rolBroker'
-		})
+  
+	// 1.2 No permitir iniciar como rechazado
+	if (estadoBroker === 'rechazado') {
+	  return res.status(400).json({
+		success: false,
+		message: 'Error Code 0x001 - [Raised] No se puede registrar un broker rechazado desde el inicio',
+		offender: 'estadoBroker'
+	  });
 	}
-
-	//? 1.2 Si el estado del broker es nulo o rechazado, rechazamos la llamada porque no se puede
-	// registrar a un broker rechazado desde el inicio
-
-  if(estadoBroker === null || estadoBroker === 'rechazado') {
-      res.status(400).json({
-				success: false,
-				message: 'Error Code 0x001 - [Raised] No se puede registrar un broker rechazado desde el inicio',
-				offender: 'estadoBroker'
-			})
-  }
-
-	//? 1.3 Validamos que los ids no sean negativos
+  
+	// 1.3 Validar ENUM de rolBroker
+	const validRoles = ['broker_superadmin', 'broker_admin', 'broker_analyst'];
+	if (!validRoles.includes(rolBroker)) {
+	  return res.status(400).json({
+		success: false,
+		message: 'Error Code 0x001 - [Raised] El rol del broker no es válido',
+		offender: 'rolBroker'
+	  });
+	}
+  
+	// 1.4 Validar IDs no negativos
 	if (aseguradoraId < 0 || adminId < 0) {
-		res.status(400).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] Los ids no deben ser negativos',
-			offender: (aseguradoraId < 0)? 'aseguradoraId' : 'adminId'
-		})
+	  return res.status(400).json({
+		success: false,
+		message: 'Error Code 0x001 - [Raised] IDs no pueden ser negativos',
+		offender: (aseguradoraId < 0) ? 'aseguradoraId' : 'adminId'
+	  });
 	}
-
-
-	//? 2. Procedemos a crear el broker
-  try {
-    const connection = await getConnection();
-		const salt = generateSalt();
-		const hashedPassword = hashPassword(password, salt);
-
-		await connection.execute(
-      'CALL MiSeguroDigital.crearBrokerManual(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @codigoResultado, @nuevoBrokerId)',
-      [email, hashedPassword, salt, nombrePrim, apellidoPrim, fullNombre, telefono,
-          fechaNacimiento, aseguradoraId, estadoBroker,rolBroker, adminId]
-    );
-    
-    const [resultadoRegistroBrokerDesdeAdminPanel] =
-			await connection.execute(
-				'SELECT @codigoResultado as codigo, @nuevoBrokerId as brokerId');
-    await connection.end();
-    
-    const { codigo, brokerId } =
-			Array.isArray(resultadoRegistroBrokerDesdeAdminPanel)
-			&& resultadoRegistroBrokerDesdeAdminPanel[0] ?
-				resultadoRegistroBrokerDesdeAdminPanel[0] as any : { codigo: 500, brokerId: null };
-    
-    if (codigo === 200) {
-      res.status(200).json({
-				success: true,
-				brokerIdCreado: brokerId,
-				message: 'Broker creado correctamente',
-				offender: ''
-			});
-    } else if (codigo === 409) {
-      res.status(409).json({
-				success: false,
-				message: 'Error Code 0x001 - [Raised] El correo ya esta registrado',
-				offender: 'email'
-			});
-    } else if (codigo === 404){
-			res.status(404).json({
-				success: false,
-				message: 'Error Code 0x001 - [Raised] Aseguradora no encontrada',
-				offender: 'aseguradoraId'
-			});
-		}else {
-      res.status(400).json({
-				success: false,
-				message: 'Error Code 0x001 - [Raised] Error al crear broker',
-				offender: 'API Error'});
-    }
-  } catch (error) {
-    res.status(500).json({
-			success: false,
-			message: 'Error Code 0x001 - [Raised] Error interno del servidor',
-			offender: error
+  
+	// 2. Crear broker
+	try {
+	  const connection = await getConnection();
+	  const salt = generateSalt();
+	  const hashedPassword = hashPassword(password, salt);
+  
+	  await connection.execute(
+		'CALL MiSeguroDigital.crearBrokerManual(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @codigoResultado, @nuevoBrokerId)',
+		[
+		  email, hashedPassword, salt, nombrePrim, apellidoPrim,
+		  fullNombre, telefono, fechaNacimiento, aseguradoraId,
+		  estadoBroker, rolBroker, adminId
+		]
+	  );
+  
+	  const [resultado] = await connection.execute(
+		'SELECT @codigoResultado as codigo, @nuevoBrokerId as brokerId'
+	  );
+  
+	  await connection.end();
+  
+	  const { codigo, brokerId } =
+		Array.isArray(resultado) && resultado[0]
+		  ? resultado[0] as any
+		  : { codigo: 500, brokerId: null };
+  
+	  if (codigo === 200) {
+		return res.status(200).json({
+		  success: true,
+		  brokerIdCreado: brokerId,
+		  message: 'Broker creado correctamente',
+		  offender: ''
 		});
-  }
-});
+	  }
+  
+	  if (codigo === 409) {
+		return res.status(409).json({
+		  success: false,
+		  message: 'Error Code 0x001 - [Raised] El correo ya está registrado',
+		  offender: 'email'
+		});
+	  }
+  
+	  if (codigo === 404) {
+		return res.status(404).json({
+		  success: false,
+		  message: 'Error Code 0x001 - [Raised] Aseguradora no encontrada',
+		  offender: 'aseguradoraId'
+		});
+	  }
+  
+	  return res.status(400).json({
+		success: false,
+		message: 'Error Code 0x001 - [Raised] Error al crear broker',
+		offender: 'API Error'
+	  });
+  
+	} catch (error) {
+	  return res.status(500).json({
+		success: false,
+		message: 'Error Code 0x001 - [Raised] Error interno del servidor',
+		offender: error
+	  });
+	}
+  });
+  
 
 /**
  * @description Actualizar broker existente. Esta ruta esta disenada para ser manejada por administradores
