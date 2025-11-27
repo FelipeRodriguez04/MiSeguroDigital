@@ -172,8 +172,8 @@ router.post('/admin/registrar-broker', async (req: Request, res: Response) => {
 router.put('/admin/actualizar-datos/:brokerId', async (req: Request, res: Response) => {
   const { brokerId } = req.params;
   const { nombrePrim, apellidoPrim,
-        fullNombre, telefono,
-        fechaNacimiento, adminId,
+        fullNombre, telefono, 
+        fechaNacimiento, estadoBroker, adminId,
         rolBrokerNuevo } = req.body;
 
 	//? 1.1 Validamos que todos los datos esten ingresados, y retornamos 400 si alguno falta con el primer offender
@@ -188,7 +188,7 @@ router.put('/admin/actualizar-datos/:brokerId', async (req: Request, res: Respon
 	}
 
 	//? 1.2 Validamos que el rol del broker nuevo sea un enum valido, y retornamos 400 si no es asi
-	if (!(rolBrokerNuevo in ['broker_analyst', 'broker_superadmin', 'broker_admin'])) {
+	if (!['broker_analyst', 'broker_superadmin', 'broker_admin'].includes(rolBrokerNuevo)) {
 		return res.status(400).json({
 			success: false,
 			message: 'Error Code 0x001 - [Raised] El rol del broker no es valido, debe ser broker_analyst, broker_superadmin o broker_admin',
@@ -213,9 +213,9 @@ router.put('/admin/actualizar-datos/:brokerId', async (req: Request, res: Respon
     const connection = await getConnection();
     
     await connection.execute(
-      'CALL MiSeguroDigital.actualizarBrokerManual(?, ?, ?, ?,?, ?, ?,?, @codigoResultado)',
-      [brokerId, nombrePrim, apellidoPrim, fullNombre, telefono,
-          fechaNacimiento, rolBrokerNuevo, 'broker_admin', adminId]
+      'CALL MiSeguroDigital.actualizarBrokerManual(?, ?, ?, ?, ?, ?,?, ?, ?,?, @codigoResultado)',
+      [brokerId, nombrePrim, apellidoPrim, fullNombre, telefono, 
+          fechaNacimiento, estadoBroker, rolBrokerNuevo, 'broker_admin', adminId]
     );
     
     const [resultadoAcutalizacionAdmin] =
@@ -228,26 +228,26 @@ router.put('/admin/actualizar-datos/:brokerId', async (req: Request, res: Respon
 
 		//? 3. Retornamos la respuesta segun el codigo de la consulta
     if (codigo === 200) {
-      res.status(200).json({
+      return res.status(200).json({
 				success: true,
 				message: 'Broker actualizado correctamente',
 				offender: ''
 			});
     } else if (codigo === 404) {
-      res.status(404).json({
+      return res.status(404).json({
 				success: false,
 				message: 'Error Code 0x001 - [Raised] Broker no encontrado en el registro',
 				offender: 'brokerId'
 			});
     } else {
-      res.status(400).json({
+      return res.status(400).json({
 				success: false,
 				message: 'Error al actualizar broker',
 				offender: 'Error Code 0x001 - [Raised] API Error'
 			});
     }
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
 			success: false,
 			message: 'Error Code 0x001 - [Raised] Error interno del servidor',
 			offender: error
@@ -301,9 +301,23 @@ router.put('/actualizar-datos/:brokerId', async (req: Request, res: Response) =>
 		const connection = await getConnection();
 
 		await connection.execute(
-			'CALL MiSeguroDigital.actualizarBrokerManual(?, ?, ?, ?,?, ?, ?,?, @codigoResultado)',
-			[brokerId, nombrePrim, apellidoPrim, fullNombre, telefono, fechaNacimiento, rolBrokerActual, 'broker', adminId]
-		);
+			`CALL MiSeguroDigital.actualizarBrokerManual(
+				?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @codigoResultado
+			)`,
+			[
+			  brokerId,
+			  nombrePrim,
+			  apellidoPrim,
+			  fullNombre,
+			  telefono,
+			  fechaNacimiento,
+			  rolBrokerActual,
+			  'activo',         // estadoBroker
+			  'broker_admin',   // rolModificador
+			  adminId
+			]
+		  );
+		  
 
 		const [resultadoAcutalizacion] = await connection.execute('SELECT @codigoResultado as codigo');
 		await connection.end();

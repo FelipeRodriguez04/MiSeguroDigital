@@ -145,7 +145,7 @@ export default function BrokerEditPolicy() {
 
 
      alert("Póliza actualizada correctamente.");
-     navigate("/broker_policies");
+     navigate("/broker/policies");
 
 
    } catch (err) {

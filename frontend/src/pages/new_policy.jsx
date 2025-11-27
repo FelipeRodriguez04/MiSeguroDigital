@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import  { useNavigate } from "react-router-dom";
 
 
 export default function BrokerNewPolicy() {
@@ -12,6 +13,7 @@ export default function BrokerNewPolicy() {
  const [porcentajeAprobacion, setPorcentajeAprobacion] = useState("");
  const [importeCancelacion, setImporteCancelacion] = useState("");
  const [estadoInicial, setEstadoInicial] = useState("");
+ const navigate = useNavigate();
 
 
  // IDs del login
@@ -138,7 +140,7 @@ export default function BrokerNewPolicy() {
      setPorcentajeAprobacion("");
      setImporteCancelacion("");
      setEstadoInicial("");
-
+     navigate ("/admin")
 
    } catch (err) {
      console.error("❌ ERROR DE CONEXIÓN:", err);
