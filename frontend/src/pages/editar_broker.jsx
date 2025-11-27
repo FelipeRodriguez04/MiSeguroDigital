@@ -47,6 +47,7 @@ export default function EditarBroker() {
 
     setLoading(true);
 
+
     try {
       const res = await fetch(
         `http://localhost:33761/api/brokers/admin/actualizar-datos/${id}`,
@@ -61,7 +62,7 @@ export default function EditarBroker() {
             fechaNacimiento: broker.fecha_nacimiento_broker,
             adminId,
             rolBrokerNuevo: broker.broker_role,
-            estadoBroker: broker.estado_broker // <-- NUEVO
+            estadoBroker: broker.estado_broker 
           })
         }
       );

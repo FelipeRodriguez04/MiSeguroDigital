@@ -6,9 +6,11 @@ export default function VerBrokers() {
   const [brokers, setBrokers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ============================================================
-  // 🔍 Cargar brokers
-  // ============================================================
+  const coloresEstado = {
+    activo: "text-green-600 font-semibold",
+    inactivo: "text-red-600 font-semibold",
+  };
+
   useEffect(() => {
     const fetchBrokers = async () => {
       try {
@@ -87,8 +89,8 @@ export default function VerBrokers() {
                     <td className="py-3 px-4">{b.id_broker}</td>
                     <td className="py-3 px-4">{b.full_nombre_broker}</td>
                     <td className="py-3 px-4">{b.email}</td>
-                    <td className="py-3 px-4">{b.broker_role}</td>
-                    <td className="py-3 px-4 capitalize">{b.estado_broker}</td>
+                    <td className="py-3 px-4">{b.broker_role ?? "No tiene rol"}</td>
+                    <td className={`py-3 px-4 capitalize ${coloresEstado[b.is_active] ?? ""}`}>{b.is_active}</td>
 
                     {/* ACCIONES */}
                     <td className="py-3 px-4 flex gap-3 justify-center">
